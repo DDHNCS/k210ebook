@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>《图像识别技术》活页式教材 · 模块三 RGB 灯控制</title>
+<style>
+/* ============ 基础变量与重置 ============ */
+:root{
+  --ink:#1A2E4B;          /* 主色：深靛蓝 */
+  --ink-2:#274a73;
+  --accent:#E8720C;       /* 强调：橙 */
+  --bg:#EEF1F6;
+  --paper:#FFFFFF;
+  --paper-2:#F7F9FC;
+  --line:#D6DEE9;
+  --line-2:#E8EDF4;
+  --text:#233040;
+  --text-2:#5A6B82;
+  --k:#2B6CB0;   /* 知识活页 */
+  --w:#E8720C;   /* 工作活页 */
+  --a:#2E7D5B;   /* 活动活页 */
+  --e:#6D5BA6;   /* 评价活页 */
+  --x:#7A8797;   /* 拓展活页 */
+  --code-bg:#0F1D2F;
+  --ok:#2E7D5B;
+  --warn:#B45309;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;scroll-padding-top:74px;}
+body{
+  font-family:"Noto Sans SC","Microsoft YaHei","PingFang SC",system-ui,-apple-system,"Segoe UI",sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.75;
+  font-size:16px;
+}
+a{color:var(--ink-2);text-decoration:none;}
+img{max-width:100%;}
+::selection{background:#FFE2C4;}
+
+/* ============ 顶部导航 ============ */
+.topbar{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  background:rgba(26,46,75,.97);
+  color:#fff;
+  display:flex;align-items:center;gap:14px;
+  padding:0 22px;height:56px;
+  box-shadow:0 2px 10px rgba(26,46,75,.25);
+}
+.topbar .brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:15.5px;letter-spacing:.4px;}
+.topbar .brand svg{flex:none;}
+.topbar .brand .sub{color:#AFC3DE;font-weight:400;font-size:12.5px;}
+.topbar .spacer{flex:1;}
+.topbar .tool{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);
+  color:#fff;padding:7px 14px;border-radius:8px;font-size:13px;cursor:pointer;
+  font-family:inherit;transition:background .2s;min-height:40px;
+}
+.topbar .tool:hover{background:rgba(255,255,255,.22);}
+.topbar a.tool{text-decoration:none;}
+.burger{display:none;background:none;border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:8px;padding:9px 12px;cursor:pointer;min-height:40px;min-width:42px;}
+@media (max-width:720px){
+  .topbar a.tool{display:none;}
+  .topbar .brand .sub{display:none;}
+  .burger{display:block;}
+  .toc a{padding:9px 22px;}
+  .topbar .tool{padding:9px 14px;}
+}
+
+/* ============ 侧边目录 ============ */
+.toc{
+  position:fixed;top:56px;bottom:0;left:0;width:250px;
+  background:var(--paper);
+  border-right:1px solid var(--line);
+  overflow-y:auto;padding:20px 0 30px;
+  z-index:90;
+}
+.toc .toc-title{
+  font-size:12px;color:var(--text-2);letter-spacing:2px;font-weight:700;
+  padding:0 22px 10px;text-transform:uppercase;
+}
+.toc a{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 22px;font-size:13.5px;color:var(--text-2);
+  border-left:3px solid transparent;transition:all .15s;
+}
+.toc a .dot{width:7px;height:7px;border-radius:50%;flex:none;}
+.toc a:hover{color:var(--ink);background:var(--paper-2);}
+.toc a.active{color:var(--ink);font-weight:700;border-left-color:var(--accent);background:var(--paper-2);}
+.toc a.active .dot{background:var(--accent);}
+.toc .g1{margin-top:14px;font-size:12px;color:var(--text-2);padding:8px 22px 4px;font-weight:700;}
+@media (max-width:960px){ .toc{left:-260px;transition:left .25s;} .toc.open{left:0;box-shadow:4px 0 18px rgba(0,0,0,.18);} }
+.toc-mask{display:none;position:fixed;inset:0;background:rgba(15,25,40,.45);z-index:85;}
+.toc-mask.open{display:block;}
+
+/* ============ 主布局 ============ */
+.wrap{
+  max-width:1000px;margin:0 auto;
+  padding:88px 26px 70px;
+}
+@media (min-width:961px){ .wrap{padding-left:296px;padding-right:46px;max-width:1240px;} }
+@media (max-width:720px){ .wrap{padding:76px 16px 50px;} }
+
+/* ============ 封面 ============ */
+.cover{
+  background:linear-gradient(160deg,#152B49 0%,#1A3A63 58%,#224A7C 100%);
+  color:#fff;border-radius:18px;overflow:hidden;
+  padding:54px 46px 44px;position:relative;
+  margin-bottom:34px;
+}
+.cover::after{
+  content:"";position:absolute;right:-90px;top:-90px;width:300px;height:300px;
+  background:radial-gradient(circle,rgba(232,114,12,.35),transparent 68%);
+}
+.cover .c-flag{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);
+  padding:5px 14px;border-radius:999px;font-size:12.5px;letter-spacing:1.5px;
+  margin-bottom:22px;
+}
+.cover h1{font-size:38px;line-height:1.25;font-weight:900;letter-spacing:1px;margin-bottom:10px;}
+.cover .c-module{font-size:19px;font-weight:700;color:#FFC38A;margin-bottom:18px;}
+.cover .c-desc{max-width:640px;color:#CFDCEE;font-size:15px;margin-bottom:26px;}
+.cover .c-meta{display:flex;flex-wrap:wrap;gap:10px 28px;font-size:13px;color:#B9CAE2;}
+.cover .c-meta b{color:#fff;font-weight:600;}
+.cover .c-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px;}
+.cover .btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:10px 22px;border-radius:10px;font-size:14.5px;font-weight:700;cursor:pointer;
+  border:1px solid transparent;transition:transform .15s,box-shadow .15s;font-family:inherit;
+}
+.cover .btn-primary{background:var(--accent);color:#fff;box-shadow:0 6px 18px rgba(232,114,12,.4);}
+.cover .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(232,114,12,.5);}
+.cover .btn-ghost{background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.3);}
+.cover .btn-ghost:hover{background:rgba(255,255,255,.18);}
+@media (max-width:720px){ .cover{padding:38px 24px 32px;} .cover h1{font-size:28px;} }
+
+/* ============ 章节标题 ============ */
+.sec-title{
+  display:flex;align-items:center;gap:12px;
+  font-size:23px;font-weight:900;color:var(--ink);
+  margin:44px 0 6px;
+}
+.sec-title .bar{width:6px;height:26px;background:var(--accent);border-radius:3px;flex:none;}
+.sec-sub{color:var(--text-2);font-size:14px;margin-bottom:20px;}
+
+/* ============ 活页卡 ============ */
+.leaf{
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:14px;
+  margin:22px 0;
+  position:relative;
+  box-shadow:0 3px 14px rgba(26,46,75,.06);
+  page-break-inside:avoid;
+}
+.leaf .leaf-head{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:14px 20px 12px;
+  border-bottom:1px solid var(--line-2);
+  background:var(--paper-2);
+  border-radius:14px 14px 0 0;
+}
+.leaf .leaf-head .tag{
+  font-size:11.5px;font-weight:800;letter-spacing:1px;color:#fff;
+  padding:3px 10px;border-radius:6px;flex:none;
+}
+.tag.k{background:var(--k);} .tag.w{background:var(--w);} .tag.a{background:var(--a);}
+.tag.e{background:var(--e);} .tag.x{background:var(--x);} .tag.m{background:var(--ink);}
+.leaf .leaf-head .id{
+  font-family:Consolas,"Courier New",monospace;
+  font-size:12px;color:var(--text-2);background:var(--paper);
+  border:1px solid var(--line);padding:2px 9px;border-radius:6px;flex:none;
+}
+.leaf .leaf-head h3{font-size:17px;font-weight:800;color:var(--ink);flex:1;min-width:200px;}
+.leaf .leaf-head .time{
+  font-size:12px;color:var(--text-2);background:var(--paper);
+  border:1px solid var(--line);padding:2px 9px;border-radius:6px;flex:none;
+}
+.leaf .leaf-body{padding:20px 24px 24px;}
+@media (max-width:720px){ .leaf .leaf-body{padding:16px 16px 20px;} }
+
+/* 打孔装饰（活页隐喻） */
+.leaf::before{
+  content:"";position:absolute;left:-13px;top:40px;width:9px;height:9px;border-radius:50%;
+  background:var(--bg);border:1.5px solid var(--line);box-shadow:inset 0 1px 2px rgba(0,0,0,.08);
+}
+.leaf::after{
+  content:"";position:absolute;left:-13px;top:64px;width:9px;height:9px;border-radius:50%;
+  background:var(--bg);border:1.5px solid var(--line);box-shadow:inset 0 1px 2px rgba(0,0,0,.08);
+}
+
+/* ============ 正文排版 ============ */
+.leaf-body h4{
+  font-size:15.5px;font-weight:800;color:var(--ink-2);
+  margin:18px 0 8px;padding-left:11px;border-left:4px solid var(--accent);
+}
+.leaf-body h4:first-child{margin-top:0;}
+.leaf-body p{margin:9px 0;text-align:justify;}
+.leaf-body ul,.leaf-body ol{margin:9px 0 9px 4px;padding-left:22px;}
+.leaf-body li{margin:5px 0;}
+.leaf-body li::marker{color:var(--accent);font-weight:700;}
+.leaf-body strong{color:var(--ink);}
+.leaf-body .note{
+  background:#FFF6EA;border:1px solid #F4D5AE;border-left:4px solid var(--accent);
+  border-radius:8px;padding:11px 15px;margin:12px 0;font-size:14px;color:#6B4A21;
+}
+.leaf-body .tip{
+  background:#EAF4EC;border:1px solid #C9E2CF;border-left:4px solid var(--a);
+  border-radius:8px;padding:11px 15px;margin:12px 0;font-size:14px;color:#2C5540;
+}
+.leaf-body .warnbox{
+  background:#FDF0F0;border:1px solid #F2C7C7;border-left:4px solid #C0392B;
+  border-radius:8px;padding:11px 15px;margin:12px 0;font-size:14px;color:#7A2E28;
+}
+
+/* ============ 表格 ============ */
+.tbl-wrap{overflow-x:auto;margin:12px 0;}
+table.tbl{
+  width:100%;border-collapse:collapse;font-size:14px;
+  background:var(--paper);
+}
+table.tbl th{
+  background:#E4EAF3;color:var(--ink);font-weight:700;text-align:center;
+  padding:9px 12px;border:1px solid var(--line);
+}
+table.tbl td{
+  padding:8px 12px;border:1px solid var(--line-2);vertical-align:middle;
+}
+table.tbl td.c{text-align:center;}
+table.tbl td.r{text-align:right;font-family:Consolas,monospace;}
+table.tbl tr:nth-child(even) td{background:#FAFBFD;}
+table.tbl tr:hover td{background:#F3F6FB;}
+
+/* ============ 代码块 ============ */
+pre.code{
+  background:var(--code-bg);color:#E6EDF7;border-radius:10px;
+  padding:16px 18px;overflow-x:auto;font-size:13px;line-height:1.65;
+  font-family:Consolas,"JetBrains Mono","Courier New",monospace;
+  margin:12px 0;tab-size:4;
+}
+pre.code .c{color:#7E93B0;}          /* 注释 */
+pre.code .fn{color:#82AAFF;}        /* 函数 */
+pre.code .kw{color:#C792EA;}        /* 关键字 */
+pre.code .num{color:#F78C6C;}       /* 数字 */
+pre.code .str{color:#C3E88D;}       /* 字符串 */
+pre.code .hd{color:#FFCB6B;}        /* 头文件 */
+pre.code .pp{color:#F78C6C;}        /* 宏 */
+code.inline{
+  background:#EDF1F7;color:#C2410C;padding:1px 7px;border-radius:5px;
+  font-family:Consolas,"Courier New",monospace;font-size:13.5px;
+}
+.cmdline{
+  background:#13263F;color:#9FD0FF;border-radius:8px;padding:8px 14px;
+  font-family:Consolas,"Courier New",monospace;font-size:13px;margin:8px 0;
+  overflow-x:auto;white-space:nowrap;
+}
+.cmdline::before{content:"PS > ";color:#E8720C;font-weight:700;}
+
+/* ============ 步骤 ============ */
+.steps{counter-reset:step;margin:12px 0;}
+.step{
+  position:relative;padding:2px 0 2px 44px;margin:13px 0;
+}
+.step::before{
+  counter-increment:step;content:counter(step);
+  position:absolute;left:0;top:2px;width:28px;height:28px;border-radius:50%;
+  background:var(--ink);color:#fff;font-weight:800;font-size:13.5px;
+  display:flex;align-items:center;justify-content:center;
+}
+.step b{color:var(--ink);}
+.step .step-sub{margin:6px 0 0;padding-left:14px;border-left:2px solid var(--line);font-size:14.5px;}
+
+/* ============ 目标卡片 ============ */
+.goal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0;}
+@media (max-width:720px){ .goal-grid{grid-template-columns:1fr;} }
+.goal{
+  border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:var(--paper-2);
+}
+.goal .g-ic{display:flex;align-items:center;gap:8px;font-weight:800;color:var(--ink);font-size:14.5px;margin-bottom:8px;}
+.goal ul{list-style:none;padding:0;margin:0;}
+.goal li{font-size:13.5px;color:var(--text-2);padding:3px 0 3px 16px;position:relative;}
+.goal li::before{content:"";position:absolute;left:0;top:12px;width:6px;height:6px;border-radius:50%;background:var(--accent);}
+
+/* ============ 任务卡（导入区） ============ */
+.taskcard{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0;}
+@media (max-width:720px){ .taskcard{grid-template-columns:repeat(2,1fr);} }
+.tc{
+  border:1px solid var(--line);border-radius:10px;padding:10px 14px;background:var(--paper-2);
+  font-size:13px;
+}
+.tc .tc-k{color:var(--text-2);font-size:12px;letter-spacing:1px;margin-bottom:3px;}
+.tc .tc-v{font-weight:700;color:var(--ink);}
+
+/* ============ 检测/折叠答案 ============ */
+.quiz{margin:10px 0;}
+.qitem{
+  border:1px solid var(--line);border-radius:10px;margin:10px 0;overflow:hidden;
+}
+.qitem .q{
+  padding:11px 16px;background:var(--paper-2);font-size:14.5px;font-weight:600;color:var(--ink);
+}
+.qitem .q .qno{
+  display:inline-block;background:var(--ink);color:#fff;border-radius:6px;
+  font-size:12px;padding:1px 8px;margin-right:8px;font-weight:800;
+}
+.qitem .ans{
+  display:none;padding:10px 16px;border-top:1px dashed var(--line);
+  font-size:13.5px;color:var(--text-2);background:#FBFCFE;
+}
+.qitem.open .ans{display:block;}
+.qitem .q-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  margin-top:8px;background:none;border:1px solid var(--line);border-radius:7px;
+  padding:4px 12px;font-size:12.5px;color:var(--text-2);cursor:pointer;font-family:inherit;
+}
+.qitem .q-btn:hover{color:var(--accent);border-color:var(--accent);}
+
+/* ============ 评价表 ============ */
+.score-td{text-align:center;}
+
+/* ============ 完成勾选 ============ */
+.done-row{display:flex;align-items:center;gap:10px;margin:10px 0 2px;}
+.done-row input{width:17px;height:17px;accent-color:var(--accent);cursor:pointer;}
+.done-row label{font-size:14px;color:var(--text-2);cursor:pointer;}
+.leaf.done{border-color:#9CC9A8;}
+.leaf.done .leaf-head{background:#F0F8F1;}
+.leaf.done .leaf-head h3{color:var(--a);}
+
+/* ============ 流程图（引脚映射） ============ */
+.flow{
+  display:flex;align-items:stretch;gap:0;margin:16px 0;flex-wrap:wrap;
+}
+.flow .fnode{
+  flex:1;min-width:130px;background:var(--paper-2);border:1.5px solid var(--ink-2);
+  border-radius:10px;padding:12px 10px;text-align:center;position:relative;
+}
+.flow .fnode .f-t{font-weight:800;color:var(--ink);font-size:14px;}
+.flow .fnode .f-s{font-size:12px;color:var(--text-2);margin-top:3px;}
+.flow .fnode.hl{border-color:var(--accent);background:#FFF4E8;}
+.flow .fnode.hl .f-t{color:#B45309;}
+.flow .farr{display:flex;align-items:center;padding:0 7px;color:var(--accent);font-weight:900;}
+@media (max-width:720px){
+  .flow{flex-direction:column;}
+  .flow .farr{transform:rotate(90deg);justify-content:center;padding:2px 0;}
+}
+
+/* ============ 时序逻辑（交替点亮推导） ============ */
+.cycle{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0;}
+@media (max-width:720px){ .cycle{grid-template-columns:repeat(2,1fr);} }
+.cy{
+  border:1px solid var(--line);border-radius:10px;padding:10px;text-align:center;
+  background:var(--paper-2);font-size:13px;
+}
+.cy .cy-t{font-weight:800;color:var(--ink);margin-bottom:4px;}
+.cy .led-line{display:flex;justify-content:center;gap:10px;margin-top:6px;}
+.cy .led{width:26px;height:26px;border-radius:50%;border:2px solid #B9C4D4;display:inline-flex;align-items:center;justify-content:center;}
+.cy .led.red-on{background:#E03131;border-color:#E03131;box-shadow:0 0 10px rgba(224,49,49,.6);}
+.cy .led.green-on{background:#2F9E44;border-color:#2F9E44;box-shadow:0 0 10px rgba(47,158,68,.6);}
+.cy .led.off{background:#EEF1F6;}
+.cy .led.blue-on{background:#1971C2;border-color:#1971C2;box-shadow:0 0 10px rgba(25,113,194,.65);}
+.cy .led-lab{font-size:10px;color:var(--text-2);}
+
+/* ============ 规格卡 ============ */
+.spec-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0;}
+@media (max-width:720px){ .spec-grid{grid-template-columns:1fr 1fr;} }
+.spec{
+  border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--paper-2);
+  display:flex;gap:10px;align-items:flex-start;
+}
+.spec svg{flex:none;margin-top:2px;}
+.spec .s-t{font-size:12.5px;color:var(--text-2);}
+.spec .s-v{font-size:13.5px;font-weight:700;color:var(--ink);margin-top:2px;}
+
+/* ============ 检查清单 ============ */
+.checklist{list-style:none;padding:0;margin:10px 0;}
+.checklist li{
+  display:flex;align-items:flex-start;gap:10px;padding:8px 12px;
+  border:1px solid var(--line-2);border-radius:8px;margin:7px 0;font-size:14px;background:var(--paper-2);
+}
+.checklist li input{width:16px;height:16px;accent-color:var(--a);margin-top:4px;flex:none;cursor:pointer;}
+
+/* ============ 时间轴 ============ */
+.timeline{display:grid;grid-template-columns:86px 34px 1fr;gap:0;margin:16px 0;max-width:760px;}
+@media (max-width:720px){ .timeline{grid-template-columns:70px 30px 1fr;} }
+.tl-time{text-align:right;padding:6px 12px 6px 0;font-size:13.5px;color:var(--text-2);font-weight:700;}
+.tl-axis{position:relative;}
+.tl-axis::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:2px;background:var(--line);transform:translateX(-50%);}
+.tl-dot{position:absolute;left:50%;top:16px;width:12px;height:12px;border-radius:50%;background:var(--accent);transform:translate(-50%,0);border:2.5px solid #FFE2C4;z-index:1;}
+.tl-content{padding:6px 0 20px 14px;}
+.tl-content b{color:var(--ink);font-size:14.5px;}
+.tl-content .tld{font-size:13px;color:var(--text-2);margin-top:2px;}
+
+/* ============ 页脚 ============ */
+.footer{
+  margin-top:46px;padding:22px;text-align:center;color:var(--text-2);font-size:12.5px;
+  border-top:1px solid var(--line);
+}
+
+/* ============ 打印 ============ */
+@media print{
+  body{background:#fff;font-size:12px;}
+  .topbar,.toc,.toc-mask{display:none !important;}
+  .wrap{padding:0;max-width:none;}
+  .cover{border-radius:0;padding:36px 30px;}
+  .leaf{box-shadow:none;margin:0 0 2px;border-radius:0;break-inside:avoid;}
+  .leaf::before,.leaf::after{display:none;}
+  .leaf .leaf-head{border-radius:0;}
+  .leaf{margin-bottom:10px;}
+  .sec-title{margin-top:26px;}
+  .qitem .ans{display:block;border-top:1px solid var(--line);}
+  .qitem .q-btn{display:none;}
+  a{color:var(--ink);}
+  pre.code{font-size:11px;}
+  table.tbl{font-size:11.5px;}
+}
+
+@media print{
+  /* PDF-break-guard */
+  .tbl-wrap, table.tbl, table.tbl tr, .taskcard, .flow, .steps, .cycle,
+  .timeline, .screen-demo, .quiz .qitem, .note, .tip, .warnbox, .ext-item,
+  .goal, .tc, .checklist { break-inside: avoid; }
+  pre.code { break-inside: avoid; }
+  img { break-inside: avoid; }
+}
+
+</style>
+</head>
+<body>
+
+<!-- ============ 顶部导航 ============ -->
+<header class="topbar">
+  <button class="burger" id="burgerBtn" aria-label="打开目录">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+  </button>
+  <div class="brand">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFC38A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg>
+    <span>图像识别技术 <span class="sub">· 活页式教材 · 模块三</span></span>
+  </div>
+  <div class="spacer"></div>
+  <a class="tool" href="index.html">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14l-4-4 4-4"/><path d="M5 10h11a4 4 0 0 1 0 8h-1"/></svg>
+    模块一
+  </a>
+  <a class="tool" href="module2.html">模块二</a>
+  <a class="tool" href="module4.html">模块四</a>
+  <a class="tool" href="module5.html">模块五</a>
+  <a class="tool" href="module6.html">模块六</a>
+  <a class="tool" href="module7.html">模块七</a>
+  <a class="tool" href="module8.html">模块八</a>
+  <a class="tool" href="module9.html">模块九</a>
+  <a class="tool" href="module10.html">模块十</a>
+  <a class="tool" href="module11.html">模块十一</a>
+  <a class="tool" href="module12.html">模块十二</a>
+  <a class="tool" href="module13.html">模块十三</a>
+  <a class="tool" href="module14.html">模块十四</a>
+  <a class="tool" href="module15.html">模块十五</a>
+  <a class="tool" href="module16.html">模块十六</a>
+  <a class="tool" href="module17.html">模块十七</a>
+  <a class="tool" href="module18.html">模块十八</a>
+  <button class="tool" id="printBtn">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+    打印教材
+  </button>
+</header>
+
+<!-- ============ 侧边目录 ============ -->
+<div class="toc-mask" id="tocMask"></div>
+<nav class="toc" id="toc">
+  <div class="toc-title">活页索引</div>
+  <a href="#cover"><span class="dot" style="background:#1A2E4B"></span>封面与模块信息</a>
+  <a href="#overview"><span class="dot" style="background:#1A2E4B"></span>模块总体设计</a>
+  <div class="g1">任务 1 · 认识 RGB 灯与高速 GPIOHS</div>
+  <a href="#t1"><span class="dot" style="background:#E8720C"></span>任务卡</a>
+  <a href="#t1k1"><span class="dot" style="background:#2B6CB0"></span>K1 准备与硬件连接</a>
+  <a href="#t1k2"><span class="dot" style="background:#2B6CB0"></span>K2 RGB 灯发光原理</a>
+  <a href="#t1k3"><span class="dot" style="background:#2B6CB0"></span>K3 高速 GPIOHS 与 API</a>
+  <a href="#t1a1"><span class="dot" style="background:#2E7D5B"></span>A1 活动与检测</a>
+  <div class="g1">任务 2 · 编程实现 RGB 三色循环</div>
+  <a href="#t2"><span class="dot" style="background:#E8720C"></span>任务卡</a>
+  <a href="#t2k1"><span class="dot" style="background:#2B6CB0"></span>K1 pin_config.h 配置解析</a>
+  <a href="#t2k2"><span class="dot" style="background:#2B6CB0"></span>K2 main.c 主程序解析</a>
+  <a href="#t2w1"><span class="dot" style="background:#E8720C"></span>W1 编译与烧录</a>
+  <a href="#t2w2"><span class="dot" style="background:#E8720C"></span>W2 验证与故障排查</a>
+  <div class="g1">评价与拓展</div>
+  <a href="#eval"><span class="dot" style="background:#6D5BA6"></span>E1 模块评价</a>
+  <a href="#ext"><span class="dot" style="background:#7A8797"></span>X1 拓展任务</a>
+</nav>
+
+<main class="wrap">
+
+<!-- ============ 封面 ============ -->
+<section class="cover" id="cover">
+  <div class="c-flag">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#FFC38A" stroke-width="2.4" stroke-linecap="round"><path d="M12 2l2.4 7.2H22l-6 4.6 2.3 7.2-6.3-4.5-6.3 4.5L8 13.8l-6-4.6h7.6z"/></svg>
+    活页式 · 工作手册式教材
+  </div>
+  <h1>图像识别技术</h1>
+  <div class="c-module">模块三 · RGB 灯控制（GPIOHS 引脚映射与 RGB 灯控制）</div>
+  <p class="c-desc">在模块二掌握通用 GPIO 与 FPIOA 映射之后，本模块学习 K210 的<strong>高速 GPIOHS</strong>：认识三色 RGB 灯、掌握 GPIOHS 与通用 GPIO 的差异，并编程实现红、绿、蓝三色以 0.5 秒间隔循环点亮。</p>
+  <div class="c-meta">
+    <span>配套课程：<b>图像识别技术（边缘计算 &amp; 机器视觉）</b></span>
+    <span>建议学时：<b>2 学时</b></span>
+    <span>前置模块：<b>模块一 / 模块二</b></span>
+    <span>硬件平台：<b>Kendryte K210 开发板</b></span>
+  </div>
+  <div class="c-actions">
+    <a class="btn btn-primary" href="#overview">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9V3z"/></svg>
+      开始学习
+    </a>
+    <a class="btn btn-ghost" href="#toc">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+      查看活页索引
+    </a>
+  </div>
+</section>
+
+<!-- ============ 模块总体设计 ============ -->
+<div class="sec-title"><span class="bar"></span><h2 id="overview">模块总体设计</h2></div>
+<p class="sec-sub">本模块沿用模块二"先映射、后配置、再操作"的范式，把控制对象从通用 GPIO 切换到<strong>高速 GPIOHS</strong>，是 K210 第二类 GPIO 外设的入门实验。</p>
+
+<div class="leaf">
+  <div class="leaf-head">
+    <span class="tag m">总览</span><span class="id">M3-01</span>
+    <h3>模块学习目标</h3>
+  </div>
+  <div class="leaf-body">
+    <div class="goal-grid">
+      <div class="goal">
+        <div class="g-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2B6CB0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>知识目标</div>
+        <ul>
+          <li>能说出 RGB 灯的结构与三色合成原理</li>
+          <li>能说出高速 GPIOHS 的数量、特性及与通用 GPIO 的差异</li>
+          <li>能说出 gpiohs.h 中核心 API 的作用</li>
+        </ul>
+      </div>
+      <div class="goal">
+        <div class="g-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#E8720C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>技能目标</div>
+        <ul>
+          <li>能读懂 pin_config.h 中 FUNC_GPIOHS0 的三层映射</li>
+          <li>能读懂 main.c 中 state%3 的循环变色逻辑</li>
+          <li>能独立完成编译、烧录并观察 RGB 三色 0.5 秒循环</li>
+        </ul>
+      </div>
+      <div class="goal">
+        <div class="g-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2E7D5B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>素养目标</div>
+        <ul>
+          <li>体会"同一范式、不同外设"的知识迁移能力</li>
+          <li>理解先关闭再点亮的时序设计思路（避免颜色残留）</li>
+          <li>养成对照现象、定位问题的实验习惯</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="leaf">
+  <div class="leaf-head">
+    <span class="tag m">总览</span><span class="id">M3-02</span>
+    <h3>任务结构与学时分配</h3>
+  </div>
+  <div class="leaf-body">
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr>
+        <th style="width:26%">任务</th><th style="width:34%">内容</th><th style="width:18%">活页构成</th><th style="width:12%">学时</th><th>学习成果</th>
+      </tr>
+      <tr>
+        <td><strong>任务 1</strong><br>认识 RGB 灯与高速 GPIOHS</td>
+        <td>元件特性与硬件连接、三色原理、GPIOHS 与 API 对比</td>
+        <td class="c">任务卡 + K×3 + A×1</td>
+        <td class="c">1 学时</td>
+        <td>能画出引脚映射，能对比两类 GPIO</td>
+      </tr>
+      <tr>
+        <td><strong>任务 2</strong><br>编程实现 RGB 三色循环</td>
+        <td>pin_config.h 与 main.c 解析、编译、烧录、现象验证</td>
+        <td class="c">任务卡 + K×2 + W×2</td>
+        <td class="c">1 学时</td>
+        <td>RGB 红绿蓝三色以 0.5 秒循环点亮</td>
+      </tr>
+    </table>
+    </div>
+    <div class="note"><strong>知识前置：</strong>务必先完成模块二（FPIOA 映射、GPIO 输出控制、编译烧录流程）；本模块与模块二逐段对应，建议对照学习。</div>
+  </div>
+</div>
+
+<div class="leaf">
+  <div class="leaf-head">
+    <span class="tag m">总览</span><span class="id">M3-03</span>
+    <h3>模块学习路径</h3>
+  </div>
+  <div class="leaf-body">
+    <div class="timeline">
+      <div class="tl-time">第 1 学时</div>
+      <div class="tl-axis"><span class="tl-dot"></span></div>
+      <div class="tl-content"><b>任务 1 · 认识 RGB 灯与高速 GPIOHS</b><div class="tld">元件与连接 → 三色合成原理 → GPIOHS 特性与 API → 活动检测</div></div>
+
+      <div class="tl-time">第 2 学时</div>
+      <div class="tl-axis"><span class="tl-dot"></span></div>
+      <div class="tl-content"><b>任务 2 · 编程实现 RGB 三色循环</b><div class="tld">读懂配置与主程序 → 编译 → 烧录 → 观察红绿蓝 0.5 秒循环</div></div>
+    </div>
+    <div class="note"><strong>本模块在课程中的位置：</strong>GPIOHS 的独立中断源特性为后续按键中断、传感器读取等实验打下基础；"三色合成"思路也将延伸到屏幕显示与图像处理中的色彩模型。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t1">
+  <div class="leaf-head">
+    <span class="tag m">任务 1</span><span class="id">M3-T1-00</span>
+    <h3>任务卡：认识 RGB 灯与高速 GPIOHS</h3>
+    <span class="time">1 学时</span>
+  </div>
+  <div class="leaf-body">
+    <h4>任务情境</h4>
+    <p>开发板上有一颗 <strong>RGB 灯</strong>——它由红、绿、蓝三颗 LED 组成，能显示多种颜色。要驱动它，需要先弄清楚三个问题：<strong>RGB 灯怎么连在 K210 上？它为什么能显示不同颜色？驱动它用的是哪一类 GPIO、与模块二的通用 GPIO 有什么区别？</strong>本任务完成这三个认知准备，任务 2 再动手编程实现三色循环。</p>
+    <div class="taskcard">
+      <div class="tc"><div class="tc-k">学习目标</div><div class="tc-v">说出三色原理与 GPIOHS 特性</div></div>
+      <div class="tc"><div class="tc-k">核心知识</div><div class="tc-v">RGB 灯、GPIOHS、API 对比</div></div>
+      <div class="tc"><div class="tc-k">任务成果</div><div class="tc-v">引脚映射图 + 两类 GPIO 对比表</div></div>
+      <div class="tc"><div class="tc-k">评价方式</div><div class="tc-v">随堂检测 + 小组互评</div></div>
+    </div>
+    <div class="tip"><strong>学习方法：</strong>对照模块二 K1–K4 学习：同样的"映射-配置-操作"流程，本模块只是换了外设（RGB 灯）和 GPIO 类型（GPIOHS），重点体会差异点。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t1k1">
+  <div class="leaf-head">
+    <span class="tag k">知识活页</span><span class="id">M3-T1-K1</span>
+    <h3>实验准备与硬件连接</h3>
+    <span class="time">约 15 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>1. 实验元件</h4>
+    <p>本实验使用的元件是开发板上的<strong>板载 RGB 灯</strong>，出厂默认已经焊接好，无需额外接线。</p>
+    <div class="spec-grid">
+      <div class="spec"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="2"><circle cx="12" cy="12" r="5" fill="#E03131"/></svg><div><div class="s-t">R 灯</div><div class="s-v">红色 LED</div></div></div>
+      <div class="spec"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2F9E44" stroke-width="2"><circle cx="12" cy="12" r="5" fill="#2F9E44"/></svg><div><div class="s-t">G 灯</div><div class="s-v">绿色 LED</div></div></div>
+      <div class="spec"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1971C2" stroke-width="2"><circle cx="12" cy="12" r="5" fill="#1971C2"/></svg><div><div class="s-t">B 灯</div><div class="s-v">蓝色 LED</div></div></div>
+    </div>
+    <h4>2. 元件特性</h4>
+    <p>RGB 灯可以点亮<strong>红色、绿色、蓝色</strong>等颜色，再根据红、绿、蓝的<strong>不同亮度组合</strong>成其他颜色，例如黄色、紫色等。点亮规则与模块二一致：<strong>低电平点亮，高电平熄灭</strong>。</p>
+    <h4>3. 硬件连接</h4>
+    <p>K210 开发板出厂默认已经焊接好 RGB 灯。连接关系为：<strong>RGB 灯的 R 连接 IO6，G 连接 IO7，B 连接 IO8</strong>。</p>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th>通道</th><th>颜色</th><th>硬件引脚（IO）</th><th>驱动电路</th><th>点亮条件</th></tr>
+      <tr><td class="c"><strong>R</strong></td><td class="c">红</td><td class="c"><code class="inline">IO6</code>（G11/R）</td><td class="c">串联限流电阻 R39（4.7KΩ）</td><td class="c">低电平</td></tr>
+      <tr><td class="c"><strong>G</strong></td><td class="c">绿</td><td class="c"><code class="inline">IO7</code>（G12/G）</td><td class="c">串联限流电阻 R40（1KΩ）</td><td class="c">低电平</td></tr>
+      <tr><td class="c"><strong>B</strong></td><td class="c">蓝</td><td class="c"><code class="inline">IO8</code>（F11/B）</td><td class="c">串联限流电阻 R41（1KΩ）</td><td class="c">低电平</td></tr>
+    </table>
+    </div>
+    <p>电路上，RGB 灯（3535 规格）内部三颗 LED 的<strong>阳极共同接 +3.3V</strong>，阴极分别通过限流电阻（红色支路 4.7KΩ、绿色与蓝色支路各 1KΩ）接到 K210 的 IO6 / IO7 / IO8。引脚输出低电平时对应 LED 导通发光。</p>
+    <div class="note"><strong>易错提醒：</strong>红色支路的限流电阻是 4.7KΩ（R39），绿色与蓝色支路是 1KΩ（R40/R41），三者阻值不同但功能相同——都是为了限流保护。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t1k2">
+  <div class="leaf-head">
+    <span class="tag k">知识活页</span><span class="id">M3-T1-K2</span>
+    <h3>RGB 灯发光原理</h3>
+    <span class="time">约 10 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>1. 结构与发光原理</h4>
+    <p>RGB 灯内部由<strong>三颗颜色分别为红色、绿色和蓝色的 LED</strong> 组成，所以发光原理与 LED 完全一样（P-N 结中电子与空穴复合发光，光的颜色由材料决定，详见模块二 K2）。</p>
+    <h4>2. 为什么能显示不同颜色</h4>
+    <p>不同的是，三颗 LED 灯<strong>靠得很近</strong>，这样通过点亮不同的 LED、并改变各自的亮度，就可以<strong>设置不同的颜色</strong>，达到展示多种颜色的功能。</p>
+    <div class="flow">
+      <div class="fnode"><div class="f-t">红 LED</div><div class="f-s">IO6 低电平点亮</div></div>
+      <div class="fnode"><div class="f-t">绿 LED</div><div class="f-s">IO7 低电平点亮</div></div>
+      <div class="fnode"><div class="f-t">蓝 LED</div><div class="f-s">IO8 低电平点亮</div></div>
+      <div class="farr">→</div>
+      <div class="fnode hl"><div class="f-t">RGB 三色合成</div><div class="f-s">红/绿/蓝 + 不同亮度 → 多种颜色</div></div>
+    </div>
+    <div class="note"><strong>记忆锚点：</strong>红 + 绿 → 黄，红 + 蓝 → 紫……三颗 LED 靠得越近、亮度组合越丰富，能显示的颜色就越多。这与后续屏幕显示、图像处理中的"三原色"是同一个原理。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t1k3">
+  <div class="leaf-head">
+    <span class="tag k">知识活页</span><span class="id">M3-T1-K3</span>
+    <h3>高速 GPIOHS 与 API</h3>
+    <span class="time">约 20 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>1. 什么是高速 GPIOHS</h4>
+    <p>K210 除了模块二使用的通用 GPIO（gpio.h）外，还有一组<strong>高速 GPIOHS</strong>（High Speed GPIO），对应头文件 <code class="inline">gpiohs.h</code>。高速 GPIOHS <strong>总共有 32 个</strong>，可配置输入输出模式，可配置上拉、下拉或高阻，<strong>每个 IO 都有单独的中断源</strong>，中断支持边沿和电平触发，每个 IO 都可以自由分配到 FPIOA 上的 48 个引脚之一。</p>
+    <h4>2. 与通用 GPIO 的对比</h4>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:26%">对比项</th><th style="width:37%">通用 GPIO（模块二）</th><th>高速 GPIOHS（本模块）</th></tr>
+      <tr><td>数量</td><td class="c">8 个</td><td class="c"><strong>32 个</strong></td></tr>
+      <tr><td>中断源</td><td class="c">8 个共用<strong>同一个总中断源</strong></td><td class="c"><strong>每个 IO 都有单独的中断源</strong></td></tr>
+      <tr><td>中断触发方式</td><td class="c">边沿触发、电平触发</td><td class="c">边沿触发、电平触发</td></tr>
+      <tr><td>IO 方向配置</td><td class="c">输入 / 输出</td><td class="c">输入 / 输出，可配置上拉、下拉或高阻</td></tr>
+      <tr><td>对应头文件</td><td class="c"><code class="inline">gpio.h</code></td><td class="c"><code class="inline">gpiohs.h</code></td></tr>
+      <tr><td>FPIOA 分配</td><td class="c">每个 IO 可分配到 48 个引脚之一</td><td class="c">每个 IO 可分配到 48 个引脚之一</td></tr>
+    </table>
+    </div>
+    <h4>3. 为用户提供的接口</h4>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:30%">API</th><th>作用</th></tr>
+      <tr><td><code class="inline">gpiohs_set_drive_mode</code></td><td>设置输入输出模式</td></tr>
+      <tr><td><code class="inline">gpiohs_set_pin</code></td><td>设置引脚电平</td></tr>
+      <tr><td><code class="inline">gpiohs_get_pin</code></td><td>读取引脚电平</td></tr>
+      <tr><td><code class="inline">gpiohs_set_pin_edge</code></td><td>设置中断触发电平</td></tr>
+      <tr><td><code class="inline">gpiohs_set_irq</code></td><td>设置中断（0.6.0 后不再支持，请使用 gpiohs_irq_register）</td></tr>
+      <tr><td><code class="inline">gpiohs_irq_register</code></td><td>注册引脚中断服务</td></tr>
+      <tr><td><code class="inline">gpiohs_irq_unregister</code></td><td>注销引脚中断</td></tr>
+    </table>
+    </div>
+    <div class="tip"><strong>本实验只用输出类接口：</strong>先 <code class="inline">gpiohs_set_drive_mode()</code> 设为输出，再 <code class="inline">gpiohs_set_pin()</code> 控制电平。<code class="inline">gpiohs_irq_register()</code> 等中断接口留待后续按键中断实验使用。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t1a1">
+  <div class="leaf-head">
+    <span class="tag a">活动活页</span><span class="id">M3-T1-A1</span>
+    <h3>活动：映射关系梳理与随堂检测</h3>
+    <span class="time">约 15 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>活动一：引脚映射关系图（个人完成）</h4>
+    <p>根据 K1–K3 活页，填写下表（每空 1 分）：</p>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:22%">项目</th><th style="width:26%">硬件引脚</th><th style="width:26%">软件 GPIO</th><th>功能宏（FUNC_GPIOHS0 + 编号）</th></tr>
+      <tr><td class="c">R（红）</td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
+      <tr><td class="c">G（绿）</td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
+      <tr><td class="c">B（蓝）</td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
+    </table>
+    </div>
+    <div class="note"><strong>提示：</strong>参考 K1 的硬件连接表；软件 GPIO 编号依次为 0、1、2，与"红绿蓝"顺序对应。完成后与同桌互对答案。</div>
+    <h4>活动二：随堂检测（自测）</h4>
+    <div class="quiz">
+      <div class="qitem">
+        <div class="q"><span class="qno">1</span>RGB 灯的 R、G、B 分别连接 K210 的哪个硬件引脚？</div>
+        <div class="ans">答案：R 连接 IO6，G 连接 IO7，B 连接 IO8。</div>
+        <button class="q-btn" onclick="toggleAns(this)">查看答案</button>
+      </div>
+      <div class="qitem">
+        <div class="q"><span class="qno">2</span>RGB 灯为什么能显示不同颜色？</div>
+        <div class="ans">答案：内部由红、绿、蓝三颗 LED 组成，靠得很近；通过点亮不同 LED 并调整不同亮度，可组合出多种颜色（如黄、紫）。</div>
+        <button class="q-btn" onclick="toggleAns(this)">查看答案</button>
+      </div>
+      <div class="qitem">
+        <div class="q"><span class="qno">3</span>高速 GPIOHS 共有多少个？中断方面有什么特点？</div>
+        <div class="ans">答案：共 32 个；每个 IO 都有单独的中断源，中断支持边沿和电平触发。</div>
+        <button class="q-btn" onclick="toggleAns(this)">查看答案</button>
+      </div>
+      <div class="qitem">
+        <div class="q"><span class="qno">4</span>通用 GPIO 与高速 GPIOHS 在中断源上有什么区别？</div>
+        <div class="ans">答案：通用 GPIO（8 个）共用同一个总中断源；高速 GPIOHS（32 个）每个 IO 都有单独的中断源。</div>
+        <button class="q-btn" onclick="toggleAns(this)">查看答案</button>
+      </div>
+      <div class="qitem">
+        <div class="q"><span class="qno">5</span>本模块映射使用的功能宏前缀是 FUNC_GPIO0 还是 FUNC_GPIOHS0？</div>
+        <div class="ans">答案：FUNC_GPIOHS0（高速 GPIOHS 从 FUNC_GPIOHS0 开始编号）。</div>
+        <button class="q-btn" onclick="toggleAns(this)">查看答案</button>
+      </div>
+    </div>
+    <div class="done-row"><input type="checkbox" id="done-t1" class="doneck" data-key="done-t1"><label for="done-t1">我已完成任务 1 的学习并自测通过（勾选后本任务标记完成）</label></div>
+  </div>
+</div>
+
+<div class="leaf" id="t2">
+  <div class="leaf-head">
+    <span class="tag m">任务 2</span><span class="id">M3-T2-00</span>
+    <h3>任务卡：编程实现 RGB 三色循环</h3>
+    <span class="time">1 学时</span>
+  </div>
+  <div class="leaf-body">
+    <h4>任务情境</h4>
+    <p>原理清楚了。现在动手编程：让板载 RGB 灯<strong>依次点亮红、绿、蓝三色，每 0.5 秒切换一次</strong>，循环往复。先读懂工程里 <code class="inline">pin_config.h</code> 与 <code class="inline">main.c</code>（注意与模块二 gpio_led 工程的差异），再完成编译、烧录，最后观察实验现象并记录。</p>
+    <div class="taskcard">
+      <div class="tc"><div class="tc-k">学习目标</div><div class="tc-v">读懂源码并完成编译烧录</div></div>
+      <div class="tc"><div class="tc-k">工程文件</div><div class="tc-v">pin_config.h + main.c</div></div>
+      <div class="tc"><div class="tc-k">任务成果</div><div class="tc-v">RGB 三色 0.5 秒循环 + 解析笔记</div></div>
+      <div class="tc"><div class="tc-k">评价方式</div><div class="tc-v">成果展示 + 排查口述</div></div>
+    </div>
+    <div class="tip"><strong>学习方法：</strong>先对照模块二 K1/K2 的写法读本模块 K1/K2（重点看 GPIOHS 与 state 变量的用法差异），再按 W1 操作，最后用 W2 对照现象自检。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t2k1">
+  <div class="leaf-head">
+    <span class="tag k">知识活页</span><span class="id">M3-T2-K1</span>
+    <h3>pin_config.h 配置解析</h3>
+    <span class="time">约 15 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>1. 文件作用</h4>
+    <p>与模块二一样，把<strong>硬件 IO 和软件 GPIO 功能抽出来单独设置</strong>，整个文件是三组宏定义。唯一的变化是：功能宏使用 <strong><code class="inline">FUNC_GPIOHS0</code></strong>（高速 GPIOHS 从 0 号开始），而不是模块二的 <code class="inline">FUNC_GPIO0</code>（通用 GPIO）。</p>
+    <div class="flow">
+      <div class="fnode"><div class="f-t">HARDWARE-PIN</div><div class="f-s">IO6 / IO7 / IO8，与原理图对应</div></div>
+      <div class="farr">→</div>
+      <div class="fnode"><div class="f-t">SOFTWARE-GPIO</div><div class="f-s">GPIOHS 0 / 1 / 2，与程序对应</div></div>
+      <div class="farr">→</div>
+      <div class="fnode hl"><div class="f-t">FUNC-GPIO</div><div class="f-s">FUNC_GPIOHS0 + 编号，绑定硬件 IO</div></div>
+    </div>
+    <h4>2. 完整源码</h4>
+    <pre class="code"><span class="c">/**
+* @file         pin_config.c
+* @brief        硬件引脚与软件GPIO的宏定义
+*/</span>
+<span class="pp">#ifndef</span> _PIN_CONFIG_H_
+<span class="pp">#define</span> _PIN_CONFIG_H_
+<span class="c">/*****************************HEAR-FILE************************************/</span>
+<span class="pp">#include</span> <span class="hd">"fpioa.h"</span>
+
+<span class="c">/*****************************HARDWARE-PIN*********************************/</span>
+<span class="c">// 硬件IO口，与原理图对应</span>
+<span class="pp">#define</span> <span class="fn">PIN_RGB_R</span>             (<span class="num">6</span>)
+<span class="pp">#define</span> <span class="fn">PIN_RGB_G</span>             (<span class="num">7</span>)
+<span class="pp">#define</span> <span class="fn">PIN_RGB_B</span>             (<span class="num">8</span>)
+
+<span class="c">/*****************************SOFTWARE-GPIO********************************/</span>
+<span class="c">// 软件GPIO口，与程序对应</span>
+<span class="pp">#define</span> <span class="fn">RGB_R_GPIONUM</span>          (<span class="num">0</span>)
+<span class="pp">#define</span> <span class="fn">RGB_G_GPIONUM</span>          (<span class="num">1</span>)
+<span class="pp">#define</span> <span class="fn">RGB_B_GPIONUM</span>          (<span class="num">2</span>)
+
+<span class="c">/*****************************FUNC-GPIO************************************/</span>
+<span class="c">// GPIO口的功能，绑定到硬件IO口</span>
+<span class="pp">#define</span> <span class="fn">FUNC_RGB_R</span>             (<span class="fn">FUNC_GPIOHS0</span> + <span class="fn">RGB_R_GPIONUM</span>)
+<span class="pp">#define</span> <span class="fn">FUNC_RGB_G</span>             (<span class="fn">FUNC_GPIOHS0</span> + <span class="fn">RGB_G_GPIONUM</span>)
+<span class="pp">#define</span> <span class="fn">FUNC_RGB_B</span>             (<span class="fn">FUNC_GPIOHS0</span> + <span class="fn">RGB_B_GPIONUM</span>)
+
+<span class="pp">#endif</span> <span class="c">/* _PIN_CONFIG_H_ */</span></pre>
+    <h4>3. 宏含义对照</h4>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:22%">宏</th><th style="width:16%">值</th><th>含义</th></tr>
+      <tr><td><code class="inline">PIN_RGB_R / G / B</code></td><td class="c"><code class="inline">6 / 7 / 8</code></td><td>RGB 灯三路硬件引脚号（对应原理图 IO6/IO7/IO8）</td></tr>
+      <tr><td><code class="inline">RGB_R_GPIONUM</code></td><td class="c"><code class="inline">0</code></td><td>红色通道的软件 GPIOHS 编号（程序操作对象）</td></tr>
+      <tr><td><code class="inline">RGB_G_GPIONUM</code></td><td class="c"><code class="inline">1</code></td><td>绿色通道的软件 GPIOHS 编号（程序操作对象）</td></tr>
+      <tr><td><code class="inline">RGB_B_GPIONUM</code></td><td class="c"><code class="inline">2</code></td><td>蓝色通道的软件 GPIOHS 编号（程序操作对象）</td></tr>
+      <tr><td><code class="inline">FUNC_RGB_R / G / B</code></td><td class="c"><code class="inline">FUNC_GPIOHS0+0/1/2</code></td><td>三路 GPIOHS 功能（分别绑定 IO6/IO7/IO8）</td></tr>
+    </table>
+    </div>
+    <div class="note"><strong>与模块二对照：</strong>模块二 LED 用 <code class="inline">FUNC_GPIO0 + 编号</code>（通用 GPIO），本模块 RGB 用 <code class="inline">FUNC_GPIOHS0 + 编号</code>（高速 GPIOHS）——映射用的功能宏必须与驱动 API 匹配（gpio_* 配 FUNC_GPIO0，gpiohs_* 配 FUNC_GPIOHS0）。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t2k2">
+  <div class="leaf-head">
+    <span class="tag k">知识活页</span><span class="id">M3-T2-K2</span>
+    <h3>main.c 主程序解析</h3>
+    <span class="time">约 20 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>1. 完整源码</h4>
+    <pre class="code"><span class="pp">#include</span> <span class="hd">"sleep.h"</span>
+<span class="pp">#include</span> <span class="hd">"gpiohs.h"</span>
+<span class="pp">#include</span> <span class="hd">"pin_config.h"</span>
+
+<span class="c">/**
+* @brief 硬件初始化，绑定GPIO口
+*/</span>
+<span class="kw">void</span> <span class="fn">hardware_init</span>(<span class="kw">void</span>)
+{
+    <span class="c">// fpioa映射</span>
+    <span class="fn">fpioa_set_function</span>(<span class="fn">PIN_RGB_R</span>, <span class="fn">FUNC_RGB_R</span>);
+    <span class="fn">fpioa_set_function</span>(<span class="fn">PIN_RGB_G</span>, <span class="fn">FUNC_RGB_G</span>);
+    <span class="fn">fpioa_set_function</span>(<span class="fn">PIN_RGB_B</span>, <span class="fn">FUNC_RGB_B</span>);
+}
+
+<span class="c">/**
+* @brief RGB灯灭
+*/</span>
+<span class="kw">void</span> <span class="fn">rgb_all_off</span>(<span class="kw">void</span>)
+{
+    <span class="fn">gpiohs_set_pin</span>(<span class="fn">RGB_R_GPIONUM</span>, <span class="fn">GPIO_PV_HIGH</span>);
+    <span class="fn">gpiohs_set_pin</span>(<span class="fn">RGB_G_GPIONUM</span>, <span class="fn">GPIO_PV_HIGH</span>);
+    <span class="fn">gpiohs_set_pin</span>(<span class="fn">RGB_B_GPIONUM</span>, <span class="fn">GPIO_PV_HIGH</span>);
+}
+
+<span class="c">/**
+* @brief 初始化RGB灯
+*/</span>
+<span class="kw">void</span> <span class="fn">init_rgb</span>(<span class="kw">void</span>)
+{
+    <span class="c">// 设置RGB灯的GPIO模式为输出</span>
+    <span class="fn">gpiohs_set_drive_mode</span>(<span class="fn">RGB_R_GPIONUM</span>, <span class="fn">GPIO_DM_OUTPUT</span>);
+    <span class="fn">gpiohs_set_drive_mode</span>(<span class="fn">RGB_G_GPIONUM</span>, <span class="fn">GPIO_DM_OUTPUT</span>);
+    <span class="fn">gpiohs_set_drive_mode</span>(<span class="fn">RGB_B_GPIONUM</span>, <span class="fn">GPIO_DM_OUTPUT</span>);
+
+    <span class="c">// 关闭RGB灯</span>
+    <span class="fn">rgb_all_off</span>();
+}
+
+<span class="c">/**
+* @brief 主函数，程序的入口
+*/</span>
+<span class="kw">int</span> <span class="fn">main</span>(<span class="kw">void</span>)
+{
+    <span class="c">// RGB灯状态，0=红灯亮，1=绿灯亮，2=蓝灯亮</span>
+    <span class="kw">int</span> <span class="fn">state</span> = <span class="num">0</span>;
+
+    <span class="c">// 硬件引脚初始化</span>
+    <span class="fn">hardware_init</span>();
+    <span class="c">// 初始化RGB灯</span>
+    <span class="fn">init_rgb</span>();
+
+    <span class="kw">while</span> (<span class="num">1</span>)
+    {
+        <span class="fn">rgb_all_off</span>();   <span class="c">// 先关闭RGB灯</span>
+        <span class="c">// 根据state的值点亮不同颜色的灯</span>
+        <span class="fn">gpiohs_set_pin</span>(<span class="fn">state</span>, <span class="fn">GPIO_PV_LOW</span>);
+        <span class="fn">msleep</span>(<span class="num">500</span>);
+        <span class="fn">state</span>++;
+        <span class="fn">state</span> = <span class="fn">state</span> % <span class="num">3</span>;
+    }
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+    <h4>2. 逐段解读</h4>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:26%">代码段</th><th>作用</th></tr>
+      <tr><td><code class="inline">#include "sleep.h"</code></td><td>提供 <code class="inline">msleep()</code> 毫秒延时函数（模块二用 <code class="inline">sleep()</code> 秒级延时）</td></tr>
+      <tr><td><code class="inline">#include "gpiohs.h"</code></td><td>高速 GPIOHS 驱动头文件（模块二为 gpio.h）</td></tr>
+      <tr><td><code class="inline">hardware_init()</code></td><td>FPIOA 映射：把 IO6/IO7/IO8 绑定为 GPIOHS 功能</td></tr>
+      <tr><td><code class="inline">init_rgb()</code></td><td>设置三路 GPIOHS 为输出模式，并先关闭 RGB 灯</td></tr>
+      <tr><td><code class="inline">rgb_all_off()</code></td><td>三路都输出高电平：LED 高电平熄灭</td></tr>
+      <tr><td><code class="inline">state = 0</code></td><td>状态变量：0=红灯亮，1=绿灯亮，2=蓝灯亮</td></tr>
+      <tr><td><code class="inline">gpiohs_set_pin(state, GPIO_PV_LOW)</code></td><td>直接用 state 作为 GPIO 编号点亮对应颜色的灯（低电平点亮）</td></tr>
+      <tr><td><code class="inline">state++ / state % 3</code></td><td>每 0.5 秒切换状态；state%3 把数值限制为 0、1、2，刚好与软件 GPIO 对应</td></tr>
+    </table>
+    </div>
+    <h4>3. 关键技巧</h4>
+    <p><strong>① 先关闭再点亮：</strong>由于不清楚具体上一次亮的是哪个灯，所以在每次设置灯的颜色前都把 RGB 灯关闭，避免颜色残留或串色。</p>
+    <p><strong>② state 直接当引脚编号：</strong>软件 GPIO 编号恰好是 0、1、2，与 state 取值一一对应，因此 <code class="inline">gpiohs_set_pin(state, GPIO_PV_LOW)</code> 一行就能点亮对应颜色，简洁且不易写错。</p>
+    <p><strong>③ 取模循环：</strong><code class="inline">state = state % 3;</code> 把 state 的值限制为 0、1、2，实现三色循环；这是"状态机 + 取模"控制循环变化的常见写法。</p>
+    <div class="note"><strong>实验总结要点：</strong>① RGB 灯与 LED 灯的点亮原理是一样的；② 高速 GPIOHS 每个 IO 都有单独的中断源，而通用 GPIO 是共享一个总中断源。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t2w1">
+  <div class="leaf-head">
+    <span class="tag w">工作活页</span><span class="id">M3-T2-W1</span>
+    <h3>编译与烧录</h3>
+    <span class="time">约 25 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>任务：把工程编译成固件并烧录进 K210</h4>
+    <div class="steps">
+      <div class="step"><b>复制工程到 SDK。</b>把课程资料中的 <code class="inline">gpiohs_rgb</code> 文件夹整体复制到 SDK 的 <code class="inline">src</code> 目录下，例如 <code class="inline">D:\K210\SDK\kendryte-standalone-sdk-develop\src\gpiohs_rgb</code>（以你自己的 SDK 安装路径为准）。</div>
+      <div class="step"><b>打开终端。</b>在 VSCode 中打开 SDK 工程，点击「终端 → 新建终端」，进入 SDK 根目录下的 <code class="inline">build</code> 目录。</div>
+      <div class="step"><b>执行 CMake 配置。</b>在 build 目录执行：<div class="cmdline">cmake .. -DPROJ=gpiohs_rgb -G "MinGW Makefiles"</div>等待配置完成（看到 "Generating done" 即成功）。</div>
+      <div class="step"><b>执行编译。</b><div class="cmdline">make</div>终端依次输出编译、链接、生成 .bin 的日志（如 "Generating .bin file ..."、"Built target gpiohs_rgb"），说明编译成功。</div>
+      <div class="step"><b>确认固件。</b>用 <code class="inline">ls</code> 或资源管理器确认 build 目录下存在 <code class="inline">gpiohs_rgb.bin</code>。</div>
+      <div class="step"><b>烧录。</b>用 Type-C 数据线连接开发板与电脑，打开 kflash 烧录工具，选择对应的设备（CH340 串口），Firmware 选择 <code class="inline">gpiohs_rgb.bin</code>，勾选「Open terminal after flash」后点击 Flash 烧录。</div>
+    </div>
+    <div class="warnbox"><strong>常见报错：</strong>若编译时提示找不到 <code class="inline">gpiohs.h</code> 或 <code class="inline">sleep.h</code>，先确认工程确实位于 <code class="inline">src\gpiohs_rgb</code> 目录，且 <code class="inline">-DPROJ=gpiohs_rgb</code> 的工程名拼写与文件夹名一致。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t2w2">
+  <div class="leaf-head">
+    <span class="tag w">工作活页</span><span class="id">M3-T2-W2</span>
+    <h3>现象验证与故障排查</h3>
+    <span class="time">约 15 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>1. 预期实验现象</h4>
+    <p>烧录完成后按一下复位键（或重新上电），观察板载 RGB 灯：</p>
+    <div class="note"><strong>现象描述：</strong>RGB 灯先亮<strong>红灯</strong>，0.5 秒后亮<strong>绿灯</strong>，再 0.5 秒后亮<strong>蓝灯</strong>，接着 0.5 秒后再亮红灯，以此循环，<strong>每 0.5 秒切换一次颜色</strong>。</div>
+    <div class="cycle">
+      <div class="cy"><div class="cy-t">t=0</div><div class="led-line"><span class="led red-on"><span class="led-lab">R</span></span><span class="led off"><span class="led-lab">G</span></span><span class="led off"><span class="led-lab">B</span></span></div><div>红灯亮</div></div>
+      <div class="cy"><div class="cy-t">t=0.5s</div><div class="led-line"><span class="led off"><span class="led-lab">R</span></span><span class="led green-on"><span class="led-lab">G</span></span><span class="led off"><span class="led-lab">B</span></span></div><div>绿灯亮</div></div>
+      <div class="cy"><div class="cy-t">t=1s</div><div class="led-line"><span class="led off"><span class="led-lab">R</span></span><span class="led off"><span class="led-lab">G</span></span><span class="led blue-on"><span class="led-lab">B</span></span></div><div>蓝灯亮</div></div>
+      <div class="cy"><div class="cy-t">t=1.5s…</div><div class="led-line"><span class="led red-on"><span class="led-lab">R</span></span><span class="led off"><span class="led-lab">G</span></span><span class="led off"><span class="led-lab">B</span></span></div><div>循环交替</div></div>
+    </div>
+    <h4>2. 现象与代码对应（口述自检）</h4>
+    <p>循环体先 <code class="inline">rgb_all_off()</code> 全部熄灭，再用 <code class="inline">gpiohs_set_pin(state, GPIO_PV_LOW)</code> 点亮 state 对应颜色；<code class="inline">msleep(500)</code> 延时 0.5 秒后 <code class="inline">state++</code> 并 <code class="inline">state % 3</code> 取模回到 0。于是颜色按 红 → 绿 → 蓝 → 红 … 循环。</p>
+    <h4>3. 故障排查表</h4>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:26%">现象</th><th style="width:36%">可能原因</th><th>处理方法</th></tr>
+      <tr><td>三色都不亮</td><td>烧录未完成 / 未复位 / 固件选错</td><td>重新烧录 gpiohs_rgb.bin，烧录后按复位键</td></tr>
+      <tr><td>只亮某一种颜色，不循环</td><td>state 未自增 / 未取模 / msleep 缺失</td><td>检查 while 循环中的 state++、state%3 与 msleep(500)</td></tr>
+      <tr><td>亮的颜色与预期不对应</td><td>引脚映射错（R/G/B 与 IO6/7/8 对应错）</td><td>核对 pin_config.h 中 PIN_RGB_* 与 GPIONUM 的对应</td></tr>
+      <tr><td>切换速度不对</td><td>msleep 参数被修改</td><td>确认 msleep(500)（毫秒），0.5 秒 = 500 毫秒</td></tr>
+      <tr><td>编译失败：找不到 gpiohs.h</td><td>工程未放到 src/gpiohs_rgb 目录</td><td>检查路径、确认工程名与 -DPROJ 参数一致</td></tr>
+    </table>
+    </div>
+    <h4>4. 实验检查清单</h4>
+    <ul class="checklist">
+      <li><input type="checkbox" id="ck1"><label for="ck1">工程已复制到 SDK 的 src/gpiohs_rgb 目录</label></li>
+      <li><input type="checkbox" id="ck2"><label for="ck2">cmake 配置与 make 编译均无报错，生成 gpiohs_rgb.bin</label></li>
+      <li><input type="checkbox" id="ck3"><label for="ck3">kflash 参数正确，烧录完成并勾选 Open terminal</label></li>
+      <li><input type="checkbox" id="ck4"><label for="ck4">观察到 RGB 灯以 0.5 秒间隔按红、绿、蓝顺序循环点亮</label></li>
+      <li><input type="checkbox" id="ck5"><label for="ck5">能用"映射 → 输出模式 → 先关后亮 → state 取模循环"口头复述程序流程</label></li>
+    </ul>
+    <div class="done-row"><input type="checkbox" id="done-t2" class="doneck" data-key="done-t2"><label for="done-t2">我已完成任务 2 的实验并记录现象（勾选后本任务标记完成）</label></div>
+  </div>
+</div>
+
+<div class="sec-title"><span class="bar"></span><h2 id="eval">模块评价</h2></div>
+<p class="sec-sub">对照评价量表逐项自评（自己评）、互评（同桌评）、师评（教师评），在对应栏填 ★（优秀 5–4 分 / 合格 3 分 / 待改进 2–1 分）。</p>
+
+<div class="leaf">
+  <div class="leaf-head">
+    <span class="tag e">评价</span><span class="id">M3-E1</span>
+    <h3>模块三 · RGB 灯控制 评价量表</h3>
+    <span class="time">约 10 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr>
+        <th style="width:8%">序号</th><th style="width:44%">评价维度</th>
+        <th style="width:12%" class="score-td">自评</th><th style="width:12%" class="score-td">互评</th><th style="width:12%" class="score-td">师评</th>
+      </tr>
+      <tr><td class="c">1</td><td>能说出 RGB 灯的内部结构与"不同亮度组合出不同颜色"的原理</td><td class="score-td"></td><td class="score-td"></td><td class="score-td"></td></tr>
+      <tr><td class="c">2</td><td>能说出 RGB 灯 R/G/B 的硬件连接（IO6/IO7/IO8）与点亮条件</td><td class="score-td"></td><td class="score-td"></td><td class="score-td"></td></tr>
+      <tr><td class="c">3</td><td>能说出高速 GPIOHS 的数量（32 个）、特性及与通用 GPIO 的差异</td><td class="score-td"></td><td class="score-td"></td><td class="score-td"></td></tr>
+      <tr><td class="c">4</td><td>能说出 gpiohs.h 核心 API（set_drive_mode / set_pin / get_pin / 中断接口）作用</td><td class="score-td"></td><td class="score-td"></td><td class="score-td"></td></tr>
+      <tr><td class="c">5</td><td>能读懂 pin_config.h（FUNC_GPIOHS0 映射）与 main.c 的 state%3 循环逻辑</td><td class="score-td"></td><td class="score-td"></td><td class="score-td"></td></tr>
+      <tr><td class="c">6</td><td>能独立完成工程复制、cmake 配置、make 编译与 kflash 烧录</td><td class="score-td"></td><td class="score-td"></td><td class="score-td"></td></tr>
+      <tr><td class="c">7</td><td>观察到 RGB 灯按红、绿、蓝顺序每 0.5 秒循环点亮，并记录实验现象</td><td class="score-td"></td><td class="score-td"></td><td class="score-td"></td></tr>
+      <tr><td class="c">8</td><td>能对照模块二体会"同一范式、不同外设"的迁移，规范操作、协作表达</td><td class="score-td"></td><td class="score-td"></td><td class="score-td"></td></tr>
+    </table>
+    </div>
+    <h4>课后反思（各写一句话）</h4>
+    <ul class="checklist">
+      <li><label>我学得最好的是：＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿</label></li>
+      <li><label>我还需要加强的是：＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿</label></li>
+      <li><label>我想对老师说：＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿</label></li>
+    </ul>
+  </div>
+</div>
+
+<div class="sec-title"><span class="bar"></span><h2 id="ext">拓展任务</h2></div>
+<p class="sec-sub">完成必学内容后选做，对应修改工程源码、重新编译烧录，体会"改一行代码 → 现象变化"的过程。</p>
+
+<div class="leaf">
+  <div class="leaf-head">
+    <span class="tag x">拓展</span><span class="id">M3-X1</span>
+    <h3>拓展任务：让 RGB 灯玩出更多颜色</h3>
+    <span class="time">选做</span>
+  </div>
+  <div class="leaf-body">
+    <h4>拓展 1：改变切换速度</h4>
+    <p>把 <code class="inline">msleep(500)</code> 改为 <code class="inline">msleep(200)</code>（0.2 秒）观察切换变快；再改为 <code class="inline">msleep(1000)</code>（1 秒）观察变慢。思考：msleep 的单位是什么？太快时人眼能看到什么现象？</p>
+    <h4>拓展 2：两色合成新颜色</h4>
+    <p>在 <code class="inline">rgb_all_off()</code> 之后连续点亮两路，例如：<div class="cmdline">gpiohs_set_pin(RGB_R_GPIONUM, GPIO_PV_LOW);<br>gpiohs_set_pin(RGB_G_GPIONUM, GPIO_PV_LOW);</div>观察 RGB 灯显示的颜色。想一想：红 + 绿 → 什么颜色？红 + 蓝、绿 + 蓝呢？这验证了"不同亮度组合"的原理。</p>
+    <h4>拓展 3：自己合成"黄色"状态</h4>
+    <p>参考 state%3 的写法，把状态扩展为 4 个：0=红、1=绿、2=蓝、3=黄（红+绿同时亮），循环间隔仍为 0.5 秒。提示：state%3 要改为 state%4，并且 state==3 时点亮两路。</p>
+    <h4>拓展 4（进阶）：按键切换颜色</h4>
+    <p>利用 <code class="inline">gpiohs_get_pin()</code> 读取按键电平，按下一次切换一种颜色。进阶提示：用 <code class="inline">gpiohs_irq_register()</code> 注册中断，体验 GPIOHS"每个 IO 单独中断源"的优势。可参考 SDK 中 gpiohs 中断示例。</p>
+    <h4>拓展 5（预告）：亮度渐变与更多颜色</h4>
+    <p>三颗 LED 只有"亮/灭"两种状态只能得到 8 种颜色组合；要显示更多颜色需要连续调节每路的亮度——这属于 PWM（脉冲宽度调制），将在后续模块学习。提前思考：如果每路亮度有 256 级，三路可以组合出多少种颜色？</p>
+    <div class="tip"><strong>完成标准：</strong>至少完成拓展 1–3 中的两个，并在活页空白处记录每种改动的现象；拓展 4–5 可作为小组探究课题。</div>
+  </div>
+</div>
+
+<footer class="footer">
+  《图像识别技术》活页式教材 · 模块三 RGB 灯控制（GPIOHS 引脚映射与 RGB 灯控制） · 建议学时 2 学时<br>
+  配套硬件：Kendryte K210 开发板 · 配套工程：gpiohs_rgb（pin_config.h + main.c）
+</footer>
+
+</main>
+
+<script>
+// ============ 目录开关（移动端） ============
+var burger = document.getElementById('burgerBtn');
+var toc = document.getElementById('toc');
+var mask = document.getElementById('tocMask');
+if (burger) {
+  burger.addEventListener('click', function(){
+    toc.classList.toggle('open');
+    mask.classList.toggle('open');
+  });
+}
+if (mask) {
+  mask.addEventListener('click', function(){
+    toc.classList.remove('open');
+    mask.classList.remove('open');
+  });
+}
+
+// ============ 打印 ============
+var printBtn = document.getElementById('printBtn');
+if (printBtn) printBtn.addEventListener('click', function(){ window.print(); });
+
+// ============ 折叠答案 ============
+function toggleAns(btn){
+  var item = btn.closest('.qitem');
+  if (item) item.classList.toggle('open');
+}
+
+// ============ 侧边目录滚动高亮 ============
+var tocLinks = document.querySelectorAll('.toc a');
+var sections = [];
+tocLinks.forEach(function(a){
+  var id = a.getAttribute('href');
+  if (id && id.charAt(0) === '#') {
+    var el = document.getElementById(id.slice(1));
+    if (el) sections.push({link:a, el:el});
+  }
+});
+function onScroll(){
+  var pos = window.scrollY + 100;
+  var current = null;
+  sections.forEach(function(s){
+    if (s.el.offsetTop <= pos) current = s;
+  });
+  sections.forEach(function(s){
+    s.link.classList.toggle('active', s === current);
+  });
+}
+window.addEventListener('scroll', onScroll, {passive:true});
+onScroll();
+
+// ============ 完成状态记忆（localStorage） ============
+var donecks = document.querySelectorAll('.doneck');
+donecks.forEach(function(cb){
+  var k = 'm3:' + cb.getAttribute('data-key');
+  if (localStorage.getItem(k) === '1') cb.checked = true;
+  cb.addEventListener('change', function(){
+    if (cb.checked) localStorage.setItem(k, '1');
+    else localStorage.removeItem(k);
+  });
+});
+</script>
+</body>
+</html>

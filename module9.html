@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>模块九 · 摄像头采集数据（OV2640 摄像头与 DVP 接口）— 图像识别技术活页式教材</title>
+<style>
+
+/* ============ 基础变量与重置 ============ */
+:root{
+  --ink:#1A2E4B;          /* 主色：深靛蓝 */
+  --ink-2:#274a73;
+  --accent:#E8720C;       /* 强调：橙 */
+  --bg:#EEF1F6;
+  --paper:#FFFFFF;
+  --paper-2:#F7F9FC;
+  --line:#D6DEE9;
+  --line-2:#E8EDF4;
+  --text:#233040;
+  --text-2:#5A6B82;
+  --k:#2B6CB0;   /* 知识活页 */
+  --w:#E8720C;   /* 工作活页 */
+  --a:#2E7D5B;   /* 活动活页 */
+  --e:#6D5BA6;   /* 评价活页 */
+  --x:#7A8797;   /* 拓展活页 */
+  --code-bg:#0F1D2F;
+  --ok:#2E7D5B;
+  --warn:#B45309;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;scroll-padding-top:74px;}
+body{
+  font-family:"Noto Sans SC","Microsoft YaHei","PingFang SC",system-ui,-apple-system,"Segoe UI",sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.75;
+  font-size:16px;
+}
+a{color:var(--ink-2);text-decoration:none;}
+img{max-width:100%;}
+::selection{background:#FFE2C4;}
+
+/* ============ 顶部导航 ============ */
+.topbar{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  background:rgba(26,46,75,.97);
+  color:#fff;
+  display:flex;align-items:center;gap:14px;
+  padding:0 22px;height:56px;
+  box-shadow:0 2px 10px rgba(26,46,75,.25);
+}
+.topbar .brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:15.5px;letter-spacing:.4px;}
+.topbar .brand svg{flex:none;}
+.topbar .brand .sub{color:#AFC3DE;font-weight:400;font-size:12.5px;}
+.topbar .spacer{flex:1;}
+.topbar .tool{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);
+  color:#fff;padding:7px 14px;border-radius:8px;font-size:13px;cursor:pointer;
+  font-family:inherit;transition:background .2s;min-height:40px;
+}
+.topbar .tool:hover{background:rgba(255,255,255,.22);}
+.topbar a.tool{text-decoration:none;}
+.burger{display:none;background:none;border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:8px;padding:9px 12px;cursor:pointer;min-height:40px;min-width:42px;}
+@media (max-width:720px){
+  .topbar a.tool{display:none;}
+  .topbar .brand .sub{display:none;}
+  .burger{display:block;}
+  .toc a{padding:9px 22px;}
+  .topbar .tool{padding:9px 14px;}
+}
+
+/* ============ 侧边目录 ============ */
+.toc{
+  position:fixed;top:56px;bottom:0;left:0;width:250px;
+  background:var(--paper);
+  border-right:1px solid var(--line);
+  overflow-y:auto;padding:20px 0 30px;
+  z-index:90;
+}
+.toc .toc-title{
+  font-size:12px;color:var(--text-2);letter-spacing:2px;font-weight:700;
+  padding:0 22px 10px;text-transform:uppercase;
+}
+.toc a{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 22px;font-size:13.5px;color:var(--text-2);
+  border-left:3px solid transparent;transition:all .15s;
+}
+.toc a .dot{width:7px;height:7px;border-radius:50%;flex:none;}
+.toc a:hover{color:var(--ink);background:var(--paper-2);}
+.toc a.active{color:var(--ink);font-weight:700;border-left-color:var(--accent);background:var(--paper-2);}
+.toc a.active .dot{background:var(--accent);}
+.toc .g1{margin-top:14px;font-size:12px;color:var(--text-2);padding:8px 22px 4px;font-weight:700;}
+@media (max-width:960px){ .toc{left:-260px;transition:left .25s;} .toc.open{left:0;box-shadow:4px 0 18px rgba(0,0,0,.18);} }
+.toc-mask{display:none;position:fixed;inset:0;background:rgba(15,25,40,.45);z-index:85;}
+.toc-mask.open{display:block;}
+
+/* ============ 主布局 ============ */
+.wrap{
+  max-width:1000px;margin:0 auto;
+  padding:88px 26px 70px;
+}
+@media (min-width:961px){ .wrap{padding-left:296px;padding-right:46px;max-width:1240px;} }
+@media (max-width:720px){ .wrap{padding:76px 16px 50px;} }
+
+/* ============ 封面 ============ */
+.cover{
+  background:linear-gradient(160deg,#152B49 0%,#1A3A63 58%,#224A7C 100%);
+  color:#fff;border-radius:18px;overflow:hidden;
+  padding:54px 46px 44px;position:relative;
+  margin-bottom:34px;
+}
+.cover::after{
+  content:"";position:absolute;right:-90px;top:-90px;width:300px;height:300px;
+  background:radial-gradient(circle,rgba(232,114,12,.35),transparent 68%);
+}
+.cover .c-flag{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);
+  padding:5px 14px;border-radius:999px;font-size:12.5px;letter-spacing:1.5px;
+  margin-bottom:22px;
+}
+.cover h1{font-size:38px;line-height:1.25;font-weight:900;letter-spacing:1px;margin-bottom:10px;}
+.cover .c-module{font-size:19px;font-weight:700;color:#FFC38A;margin-bottom:18px;}
+.cover .c-desc{max-width:640px;color:#CFDCEE;font-size:15px;margin-bottom:26px;}
+.cover .c-meta{display:flex;flex-wrap:wrap;gap:10px 28px;font-size:13px;color:#B9CAE2;}
+.cover .c-meta b{color:#fff;font-weight:600;}
+.cover .c-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px;}
+.cover .btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:10px 22px;border-radius:10px;font-size:14.5px;font-weight:700;cursor:pointer;
+  border:1px solid transparent;transition:transform .15s,box-shadow .15s;font-family:inherit;
+}
+.cover .btn-primary{background:var(--accent);color:#fff;box-shadow:0 6px 18px rgba(232,114,12,.4);}
+.cover .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(232,114,12,.5);}
+.cover .btn-ghost{background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.3);}
+.cover .btn-ghost:hover{background:rgba(255,255,255,.18);}
+@media (max-width:720px){ .cover{padding:38px 24px 32px;} .cover h1{font-size:28px;} }
+
+/* ============ 章节标题 ============ */
+.sec-title{
+  display:flex;align-items:center;gap:12px;
+  font-size:23px;font-weight:900;color:var(--ink);
+  margin:44px 0 6px;
+}
+.sec-title .bar{width:6px;height:26px;background:var(--accent);border-radius:3px;flex:none;}
+.sec-sub{color:var(--text-2);font-size:14px;margin-bottom:20px;}
+
+/* ============ 活页卡 ============ */
+.leaf{
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:14px;
+  margin:22px 0;
+  position:relative;
+  box-shadow:0 3px 14px rgba(26,46,75,.06);
+  page-break-inside:avoid;
+}
+.leaf .leaf-head{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:14px 20px 12px;
+  border-bottom:1px solid var(--line-2);
+  background:var(--paper-2);
+  border-radius:14px 14px 0 0;
+}
+.leaf .leaf-head .tag{
+  font-size:11.5px;font-weight:800;letter-spacing:1px;color:#fff;
+  padding:3px 10px;border-radius:6px;flex:none;
+}
+.tag.k{background:var(--k);} .tag.w{background:var(--w);} .tag.a{background:var(--a);}
+.tag.e{background:var(--e);} .tag.x{background:var(--x);} .tag.m{background:var(--ink);}
+.leaf .leaf-head .id{
+  font-family:Consolas,"Courier New",monospace;
+  font-size:12px;color:var(--text-2);background:var(--paper);
+  border:1px solid var(--line);padding:2px 9px;border-radius:6px;flex:none;
+}
+.leaf .leaf-head h3{font-size:17px;font-weight:800;color:var(--ink);flex:1;min-width:200px;}
+.leaf .leaf-head .time{
+  font-size:12px;color:var(--text-2);background:var(--paper);
+  border:1px solid var(--line);padding:2px 9px;border-radius:6px;flex:none;
+}
+.leaf .leaf-body{padding:20px 24px 24px;}
+@media (max-width:720px){ .leaf .leaf-body{padding:16px 16px 20px;} }
+
+/* 打孔装饰（活页隐喻） */
+.leaf::before{
+  content:"";position:absolute;left:-13px;top:40px;width:9px;height:9px;border-radius:50%;
+  background:var(--bg);border:1.5px solid var(--line);box-shadow:inset 0 1px 2px rgba(0,0,0,.08);
+}
+.leaf::after{
+  content:"";position:absolute;left:-13px;top:64px;width:9px;height:9px;border-radius:50%;
+  background:var(--bg);border:1.5px solid var(--line);box-shadow:inset 0 1px 2px rgba(0,0,0,.08);
+}
+
+/* ============ 正文排版 ============ */
+.leaf-body h4{
+  font-size:15.5px;font-weight:800;color:var(--ink-2);
+  margin:18px 0 8px;padding-left:11px;border-left:4px solid var(--accent);
+}
+.leaf-body h4:first-child{margin-top:0;}
+.leaf-body p{margin:9px 0;text-align:justify;}
+.leaf-body ul,.leaf-body ol{margin:9px 0 9px 4px;padding-left:22px;}
+.leaf-body li{margin:5px 0;}
+.leaf-body li::marker{color:var(--accent);font-weight:700;}
+.leaf-body strong{color:var(--ink);}
+.leaf-body .note{
+  background:#FFF6EA;border:1px solid #F4D5AE;border-left:4px solid var(--accent);
+  border-radius:8px;padding:11px 15px;margin:12px 0;font-size:14px;color:#6B4A21;
+}
+.leaf-body .tip{
+  background:#EAF4EC;border:1px solid #C9E2CF;border-left:4px solid var(--a);
+  border-radius:8px;padding:11px 15px;margin:12px 0;font-size:14px;color:#2C5540;
+}
+.leaf-body .warnbox{
+  background:#FDF0F0;border:1px solid #F2C7C7;border-left:4px solid #C0392B;
+  border-radius:8px;padding:11px 15px;margin:12px 0;font-size:14px;color:#7A2E28;
+}
+
+/* ============ 表格 ============ */
+.tbl-wrap{overflow-x:auto;margin:12px 0;}
+table.tbl{
+  width:100%;border-collapse:collapse;font-size:14px;
+  background:var(--paper);
+}
+table.tbl th{
+  background:#E4EAF3;color:var(--ink);font-weight:700;text-align:center;
+  padding:9px 12px;border:1px solid var(--line);
+}
+table.tbl td{
+  padding:8px 12px;border:1px solid var(--line-2);vertical-align:middle;
+}
+table.tbl td.c{text-align:center;}
+table.tbl td.r{text-align:right;font-family:Consolas,monospace;}
+table.tbl tr:nth-child(even) td{background:#FAFBFD;}
+table.tbl tr:hover td{background:#F3F6FB;}
+
+/* ============ 代码块 ============ */
+pre.code{
+  background:var(--code-bg);color:#E6EDF7;border-radius:10px;
+  padding:16px 18px;overflow-x:auto;font-size:13px;line-height:1.65;
+  font-family:Consolas,"JetBrains Mono","Courier New",monospace;
+  margin:12px 0;tab-size:4;
+}
+pre.code .c{color:#7E93B0;}          /* 注释 */
+pre.code .fn{color:#82AAFF;}        /* 函数 */
+pre.code .kw{color:#C792EA;}        /* 关键字 */
+pre.code .num{color:#F78C6C;}       /* 数字 */
+pre.code .str{color:#C3E88D;}       /* 字符串 */
+pre.code .hd{color:#FFCB6B;}        /* 头文件 */
+pre.code .pp{color:#F78C6C;}        /* 宏 */
+code.inline{
+  background:#EDF1F7;color:#C2410C;padding:1px 7px;border-radius:5px;
+  font-family:Consolas,"Courier New",monospace;font-size:13.5px;
+}
+.cmdline{
+  background:#13263F;color:#9FD0FF;border-radius:8px;padding:8px 14px;
+  font-family:Consolas,"Courier New",monospace;font-size:13px;margin:8px 0;
+  overflow-x:auto;white-space:nowrap;
+}
+.cmdline::before{content:"PS > ";color:#E8720C;font-weight:700;}
+
+/* ============ 步骤 ============ */
+.steps{counter-reset:step;margin:12px 0;}
+.step{
+  position:relative;padding:2px 0 2px 44px;margin:13px 0;
+}
+.step::before{
+  counter-increment:step;content:counter(step);
+  position:absolute;left:0;top:2px;width:28px;height:28px;border-radius:50%;
+  background:var(--ink);color:#fff;font-weight:800;font-size:13.5px;
+  display:flex;align-items:center;justify-content:center;
+}
+.step b{color:var(--ink);}
+.step .step-sub{margin:6px 0 0;padding-left:14px;border-left:2px solid var(--line);font-size:14.5px;}
+
+/* ============ 目标卡片 ============ */
+.goal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0;}
+@media (max-width:720px){ .goal-grid{grid-template-columns:1fr;} }
+.goal{
+  border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:var(--paper-2);
+}
+.goal .g-ic{display:flex;align-items:center;gap:8px;font-weight:800;color:var(--ink);font-size:14.5px;margin-bottom:8px;}
+.goal ul{list-style:none;padding:0;margin:0;}
+.goal li{font-size:13.5px;color:var(--text-2);padding:3px 0 3px 16px;position:relative;}
+.goal li::before{content:"";position:absolute;left:0;top:12px;width:6px;height:6px;border-radius:50%;background:var(--accent);}
+
+/* ============ 任务卡（导入区） ============ */
+.taskcard{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0;}
+@media (max-width:720px){ .taskcard{grid-template-columns:repeat(2,1fr);} }
+.tc{
+  border:1px solid var(--line);border-radius:10px;padding:10px 14px;background:var(--paper-2);
+  font-size:13px;
+}
+.tc .tc-k{color:var(--text-2);font-size:12px;letter-spacing:1px;margin-bottom:3px;}
+.tc .tc-v{font-weight:700;color:var(--ink);}
+
+/* ============ 检测/折叠答案 ============ */
+.quiz{margin:10px 0;}
+.qitem{
+  border:1px solid var(--line);border-radius:10px;margin:10px 0;overflow:hidden;
+}
+.qitem .q{
+  padding:11px 16px;background:var(--paper-2);font-size:14.5px;font-weight:600;color:var(--ink);
+}
+.qitem .q .qno{
+  display:inline-block;background:var(--ink);color:#fff;border-radius:6px;
+  font-size:12px;padding:1px 8px;margin-right:8px;font-weight:800;
+}
+.qitem .ans{
+  display:none;padding:10px 16px;border-top:1px dashed var(--line);
+  font-size:13.5px;color:var(--text-2);background:#FBFCFE;
+}
+.qitem.open .ans{display:block;}
+.qitem .q-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  margin-top:8px;background:none;border:1px solid var(--line);border-radius:7px;
+  padding:4px 12px;font-size:12.5px;color:var(--text-2);cursor:pointer;font-family:inherit;
+}
+.qitem .q-btn:hover{color:var(--accent);border-color:var(--accent);}
+
+/* ============ 评价表 ============ */
+.score-td{text-align:center;}
+
+/* ============ 完成勾选 ============ */
+.done-row{display:flex;align-items:center;gap:10px;margin:10px 0 2px;}
+.done-row input{width:17px;height:17px;accent-color:var(--accent);cursor:pointer;}
+.done-row label{font-size:14px;color:var(--text-2);cursor:pointer;}
+.leaf.done{border-color:#9CC9A8;}
+.leaf.done .leaf-head{background:#F0F8F1;}
+.leaf.done .leaf-head h3{color:var(--a);}
+
+/* ============ 流程图（引脚映射） ============ */
+.flow{
+  display:flex;align-items:stretch;gap:0;margin:16px 0;flex-wrap:wrap;
+}
+.flow .fnode{
+  flex:1;min-width:130px;background:var(--paper-2);border:1.5px solid var(--ink-2);
+  border-radius:10px;padding:12px 10px;text-align:center;position:relative;
+}
+.flow .fnode .f-t{font-weight:800;color:var(--ink);font-size:14px;}
+.flow .fnode .f-s{font-size:12px;color:var(--text-2);margin-top:3px;}
+.flow .fnode.hl{border-color:var(--accent);background:#FFF4E8;}
+.flow .fnode.hl .f-t{color:#B45309;}
+.flow .farr{display:flex;align-items:center;padding:0 7px;color:var(--accent);font-weight:900;}
+@media (max-width:720px){
+  .flow{flex-direction:column;}
+  .flow .farr{transform:rotate(90deg);justify-content:center;padding:2px 0;}
+}
+
+/* ============ 时序逻辑（交替点亮推导） ============ */
+.cycle{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0;}
+@media (max-width:720px){ .cycle{grid-template-columns:repeat(2,1fr);} }
+.cy{
+  border:1px solid var(--line);border-radius:10px;padding:10px;text-align:center;
+  background:var(--paper-2);font-size:13px;
+}
+.cy .cy-t{font-weight:800;color:var(--ink);margin-bottom:4px;}
+.cy .led-line{display:flex;justify-content:center;gap:10px;margin-top:6px;}
+.cy .led{width:26px;height:26px;border-radius:50%;border:2px solid #B9C4D4;display:inline-flex;align-items:center;justify-content:center;}
+.cy .led.red-on{background:#E03131;border-color:#E03131;box-shadow:0 0 10px rgba(224,49,49,.6);}
+.cy .led.green-on{background:#2F9E44;border-color:#2F9E44;box-shadow:0 0 10px rgba(47,158,68,.6);}
+.cy .led.off{background:#EEF1F6;}
+.cy .led.blue-on{background:#1971C2;border-color:#1971C2;box-shadow:0 0 10px rgba(25,113,194,.65);}
+.cy .led-lab{font-size:10px;color:var(--text-2);}
+
+/* ============ 规格卡 ============ */
+.spec-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0;}
+@media (max-width:720px){ .spec-grid{grid-template-columns:1fr 1fr;} }
+.spec{
+  border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--paper-2);
+  display:flex;gap:10px;align-items:flex-start;
+}
+.spec svg{flex:none;margin-top:2px;}
+.spec .s-t{font-size:12.5px;color:var(--text-2);}
+.spec .s-v{font-size:13.5px;font-weight:700;color:var(--ink);margin-top:2px;}
+
+/* ============ 检查清单 ============ */
+.checklist{list-style:none;padding:0;margin:10px 0;}
+.checklist li{
+  display:flex;align-items:flex-start;gap:10px;padding:8px 12px;
+  border:1px solid var(--line-2);border-radius:8px;margin:7px 0;font-size:14px;background:var(--paper-2);
+}
+.checklist li input{width:16px;height:16px;accent-color:var(--a);margin-top:4px;flex:none;cursor:pointer;}
+
+/* ============ 时间轴 ============ */
+.timeline{display:grid;grid-template-columns:86px 34px 1fr;gap:0;margin:16px 0;max-width:760px;}
+@media (max-width:720px){ .timeline{grid-template-columns:70px 30px 1fr;} }
+.tl-time{text-align:right;padding:6px 12px 6px 0;font-size:13.5px;color:var(--text-2);font-weight:700;}
+.tl-axis{position:relative;}
+.tl-axis::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:2px;background:var(--line);transform:translateX(-50%);}
+.tl-dot{position:absolute;left:50%;top:16px;width:12px;height:12px;border-radius:50%;background:var(--accent);transform:translate(-50%,0);border:2.5px solid #FFE2C4;z-index:1;}
+.tl-content{padding:6px 0 20px 14px;}
+.tl-content b{color:var(--ink);font-size:14.5px;}
+.tl-content .tld{font-size:13px;color:var(--text-2);margin-top:2px;}
+
+/* ============ 页脚 ============ */
+.footer{
+  margin-top:46px;padding:22px;text-align:center;color:var(--text-2);font-size:12.5px;
+  border-top:1px solid var(--line);
+}
+
+/* ============ 打印 ============ */
+@media print{
+  body{background:#fff;font-size:12px;}
+  .topbar,.toc,.toc-mask{display:none !important;}
+  .wrap{padding:0;max-width:none;}
+  .cover{border-radius:0;padding:36px 30px;}
+  .leaf{box-shadow:none;margin:0 0 2px;border-radius:0;break-inside:avoid;}
+  .leaf::before,.leaf::after{display:none;}
+  .leaf .leaf-head{border-radius:0;}
+  .leaf{margin-bottom:10px;}
+  .sec-title{margin-top:26px;}
+  .qitem .ans{display:block;border-top:1px solid var(--line);}
+  .qitem .q-btn{display:none;}
+  a{color:var(--ink);}
+  pre.code{font-size:11px;}
+  table.tbl{font-size:11.5px;}
+}
+
+
+@media print{
+  /* PDF-break-guard */
+  .tbl-wrap, table.tbl, table.tbl tr, .taskcard, .flow, .steps, .cycle,
+  .timeline, .screen-demo, .quiz .qitem, .note, .tip, .warnbox, .ext-item,
+  .goal, .tc, .checklist { break-inside: avoid; }
+  pre.code { break-inside: avoid; }
+  img { break-inside: avoid; }
+}
+
+</style>
+</head>
+<body>
+
+<!-- ============ 顶部导航 ============ -->
+<header class="topbar">
+  <button class="burger" id="burgerBtn" aria-label="打开目录">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+  </button>
+  <div class="brand">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFC38A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg>
+    <span>图像识别技术 <span class="sub">· 活页式教材 · 模块九</span></span>
+  </div>
+  <div class="spacer"></div>
+  <a class="tool" href="index.html">模块一</a>
+  <a class="tool" href="module2.html">模块二</a>
+  <a class="tool" href="module3.html">模块三</a>
+  <a class="tool" href="module4.html">模块四</a>
+  <a class="tool" href="module5.html">模块五</a>
+  <a class="tool" href="module6.html">模块六</a>
+  <a class="tool" href="module7.html">模块七</a>
+  <a class="tool" href="module8.html">模块八</a>
+  <a class="tool" href="module10.html">模块十</a>
+  <a class="tool" href="module11.html">模块十一</a>
+  <a class="tool" href="module12.html">模块十二</a>
+  <a class="tool" href="module13.html">模块十三</a>
+  <a class="tool" href="module14.html">模块十四</a>
+  <a class="tool" href="module15.html">模块十五</a>
+  <a class="tool" href="module16.html">模块十六</a>
+  <a class="tool" href="module17.html">模块十七</a>
+  <a class="tool" href="module18.html">模块十八</a>
+  <button class="tool" id="printBtn">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+    打印教材
+  </button>
+</header>
+
+<!-- ============ 侧边目录 ============ -->
+<div class="toc-mask" id="tocMask"></div>
+<nav class="toc" id="toc">
+  <div class="toc-title">活页索引</div>
+  <a href="#cover"><span class="dot" style="background:#1A2E4B"></span>封面与模块信息</a>
+  <a href="#overview"><span class="dot" style="background:#1A2E4B"></span>模块总体设计</a>
+  <div class="g1">任务 1 · 认识摄像头与 DVP 接口</div>
+  <a href="#t1"><span class="dot" style="background:#E8720C"></span>任务卡</a>
+  <a href="#t1k1"><span class="dot" style="background:#2B6CB0"></span>K1 元件特性与连接</a>
+  <a href="#t1k2"><span class="dot" style="background:#2B6CB0"></span>K2 DVP 接口特性</a>
+  <a href="#t1k3"><span class="dot" style="background:#2B6CB0"></span>K3 SDK API 与原理</a>
+  <a href="#t1a1"><span class="dot" style="background:#2E7D5B"></span>A1 活动与检测</a>
+  <div class="g1">任务 2 · 编程实现摄像头采集显示</div>
+  <a href="#t2"><span class="dot" style="background:#E8720C"></span>任务卡</a>
+  <a href="#t2k1"><span class="dot" style="background:#2B6CB0"></span>K1 配置与主程序解析</a>
+  <a href="#t2k2"><span class="dot" style="background:#2B6CB0"></span>K2 关键代码详解</a>
+  <a href="#t2w1"><span class="dot" style="background:#E8720C"></span>W1 编译与烧录</a>
+  <a href="#t2w2"><span class="dot" style="background:#E8720C"></span>W2 验证与故障排查</a>
+  <div class="g1">评价与拓展</div>
+  <a href="#eval"><span class="dot" style="background:#6D5BA6"></span>E1 模块评价</a>
+  <a href="#ext"><span class="dot" style="background:#7A8797"></span>X1 拓展任务</a>
+</nav>
+
+<main class="wrap">
+
+<!-- ============ 封面 ============ -->
+<section class="cover" id="cover">
+  <div class="c-flag">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#FFC38A" stroke-width="2.4" stroke-linecap="round"><path d="M12 2l2.4 7.2H22l-6 4.6 2.3 7.2-6.3-4.5-6.3 4.5L8 13.8l-6-4.6h7.6z"/></svg>
+    活页式 · 工作手册式教材
+  </div>
+  <h1>图像识别技术</h1>
+  <div class="c-module">模块九 · 摄像头采集数据（OV2640 摄像头与 DVP 接口）</div>
+  <p class="c-desc">前面模块都在<strong>"处理"数据</strong>，本模块真正<strong>"看见"世界</strong>：OV2640 摄像头通过 <strong>DVP 数字摄像头接口</strong>把画面传给 K210，<strong>一帧一帧刷新到 LCD 上实时显示</strong>。这是迈向图像识别的关键一步——<strong>先有图像，才有识别</strong>。</p>
+  <div class="c-meta">
+    <span>配套课程：<b>图像识别技术（边缘计算 &amp; 机器视觉）</b></span>
+    <span>建议学时：<b>2 学时</b></span>
+    <span>前置模块：<b>模块一 ~ 模块八</b></span>
+    <span>硬件平台：<b>Kendryte K210 开发板</b></span>
+  </div>
+  <div class="c-actions">
+    <a class="btn btn-primary" href="#overview">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9V3z"/></svg>
+      开始学习
+    </a>
+    <a class="btn btn-ghost" href="#toc">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+      查看活页索引
+    </a>
+  </div>
+</section>
+
+<!-- ============ 模块总体设计 ============ -->
+<div class="sec-title"><span class="bar"></span><h2 id="overview">模块总体设计</h2></div>
+<p class="sec-sub">摄像头输出 → <strong>DVP 接口</strong>（SCCB 配置 + 中断传输）→ 内存缓冲 → LCD 显示。核心机制：DVP 中断"<strong>帧开始 / 帧结束</strong>"通知 + 主循环等待帧完成标志刷新画面，实现实时视频显示。</p>
+
+<div class="leaf">
+  <div class="leaf-head">
+    <span class="tag m">总览</span><span class="id">M9-01</span>
+    <h3>模块学习目标</h3>
+  </div>
+  <div class="leaf-body">
+    <div class="goal-grid">
+      <div class="goal">
+        <div class="g-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2B6CB0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>知识目标</div>
+        <ul>
+          <li>能说出 OV2640 特性（CMOS、200 万像素、自动控制）</li>
+          <li>能说出 DVP 接口五大特性与 dvp.h 常用 API</li>
+          <li>能说出"帧中断 + 缓冲刷新"的采集显示机制</li>
+        </ul>
+      </div>
+      <div class="goal">
+        <div class="g-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#E8720C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>技能目标</div>
+        <ul>
+          <li>能读懂 pin_config.h（DVP 八引脚）与 main.c 流程</li>
+          <li>能完成 camera 工程编译、烧录并观察实时画面</li>
+          <li>能通过现象判断采集链路（摄像头/DVP/LCD）是否正常</li>
+        </ul>
+      </div>
+      <div class="goal">
+        <div class="g-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2E7D5B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>素养目标</div>
+        <ul>
+          <li>理解"中断通知 + 主循环刷新"的实时流水线</li>
+          <li>体会"逐帧刷新"动态画面的基本原理</li>
+          <li>形成"采集 → 显示 → 识别"的机器视觉系统观</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="leaf">
+  <div class="leaf-head">
+    <span class="tag m">总览</span><span class="id">M9-02</span>
+    <h3>任务结构与学时分配</h3>
+  </div>
+  <div class="leaf-body">
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr>
+        <th style="width:26%">任务</th><th style="width:34%">内容</th><th style="width:18%">活页构成</th><th style="width:12%">学时</th><th>学习成果</th>
+      </tr>
+      <tr>
+        <td><strong>任务 1</strong><br>认识摄像头与 DVP 接口</td>
+        <td>OV2640 与 LCD 特性、DVP 接口、dvp.h API、成像原理</td>
+        <td class="c">任务卡 + K×3 + A×1</td>
+        <td class="c">1 学时</td>
+        <td>能说出采集显示机制与 API</td>
+      </tr>
+      <tr>
+        <td><strong>任务 2</strong><br>编程实现摄像头采集显示</td>
+        <td>pin_config.h 与 main.c 解析、关键代码、编译、烧录、现象验证</td>
+        <td class="c">任务卡 + K×2 + W×2</td>
+        <td class="c">1 学时</td>
+        <td>LCD 实时显示摄像头画面</td>
+      </tr>
+    </table>
+    </div>
+    <div class="note"><strong>知识前置：</strong>中断初始化（plic_init / sysctl_enable_irq）沿用模块四；LCD 显示（lcd_draw_picture）沿用模块六；SCCB 协议与 I2C 类似（模块七），用于配置 OV2640 寄存器。</div>
+  </div>
+</div>
+
+<div class="leaf">
+  <div class="leaf-head">
+    <span class="tag m">总览</span><span class="id">M9-03</span>
+    <h3>模块学习路径</h3>
+  </div>
+  <div class="leaf-body">
+    <div class="timeline">
+      <div class="tl-time">第 1 学时</div>
+      <div class="tl-axis"><span class="tl-dot"></span></div>
+      <div class="tl-content"><b>任务 1 · 认识摄像头与 DVP 接口</b><div class="tld">元件特性 → DVP 五特性 → SDK API → 活动检测</div></div>
+
+      <div class="tl-time">第 2 学时</div>
+      <div class="tl-axis"><span class="tl-dot"></span></div>
+      <div class="tl-content"><b>任务 2 · 编程实现摄像头采集显示</b><div class="tld">读懂配置与主程序 → 编译 → 烧录 → 验证实时画面</div></div>
+    </div>
+    <div class="note"><strong>本模块在课程中的位置：</strong>这是机器视觉的"眼睛"入口；后续图像识别（人脸/物体检测）都依赖本模块的采集链路，DVP 同时输出到 KPU 与显示屏，为识别结果叠加显示打基础。</div>
+  </div>
+</div>
+
+
+<div class="leaf" id="t1">
+  <div class="leaf-head">
+    <span class="tag m">任务 1</span><span class="id">M9-T1-00</span>
+    <h3>任务卡：认识摄像头与 DVP 接口</h3>
+    <span class="time">1 学时</span>
+  </div>
+  <div class="leaf-body">
+    <h4>任务情境</h4>
+    <p>图像识别的第一步是<strong>看到图像</strong>。开发板上的 <strong>OV2640 摄像头</strong>通过 <strong>DVP 数字摄像头接口</strong>把画面传给 K210。本任务认识三件事：<strong>摄像头有什么能力？DVP 接口怎么传数据？SDK 提供哪些接口？</strong>任务 2 动手编程让画面实时显示到 LCD。</p>
+    <div class="taskcard">
+      <div class="tc"><div class="tc-k">学习目标</div><div class="tc-v">说出采集显示机制与 API</div></div>
+      <div class="tc"><div class="tc-k">核心知识</div><div class="tc-v">OV2640、DVP、SCCB</div></div>
+      <div class="tc"><div class="tc-k">任务成果</div><div class="tc-v">DVP 特性表 + API 说明</div></div>
+      <div class="tc"><div class="tc-k">评价方式</div><div class="tc-v">随堂检测 + 小组互评</div></div>
+    </div>
+    <div class="tip"><strong>学习方法：</strong>DVP 是"图像专用"的并行接口（像素时钟 + 行/场同步），与 SPI/I2C 的串行不同；记住"SCCB 管配置、DVP 管传图、中断管通知"三条线。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t1k1">
+  <div class="leaf-head">
+    <span class="tag k">知识活页</span><span class="id">M9-T1-K1</span>
+    <h3>元件特性与连接</h3>
+    <span class="time">约 15 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>1. 实验元件</h4>
+    <p>本实验使用的元件是开发板上板载的 <strong>ov2640 摄像头</strong>与 <strong>LCD 显示屏</strong>，出厂默认已经安装好，只需使用 type-C 数据线连接 K210 开发板与电脑即可。</p>
+    <div class="spec-grid">
+      <div class="spec"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A2E4B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><div><div class="s-t">OV2640 摄像头</div><div class="s-v">CMOS 图像传感器 · 200 万像素</div></div></div>
+      <div class="spec"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="2" stroke-linecap="round"><path d="M12 2l2.4 7.2H22l-6 4.6 2.3 7.2-6.3-4.5-6.3 4.5L8 13.8l-6-4.6h7.6z"/></svg><div><div class="s-t">LCD 显示屏</div><div class="s-v">2.0 寸 · 320×240 · ST7789</div></div></div>
+      <div class="spec"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2F9E44" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 10h8M8 14h5"/></svg><div><div class="s-t">DVP 接口</div><div class="s-v">数字摄像头接口 · 板载连接</div></div></div>
+    </div>
+    <h4>2. OV2640 特性</h4>
+    <p>OV2640 是 <strong>Omni Vision 公司生产的一颗 CMOS 图像传感器</strong>，支持<strong>最高 200 万像素</strong>，支持<strong>自动曝光控制、自动增益控制、自动白平衡、自动消除灯光条纹</strong>等自动控制功能。</p>
+    <h4>3. LCD 特性（回顾）</h4>
+    <p>LCD 显示为 <strong>2.0 寸，分辨率为 320×240，驱动芯片是 ST7789</strong>，体积小，厚度薄，耗能低，工作电压为 <strong>3.3V</strong>，显示屏的材料为 <strong>TFT</strong>。<strong>TFT（Thin Film Transistor）是指薄膜晶体管</strong>，使每个液晶像素点都是由集成在像素点后面的薄膜晶体管来驱动，从而可以做到<strong>高速度、高亮度、高对比度</strong>显示屏幕信息。</p>
+    <div class="note"><strong>记忆锚点：</strong>摄像头"拍得到"（CMOS 感光），LCD"显示得出"（TFT 逐点驱动），DVP 在中间"传得快"。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t1k2">
+  <div class="leaf-head">
+    <span class="tag k">知识活页</span><span class="id">M9-T1-K2</span>
+    <h3>DVP 接口特性</h3>
+    <span class="time">约 15 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>1. 什么是 DVP</h4>
+    <p>OV2640 摄像头与 K210 开发板通过<strong>数字摄像头接口（DVP）</strong>连接，DVP 是常用的摄像头接口模块，具有以下特性：</p>
+    <div class="steps">
+      <div class="step"><b>a. SCCB 配置：</b>支持 <strong>SCCB 协议</strong>配置摄像头寄存器（SCCB 与 I2C 类似，是 OmniVision 的配置总线）。</div>
+      <div class="step"><b>b. 分辨率：</b>支持 <strong>640×480（30 万像素）及以下分辨率</strong>，每帧大小可配置。</div>
+      <div class="step"><b>c. 图像格式：</b>支持 <strong>YUV422 和 RGB565</strong> 格式的图像输入。</div>
+      <div class="step"><b>d. 双路输出：</b>支持图像同时输出到 <strong>KPU 和显示屏</strong>：输出到 KPU 的格式可选 <strong>RGB888</strong>，或 YUV422 输入时的 <strong>Y 分量</strong>；输出到显示屏的格式为 <strong>RGB565</strong>。</div>
+      <div class="step"><b>e. 帧中断：</b>检测到<strong>一帧开始或一帧图像传输完成</strong>时可向 CPU 发送中断。</div>
+    </div>
+    <h4>2. 采集显示链路</h4>
+    <div class="flow">
+      <div class="fnode"><div class="f-t">OV2640 感光</div><div class="f-s">SCCB 配置寄存器</div></div>
+      <div class="farr">→</div>
+      <div class="fnode"><div class="f-t">DVP 采集</div><div class="f-s">RGB565 逐帧输入</div></div>
+      <div class="farr">→</div>
+      <div class="fnode hl"><div class="f-t">内存缓冲</div><div class="f-s">display_buf_addr</div></div>
+      <div class="farr">→</div>
+      <div class="fnode"><div class="f-t">LCD 刷新</div><div class="f-s">一帧一帧实时显示</div></div>
+    </div>
+    <div class="note"><strong>理解要点：</strong>DVP 的"同时输出到 KPU 与显示屏"特性非常关键——同一帧图像既能给 AI 模块做识别，又能给人看，这正是后续图像识别项目的基础架构。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t1k3">
+  <div class="leaf-head">
+    <span class="tag k">知识活页</span><span class="id">M9-T1-K3</span>
+    <h3>SDK API 与成像原理</h3>
+    <span class="time">约 20 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>1. SDK 接口（头文件 dvp.h）</h4>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:38%">API</th><th>作用</th></tr>
+      <tr><td><code class="inline">dvp_init</code></td><td>DVP 初始化</td></tr>
+      <tr><td><code class="inline">dvp_set_output_enable</code></td><td>设置输出模式（内存或 AI）使能或禁止</td></tr>
+      <tr><td><code class="inline">dvp_set_image_format</code></td><td>设置图像接收模式，RGB 或 YUV</td></tr>
+      <tr><td><code class="inline">dvp_set_image_size</code></td><td>设置 DVP 图像采集尺寸</td></tr>
+      <tr><td><code class="inline">dvp_set_ai_addr</code></td><td>设置 AI 存放图像的地址，供 AI 模块进行算法处理</td></tr>
+      <tr><td><code class="inline">dvp_set_display_addr</code></td><td>设置采集图像在内存中的存放地址，可以用来显示</td></tr>
+      <tr><td><code class="inline">dvp_config_interrupt</code></td><td>设置图像开始和结束中断状态，使能或禁用</td></tr>
+      <tr><td><code class="inline">dvp_get_interrupt</code></td><td>判断是否是输入的中断类型，返回值：0 为否，非 0 为是</td></tr>
+      <tr><td><code class="inline">dvp_clear_interrupt</code></td><td>清除中断</td></tr>
+      <tr><td><code class="inline">dvp_start_convert</code></td><td>开始采集图像，在确定图像采集开始中断后调用</td></tr>
+      <tr><td><code class="inline">dvp_enable_burst</code> / <code class="inline">dvp_disable_burst</code></td><td>使能 / 禁用突发传输模式</td></tr>
+      <tr><td><code class="inline">dvp_enable_auto</code> / <code class="inline">dvp_disable_auto</code></td><td>使能 / 禁用自动接收图像模式</td></tr>
+      <tr><td><code class="inline">dvp_sccb_send_data</code> / <code class="inline">dvp_sccb_receive_data</code></td><td>通过 SCCB 协议发送 / 接收数据</td></tr>
+      <tr><td><code class="inline">dvp_sccb_set_clk_rate</code></td><td>设置 sccb 的速率</td></tr>
+      <tr><td><code class="inline">dvp_set_xclk_rate</code></td><td>设置输入时钟的速率</td></tr>
+    </table>
+    </div>
+    <h4>2. 实验原理：透镜成像</h4>
+    <p>ov2640 摄像头模组<strong>利用透镜成像的原理采集图像</strong>：通过感光芯片及相关电路来记录和传输图像信号，按一定的分辨率，以<strong>隔行扫描</strong>的方式采集图像上的点；当扫描到某点时，就通过图像传感芯片将该点处图像的<strong>灰度转换成灰度一一对应的电压值</strong>，然后将此电压值通过<strong>视频信号端输出</strong>。</p>
+    <div class="note"><strong>记忆锚点：</strong>"光 → 电"：感光点把明暗（灰度）变成电压，扫描逐点输出，再经 DVP 组装成一帧帧图像。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t1a1">
+  <div class="leaf-head">
+    <span class="tag a">活动活页</span><span class="id">M9-T1-A1</span>
+    <h3>活动：DVP 特性梳理与随堂检测</h3>
+    <span class="time">约 15 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>活动一：DVP 特性表填写（个人完成）</h4>
+    <p>根据 K1–K3 活页，填写下表（每空 1 分）：</p>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:40%">特性项</th><th style="width:30%">内容</th><th>说明</th></tr>
+      <tr><td class="c">配置协议</td><td class="c"></td><td class="c">配置摄像头寄存器</td></tr>
+      <tr><td class="c">最大分辨率</td><td class="c"></td><td class="c">30 万像素</td></tr>
+      <tr><td class="c">图像格式</td><td class="c"></td><td class="c">两种输入格式</td></tr>
+      <tr><td class="c">双路输出</td><td class="c"></td><td class="c">给 KPU / 显示屏</td></tr>
+    </table>
+    </div>
+    <div class="note"><strong>提示：</strong>SCCB / 640×480 / YUV422 与 RGB565 / KPU（RGB888 或 Y 分量）与显示屏（RGB565）。完成后与同桌互对答案。</div>
+    <h4>活动二：随堂检测（自测）</h4>
+    <div class="quiz">
+      <div class="qitem">
+        <div class="q"><span class="qno">1</span>OV2640 是哪家公司生产的什么类型的传感器？支持多少像素？</div>
+        <div class="ans">答案：Omni Vision 公司生产的 CMOS 图像传感器，最高支持 200 万像素。</div>
+        <button class="q-btn" onclick="toggleAns(this)">查看答案</button>
+      </div>
+      <div class="qitem">
+        <div class="q"><span class="qno">2</span>OV2640 支持哪些自动控制功能？</div>
+        <div class="ans">答案：自动曝光控制、自动增益控制、自动白平衡、自动消除灯光条纹。</div>
+        <button class="q-btn" onclick="toggleAns(this)">查看答案</button>
+      </div>
+      <div class="qitem">
+        <div class="q"><span class="qno">3</span>DVP 接口支持哪些分辨率与图像格式？</div>
+        <div class="ans">答案：640×480 及以下；YUV422 和 RGB565。</div>
+        <button class="q-btn" onclick="toggleAns(this)">查看答案</button>
+      </div>
+      <div class="qitem">
+        <div class="q"><span class="qno">4</span>DVP 的图像可以同时输出到哪里？格式分别是什么？</div>
+        <div class="ans">答案：同时输出到 KPU（RGB888 或 YUV422 的 Y 分量）和显示屏（RGB565）。</div>
+        <button class="q-btn" onclick="toggleAns(this)">查看答案</button>
+      </div>
+      <div class="qitem">
+        <div class="q"><span class="qno">5</span>dvp.h 中"设置采集图像在内存中的存放地址，用来显示"的是哪个函数？</div>
+        <div class="ans">答案：dvp_set_display_addr。</div>
+        <button class="q-btn" onclick="toggleAns(this)">查看答案</button>
+      </div>
+      <div class="qitem">
+        <div class="q"><span class="qno">6</span>K210 显示摄像头画面为什么是动态的？</div>
+        <div class="ans">答案：一帧一帧刷新 LCD 界面（采集 → 缓冲 → 显示循环），帧率足够快时人眼看到的就是动态画面。</div>
+        <button class="q-btn" onclick="toggleAns(this)">查看答案</button>
+      </div>
+    </div>
+    <div class="done-row"><input type="checkbox" id="done-t1" class="doneck" data-key="done-t1"><label for="done-t1">我已完成任务 1 的学习并自测通过（勾选后本任务标记完成）</label></div>
+  </div>
+</div>
+
+<div class="leaf" id="t2">
+  <div class="leaf-head">
+    <span class="tag m">任务 2</span><span class="id">M9-T2-00</span>
+    <h3>任务卡：编程实现摄像头采集显示</h3>
+    <span class="time">1 学时</span>
+  </div>
+  <div class="leaf-body">
+    <h4>任务情境</h4>
+    <p>原理清楚后动手编程：<strong>上电先显示 logo 图片与欢迎语 1 秒，然后打开摄像头，把采集到的画面实时显示到 LCD 上。</strong>工程由 <code class="inline">main.c + dvp_cam.c/h + ov2640.c/h + lcd/</code> 组成。重点读懂 main.c 的"初始化 → 等待帧完成 → 刷新显示"循环与 dvp_cam.c 的中断回调。</p>
+    <div class="taskcard">
+      <div class="tc"><div class="tc-k">学习目标</div><div class="tc-v">读懂摄像头代码并完成实验</div></div>
+      <div class="tc"><div class="tc-k">工程文件</div><div class="tc-v">main.c + dvp_cam.c + ov2640.c</div></div>
+      <div class="tc"><div class="tc-k">任务成果</div><div class="tc-v">LCD 实时显示摄像头画面</div></div>
+      <div class="tc"><div class="tc-k">评价方式</div><div class="tc-v">成果展示 + 流程口述</div></div>
+    </div>
+    <div class="tip"><strong>学习方法：</strong>代码分三层：main.c 管业务（等标志、刷屏），dvp_cam.c 管 DVP 采集与中断，ov2640.c 管摄像头寄存器配置。抓住"中断里置标志、主循环消费标志"这条主线。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t2k1">
+  <div class="leaf-head">
+    <span class="tag k">知识活页</span><span class="id">M9-T2-K1</span>
+    <h3>pin_config.h 与 main.c 解析</h3>
+    <span class="time">约 20 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>1. pin_config.h 配置（摄像头部分）</h4>
+    <p>DVP 摄像头共有 <strong>8 个引脚</strong>：像素时钟、输入时钟、行/场同步、电源控制、复位、SCCB 配置（SCL/SDA），全部通过 FPIOA 映射到 IO40~IO47。</p>
+    <pre class="code"><span class="c">// camera（DVP 接口引脚）</span>
+<span class="pp">#define</span> <span class="fn">PIN_DVP_PCLK</span>           (<span class="num">47</span>)
+<span class="pp">#define</span> <span class="fn">PIN_DVP_XCLK</span>           (<span class="num">46</span>)
+<span class="pp">#define</span> <span class="fn">PIN_DVP_HSYNC</span>          (<span class="num">45</span>)
+<span class="pp">#define</span> <span class="fn">PIN_DVP_PWDN</span>           (<span class="num">44</span>)
+<span class="pp">#define</span> <span class="fn">PIN_DVP_VSYNC</span>          (<span class="num">43</span>)
+<span class="pp">#define</span> <span class="fn">PIN_DVP_RST</span>            (<span class="num">42</span>)
+<span class="pp">#define</span> <span class="fn">PIN_DVP_SCL</span>            (<span class="num">41</span>)
+<span class="pp">#define</span> <span class="fn">PIN_DVP_SDA</span>            (<span class="num">40</span>)</pre>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:28%">硬件引脚</th><th style="width:22%">IO</th><th>功能（FUNC）</th></tr>
+      <tr><td><code class="inline">PIN_DVP_SCL / SDA</code></td><td class="c">41 / 40</td><td><code class="inline">FUNC_SCCB_SCLK / SDA</code>——SCCB 配置总线</td></tr>
+      <tr><td><code class="inline">PIN_DVP_VSYNC / HSYNC</code></td><td class="c">43 / 45</td><td><code class="inline">FUNC_CMOS_VSYNC / HREF</code>——场/行同步</td></tr>
+      <tr><td><code class="inline">PIN_DVP_PCLK / XCLK</code></td><td class="c">47 / 46</td><td><code class="inline">FUNC_CMOS_PCLK / XCLK</code>——像素时钟/输入时钟</td></tr>
+      <tr><td><code class="inline">PIN_DVP_RST / PWDN</code></td><td class="c">42 / 44</td><td><code class="inline">FUNC_CMOS_RST / PWDN</code>——复位/掉电</td></tr>
+    </table>
+    </div>
+    <h4>2. main.c 完整源码</h4>
+    <pre class="code"><span class="pp">#include</span> <span class="hd">"unistd.h"</span>
+<span class="pp">#include</span> <span class="hd">"gpiohs.h"</span>
+<span class="pp">#include</span> <span class="hd">"lcd.h"</span>
+<span class="pp">#include</span> <span class="hd">"st7789.h"</span>
+<span class="pp">#include</span> <span class="hd">"sysctl.h"</span>
+<span class="pp">#include</span> <span class="hd">"uarths.h"</span>
+<span class="pp">#include</span> <span class="hd">"ov2640.h"</span>
+<span class="pp">#include</span> <span class="hd">"dvp_cam.h"</span>
+<span class="pp">#include</span> <span class="hd">"pin_config.h"</span>
+
+<span class="fn">extern</span> <span class="kw">const</span> <span class="fn">unsigned char</span> <span class="fn">gImage_logo</span>[<span class="num">153608</span>];
+
+<span class="c">/**
+* @brief 设置摄像头和显示器电源域电压值（1.8V）
+*/</span>
+<span class="kw">void</span> <span class="fn">io_set_power</span>(<span class="kw">void</span>)
+{
+    <span class="fn">sysctl_set_power_mode</span>(<span class="fn">SYSCTL_POWER_BANK6</span>, <span class="fn">SYSCTL_POWER_V18</span>);
+    <span class="fn">sysctl_set_power_mode</span>(<span class="fn">SYSCTL_POWER_BANK7</span>, <span class="fn">SYSCTL_POWER_V18</span>);
+}
+
+<span class="c">/**
+* @brief 硬件初始化，绑定GPIO口
+*/</span>
+<span class="kw">void</span> <span class="fn">hardware_init</span>(<span class="kw">void</span>)
+{
+    <span class="c">/* lcd */</span>
+    <span class="fn">fpioa_set_function</span>(<span class="fn">PIN_LCD_CS</span>,  <span class="fn">FUNC_LCD_CS</span>);
+    <span class="fn">fpioa_set_function</span>(<span class="fn">PIN_LCD_RST</span>, <span class="fn">FUNC_LCD_RST</span>);
+    <span class="fn">fpioa_set_function</span>(<span class="fn">PIN_LCD_RS</span>,  <span class="fn">FUNC_LCD_RS</span>);
+    <span class="fn">fpioa_set_function</span>(<span class="fn">PIN_LCD_WR</span>,  <span class="fn">FUNC_LCD_WR</span>);
+
+    <span class="c">/* DVP camera */</span>
+    <span class="fn">fpioa_set_function</span>(<span class="fn">PIN_DVP_RST</span>,   <span class="fn">FUNC_CMOS_RST</span>);
+    <span class="fn">fpioa_set_function</span>(<span class="fn">PIN_DVP_PWDN</span>,  <span class="fn">FUNC_CMOS_PWDN</span>);
+    <span class="fn">fpioa_set_function</span>(<span class="fn">PIN_DVP_XCLK</span>,  <span class="fn">FUNC_CMOS_XCLK</span>);
+    <span class="fn">fpioa_set_function</span>(<span class="fn">PIN_DVP_VSYNC</span>, <span class="fn">FUNC_CMOS_VSYNC</span>);
+    <span class="fn">fpioa_set_function</span>(<span class="fn">PIN_DVP_HSYNC</span>, <span class="fn">FUNC_CMOS_HREF</span>);
+    <span class="fn">fpioa_set_function</span>(<span class="fn">PIN_DVP_PCLK</span>,  <span class="fn">FUNC_CMOS_PCLK</span>);
+    <span class="fn">fpioa_set_function</span>(<span class="fn">PIN_DVP_SCL</span>,   <span class="fn">FUNC_SCCB_SCLK</span>);
+    <span class="fn">fpioa_set_function</span>(<span class="fn">PIN_DVP_SDA</span>,   <span class="fn">FUNC_SCCB_SDA</span>);
+
+    <span class="c">/* 使能SPI0和DVP */</span>
+    <span class="fn">sysctl_set_spi0_dvp_data</span>(<span class="num">1</span>);
+}
+
+<span class="c">/**
+* @brief 主函数，程序的入口
+*/</span>
+<span class="kw">int</span> <span class="fn">main</span>(<span class="kw">void</span>)
+{
+    <span class="c">/* 硬件引脚初始化 */</span>
+    <span class="fn">hardware_init</span>();
+
+    <span class="c">/* 设置IO口电压（摄像头与LCD都需1.8V） */</span>
+    <span class="fn">io_set_power</span>();
+
+    <span class="c">/* 设置系统时钟和DVP时钟 */</span>
+    <span class="fn">sysctl_pll_set_freq</span>(<span class="fn">SYSCTL_PLL0</span>, <span class="num">800000000UL</span>);
+    <span class="fn">sysctl_pll_set_freq</span>(<span class="fn">SYSCTL_PLL1</span>, <span class="num">300000000UL</span>);
+    <span class="fn">sysctl_pll_set_freq</span>(<span class="fn">SYSCTL_PLL2</span>, <span class="num">45158400UL</span>);
+    <span class="fn">uarths_init</span>();
+
+    <span class="c">/* 系统中断初始化，使能全局中断 */</span>
+    <span class="fn">plic_init</span>();
+    <span class="fn">sysctl_enable_irq</span>();
+
+    <span class="c">/* 初始化LCD */</span>
+    <span class="fn">lcd_init</span>();
+
+    <span class="c">/* LCD显示图片与欢迎语（1秒） */</span>
+    <span class="fn">uint16_t</span> *<span class="fn">img</span> = &amp;<span class="fn">gImage_logo</span>;
+    <span class="fn">lcd_draw_picture_half</span>(<span class="num">0</span>, <span class="num">0</span>, <span class="num">320</span>, <span class="num">240</span>, <span class="fn">img</span>);
+    <span class="fn">lcd_draw_string</span>(<span class="num">16</span>, <span class="num">40</span>, <span class="str">"Hello HNSW!"</span>, <span class="fn">RED</span>);
+    <span class="fn">lcd_draw_string</span>(<span class="num">16</span>, <span class="num">60</span>, <span class="str">"Nice to meet you!"</span>, <span class="fn">BLUE</span>);
+    <span class="fn">sleep</span>(<span class="num">1</span>);
+
+    <span class="c">/* 初始化摄像头（内部：DVP初始化 + 中断配置 + OV2640寄存器） */</span>
+    <span class="fn">ov2640_init</span>();
+
+    <span class="kw">while</span> (<span class="num">1</span>)
+    {
+        <span class="c">/* 等待摄像头采集结束，然后清除结束标志 */</span>
+        <span class="kw">while</span> (<span class="fn">g_dvp_finish_flag</span> == <span class="num">0</span>)
+            ;
+        <span class="fn">g_dvp_finish_flag</span> = <span class="num">0</span>;
+
+        <span class="c">/* 显示画面 */</span>
+        <span class="fn">lcd_draw_picture</span>(<span class="num">0</span>, <span class="num">0</span>, <span class="num">320</span>, <span class="num">240</span>, <span class="fn">display_buf_addr</span>);
+    }
+
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+    <h4>3. 主流程解读</h4>
+    <div class="steps">
+      <div class="step"><b>硬件与电源：</b><code class="inline">hardware_init()</code> 映射 LCD 与 DVP 引脚；<code class="inline">io_set_power()</code> 把 bank6 与 bank7 都设为 1.8V（摄像头和显示器都需要 1.8V 电平信号）。</div>
+      <div class="step"><b>时钟与中断：</b>PLL0 800MHz（主频）、PLL1 300MHz、PLL2 45.1584MHz（DVP 时钟）；<code class="inline">plic_init() + sysctl_enable_irq()</code>。</div>
+      <div class="step"><b>LCD 欢迎界面：</b><code class="inline">lcd_init()</code> → 显示 logo 图片 + 两行欢迎语，停留 1 秒。</div>
+      <div class="step"><b>初始化摄像头：</b><code class="inline">ov2640_init()</code>——内部依次完成 DVP 初始化、DVP 中断配置、OV2640 寄存器配置。</div>
+      <div class="step"><b>实时显示循环：</b><code class="inline">while(1)</code> 等待 <code class="inline">g_dvp_finish_flag</code>（中断置 1）→ 清零 → <code class="inline">lcd_draw_picture</code> 把 display_buf_addr 的画面刷上屏，循环往复。</div>
+    </div>
+    <div class="note"><strong>教材与工程差异：</strong>教材通用示例欢迎语为 "Hello Yahboom!"；本工程源码定制为 "Hello HNSW!"，烧录后以工程源码实际显示为准。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t2k2">
+  <div class="leaf-head">
+    <span class="tag k">知识活页</span><span class="id">M9-T2-K2</span>
+    <h3>关键代码详解</h3>
+    <span class="time">约 20 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>1. DVP 初始化（dvp_cam_init）</h4>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:44%">配置</th><th>作用</th></tr>
+      <tr><td><code class="inline">dvp_init(8)</code></td><td>DVP 初始化，设置 SCCB 寄存器长度为 8bit</td></tr>
+      <tr><td><code class="inline">dvp_set_xclk_rate(24000000)</code></td><td>设置输入时钟为 24MHz</td></tr>
+      <tr><td><code class="inline">dvp_enable_burst()</code></td><td>使能突发传输模式</td></tr>
+      <tr><td><code class="inline">dvp_set_output_enable(AI, 0)</code> + <code class="inline">(DISPLAY, 1)</code></td><td>关闭 AI 输出、使能显示模式</td></tr>
+      <tr><td><code class="inline">dvp_set_image_format(DVP_CFG_RGB_FORMAT)</code></td><td>设置输出格式为 RGB</td></tr>
+      <tr><td><code class="inline">dvp_set_image_size(320, 240)</code></td><td>设置输出像素大小为 320×240</td></tr>
+      <tr><td><code class="inline">iomem_malloc(320*240*2)</code></td><td>分配显示缓冲（RGB565 一帧 150KB）</td></tr>
+      <tr><td><code class="inline">dvp_set_display_addr + dvp_config_interrupt + dvp_disable_auto</code></td><td>设置显示地址、使能帧开始/结束中断、关闭自动接收</td></tr>
+    </table>
+    </div>
+    <h4>2. 中断回调（on_dvp_irq_cb）</h4>
+    <p><code class="inline">dvp_cam_set_irq()</code> 注册 DVP 中断（优先级 1）并清除中断位；中断回调里做两件事：</p>
+    <div class="flow">
+      <div class="fnode"><div class="f-t">帧完成</div><div class="f-s">置 g_dvp_finish_flag=1</div></div>
+      <div class="farr">/</div>
+      <div class="fnode"><div class="f-t">帧开始</div><div class="f-s">dvp_start_convert() 继续采集</div></div>
+    </div>
+    <div class="note"><strong>工程思想：</strong>中断回调不刷新屏幕（耗时），只置标志；主循环消费标志后调用 lcd_draw_picture 刷新——与模块四"回调里少做事"一脉相承。</div>
+    <h4>3. 摄像头初始化（ov2640_init）</h4>
+    <p><code class="inline">ov2640_init()</code> 内部流程：先 <code class="inline">dvp_cam_init()</code>（配置 DVP 通道）→ <code class="inline">dvp_cam_set_irq()</code>（注册中断）→ 读 OV2640 ID 校验 → 把 OV2640 的寄存器以及对应的数据逐一发送（具体的寄存器以及功能可以查看硬件资料中的摄像头资料），完成后开始出图。</p>
+    <h4>4. 逐帧刷新原理</h4>
+    <p>K210 显示摄像头画面是<strong>通过一帧一帧刷新 LCD 界面来达到动态效果</strong>的：帧完成中断 → 标志置 1 → 主循环把缓冲数据刷上屏 → 等待下一帧。每帧 320×240×2 字节 ≈ 150KB，循环足够快，人眼看到的就是连续视频。</p>
+    <div class="note"><strong>实验总结：</strong>① K210 开发板板载 dvp 接口可以与兼容 dvp 接口的 ov2640 摄像头连接使用；② K210 开发板显示摄像头画面是通过一帧一帧刷新 LCD 界面来达到动态效果的。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t2w1">
+  <div class="leaf-head">
+    <span class="tag w">工作活页</span><span class="id">M9-T2-W1</span>
+    <h3>编译与烧录</h3>
+    <span class="time">约 15 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>任务：把工程编译成固件并烧录进 K210</h4>
+    <div class="steps">
+      <div class="step"><b>复制工程到 SDK。</b>把课程资料中的 <code class="inline">camera</code> 文件夹整体复制到 SDK 的 <code class="inline">src</code> 目录下，例如 <code class="inline">D:\K210\SDK\kendryte-standalone-sdk-develop\src\camera</code>（以你自己的 SDK 安装路径为准）。</div>
+      <div class="step"><b>打开终端。</b>在 VSCode 中打开 SDK 工程，点击「终端 → 新建终端」，进入 SDK 根目录下的 <code class="inline">build</code> 目录。</div>
+      <div class="step"><b>执行 CMake 配置。</b><div class="cmdline">cmake .. -DPROJ=camera -G "MinGW Makefiles"</div>等待配置完成（看到 "Generating done" 即成功）。</div>
+      <div class="step"><b>执行编译。</b><div class="cmdline">make</div>输出编译、链接、生成 .bin 的日志（"Built target camera"）即成功。</div>
+      <div class="step"><b>确认固件。</b>确认 build 目录下存在 <code class="inline">camera.bin</code>。</div>
+      <div class="step"><b>烧录。</b>用 Type-C 数据线连接开发板与电脑，打开 kflash 烧录工具，选择对应的设备（CH340 串口），Firmware 选择 <code class="inline">camera.bin</code>，点击 Flash 烧录。</div>
+    </div>
+    <div class="warnbox"><strong>常见报错：</strong>camera 工程包含 lcd 子目录与 dvp_cam.c / ov2640.c，务必整个 camera 文件夹复制进 src 目录，且 <code class="inline">-DPROJ=camera</code> 拼写正确。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t2w2">
+  <div class="leaf-head">
+    <span class="tag w">工作活页</span><span class="id">M9-T2-W2</span>
+    <h3>现象验证与故障排查</h3>
+    <span class="time">约 20 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>1. 预期实验现象</h4>
+    <div class="note"><strong>现象描述：</strong>LCD 显示器先显示图片 logo 和字符串（欢迎语），一秒后打开摄像头采集的画面，并且<strong>实时显示在 LCD 上</strong>——移动摄像头/物体，画面随之变化，像"电子取景器"一样。</div>
+    <div class="cycle">
+      <div class="cy"><div class="cy-t">上电</div><div class="screen-demo"><div class="scr-inner">LOGO</div></div><div>图片 + 欢迎语</div></div>
+      <div class="cy"><div class="cy-t">1秒后</div><div class="screen-demo"><div class="scr-inner"><div class="scr-cam"></div></div></div><div>打开摄像头</div></div>
+      <div class="cy"><div class="cy-t">实时</div><div class="screen-demo"><div class="scr-inner"><div class="scr-cam"></div></div></div><div>画面随动</div></div>
+      <div class="cy"><div class="cy-t">持续</div><div class="screen-demo"><div class="scr-inner"><div class="scr-cam"></div></div></div><div>逐帧刷新</div></div>
+    </div>
+    <h4>2. 现象与代码对应（口述自检）</h4>
+    <p>上电 → 引脚映射 + 1.8V 电源 + PLL 时钟 → plic_init 使能中断 → lcd_init 显示 logo 与欢迎语（sleep 1s）→ <code class="inline">ov2640_init()</code>（DVP 初始化 + 中断注册 + OV2640 寄存器配置）→ while(1)：等待 <code class="inline">g_dvp_finish_flag</code> → 清零 → <code class="inline">lcd_draw_picture</code> 刷新画面。</p>
+    <h4>3. 故障排查表</h4>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:26%">现象</th><th style="width:36%">可能原因</th><th>处理方法</th></tr>
+      <tr><td>LCD 花屏/雪花</td><td>DVP 引脚映射错误 / XCLK 时钟未配 / 数据线松动</td><td>核对 pin_config.h 八引脚与 hardware_init 映射；确认 PLL2 时钟</td></tr>
+      <tr><td>黑屏无画面</td><td>ov2640_init 未调用 / OV2640 寄存器配置失败</td><td>确认 main 中 ov2640_init() 已执行；检查 SCCB 接线与地址 0x60</td></tr>
+      <tr><td>画面卡住不动</td><td>帧完成标志未置位 / 中断未注册</td><td>确认 dvp_cam_set_irq 与 plic_init、sysctl_enable_irq 顺序</td></tr>
+      <tr><td>只有欢迎语没有摄像头画面</td><td>DVP 输出模式未使能显示 / 缓冲地址错误</td><td>确认 dvp_set_output_enable(DISPLAY, 1) 与 dvp_set_display_addr</td></tr>
+      <tr><td>画面颜色异常</td><td>图像格式不是 RGB / LCD 颜色格式不匹配</td><td>确认 dvp_set_image_format(DVP_CFG_RGB_FORMAT) 与 lcd 格式一致</td></tr>
+      <tr><td>编译失败：找不到 dvp_cam.h</td><td>工程未放到 src/camera 目录</td><td>检查路径、确认 -DPROJ=camera 参数一致</td></tr>
+    </table>
+    </div>
+    <h4>4. 实验检查清单</h4>
+    <ul class="checklist">
+      <li><input type="checkbox" id="ck1"><label for="ck1">camera 工程已复制到 SDK 的 src/camera 目录，编译生成 camera.bin</label></li>
+      <li><input type="checkbox" id="ck2"><label for="ck2">kflash 烧录完成，LCD 先显示 logo 图片与欢迎语 1 秒</label></li>
+      <li><input type="checkbox" id="ck3"><label for="ck3">之后 LCD 实时显示摄像头画面，画面随物体移动变化</label></li>
+      <li><input type="checkbox" id="ck4"><label for="ck4">无花屏、无黑屏、画面连续不卡顿</label></li>
+      <li><input type="checkbox" id="ck5"><label for="ck5">能用"映射→1.8V→时钟中断→LCD→ov2640_init→帧标志刷新"口头复述流程</label></li>
+    </ul>
+    <div class="done-row"><input type="checkbox" id="done-t2" class="doneck" data-key="done-t2"><label for="done-t2">我已完成任务 2 的实验并记录现象（勾选后本任务标记完成）</label></div>
+  </div>
+</div>
+
+<div class="sec-title"><span class="bar"></span><h2 id="eval">模块评价</h2></div>
+<p class="sec-sub">对照评价量表逐项自评（自己评）、互评（同桌评）、师评（教师评），在对应栏填 ★（优秀 5-4 分 / 合格 3 分 / 待改进 2-1 分）。</p>
+
+<div class="leaf">
+  <div class="leaf-head">
+    <span class="tag e">评价</span><span class="id">M9-E1</span>
+    <h3>模块九 · 摄像头采集数据 评价量表</h3>
+    <span class="time">约 10 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:8%">序号</th><th>评价维度</th><th style="width:12%">自评</th><th style="width:12%">互评</th><th style="width:12%">师评</th></tr>
+      <tr><td class="c">1</td><td>能说出 OV2640 特性（OmniVision、CMOS、200 万像素、四项自动控制）</td><td></td><td></td><td></td></tr>
+      <tr><td class="c">2</td><td>能说出 DVP 接口五大特性（SCCB、640×480、YUV422/RGB565、双路输出、帧中断）</td><td></td><td></td><td></td></tr>
+      <tr><td class="c">3</td><td>能说出 dvp.h 常用 API 的用途（display_addr / start_convert / config_interrupt 等）</td><td></td><td></td><td></td></tr>
+      <tr><td class="c">4</td><td>能说出摄像头 8 引脚映射（IO40~47、FUNC_CMOS_* 与 FUNC_SCCB_*）</td><td></td><td></td><td></td></tr>
+      <tr><td class="c">5</td><td>能读懂 main.c 流程（映射→1.8V→PLL→中断→LCD→ov2640_init→帧标志刷新）</td><td></td><td></td><td></td></tr>
+      <tr><td class="c">6</td><td>能说出中断回调"置标志"与主循环"消费标志"的配合</td><td></td><td></td><td></td></tr>
+      <tr><td class="c">7</td><td>能独立完成 camera 工程编译、烧录，LCD 实时显示画面</td><td></td><td></td><td></td></tr>
+      <tr><td class="c">8</td><td>理解"逐帧刷新"动态显示原理与 DVP 同时输出 KPU/显示屏的架构</td><td></td><td></td><td></td></tr>
+    </table>
+    </div>
+    <h4>课后反思（各写一句话）</h4>
+    <p class="reflect">我学得最好的是：________________________</p>
+    <p class="reflect">我还需要加强的是：________________________</p>
+    <p class="reflect">我想对老师说：________________________</p>
+  </div>
+</div>
+
+<div class="sec-title"><span class="bar"></span><h2 id="ext">拓展任务</h2></div>
+<p class="sec-sub">完成必学内容后选做，对应修改工程源码、重新编译烧录，体会"采集 → 显示 → 识别"的演进。</p>
+
+<div class="leaf">
+  <div class="leaf-head">
+    <span class="tag x">拓展</span><span class="id">M9-X1</span>
+    <h3>拓展任务：让摄像头更好玩</h3>
+    <span class="time">选做</span>
+  </div>
+  <div class="leaf-body">
+    <h4>拓展 1：改分辨率</h4>
+    <p>修改 <code class="inline">dvp_cam.h</code> 里的 <code class="inline">CAM_WIDTH_PIXEL / CAM_HIGHT_PIXEL</code>（如 160×120），同时把 main.c 的 <code class="inline">lcd_draw_picture</code> 参数改为对应尺寸，观察画面清晰度与流畅度变化。</p>
+    <h4>拓展 2：叠加文字信息</h4>
+    <p>在刷新循环里用 <code class="inline">lcd_draw_string</code> 叠加一行计数器（帧率）：每刷新一帧计数加 1，显示在画面左上角，体验"视频 + 信息叠加"（类似监控 OSD）。</p>
+    <h4>拓展 3：灰度画面</h4>
+    <p>把 <code class="inline">dvp_set_image_format(DVP_CFG_RGB_FORMAT)</code> 改为 YUV 格式，只取 Y 分量显示（Y 即亮度），观察黑白画面效果；思考为什么灰度图数据量更小。</p>
+    <h4>拓展 4：画面特效</h4>
+    <p>在刷新循环前用 <code class="inline">lcd_set_area + tft_fill_data</code> 局部遮挡画面的一角（如右下角白色矩形），做一个"画中画/遮挡"效果；或把画面缩小显示在屏幕一角。</p>
+    <h4>拓展 5（进阶）：打开 AI 输出</h4>
+    <p>在 dvp_cam_init 里把 <code class="inline">dvp_set_output_enable(DVP_OUTPUT_AI, 0)</code> 改为 1，并思考：同一帧图像同时给 KPU 和显示屏，KPU 拿到的 RGB888 数据如何用于识别？这为后续"摄像头 + 模型"的图像识别项目做了铺垫。</p>
+    <div class="note"><strong>完成标准：</strong>至少完成拓展 1–3 中的两个，并在活页空白处记录每种改动的现象；拓展 4–5 可作为小组探究课题。</div>
+  </div>
+</div>
+
+<footer class="footer">
+  《图像识别技术》活页式教材 · 模块九 摄像头采集数据（OV2640 摄像头与 DVP 接口） · 建议学时 2 学时<br>
+  配套硬件：Kendryte K210 开发板 · 配套工程：camera（main.c + dvp_cam.c + ov2640.c + lcd）
+</footer>
+
+</main>
+
+<script>
+// ============ 目录开关（移动端） ============
+var burger = document.getElementById('burgerBtn');
+var toc = document.getElementById('toc');
+var mask = document.getElementById('tocMask');
+if (burger) {
+  burger.addEventListener('click', function(){
+    toc.classList.toggle('open');
+    mask.classList.toggle('open');
+  });
+}
+if (mask) {
+  mask.addEventListener('click', function(){
+    toc.classList.remove('open');
+    mask.classList.remove('open');
+  });
+}
+
+// ============ 打印 ============
+var printBtn = document.getElementById('printBtn');
+if (printBtn) printBtn.addEventListener('click', function(){ window.print(); });
+
+// ============ 折叠答案 ============
+function toggleAns(btn){
+  var item = btn.closest('.qitem');
+  if (item) item.classList.toggle('open');
+}
+
+// ============ 侧边目录滚动高亮 ============
+var tocLinks = document.querySelectorAll('.toc a');
+var sections = [];
+tocLinks.forEach(function(a){
+  var id = a.getAttribute('href');
+  if (id && id.charAt(0) === '#') {
+    var el = document.getElementById(id.slice(1));
+    if (el) sections.push({link:a, el:el});
+  }
+});
+function onScroll(){
+  var pos = window.scrollY + 100;
+  var current = null;
+  sections.forEach(function(s){
+    if (s.el.offsetTop <= pos) current = s;
+  });
+  sections.forEach(function(s){
+    s.link.classList.toggle('active', s === current);
+  });
+}
+window.addEventListener('scroll', onScroll, {passive:true});
+onScroll();
+
+// ============ 完成状态记忆（localStorage） ============
+var donecks = document.querySelectorAll('.doneck');
+donecks.forEach(function(cb){
+  var k = 'm9:' + cb.getAttribute('data-key');
+  if (localStorage.getItem(k) === '1') cb.checked = true;
+  cb.addEventListener('change', function(){
+    if (cb.checked) localStorage.setItem(k, '1');
+    else localStorage.removeItem(k);
+  });
+});
+</script>
+</body>
+</html>

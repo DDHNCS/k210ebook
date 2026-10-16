@@ -425,6 +425,14 @@ code.inline{
   img { break-inside: avoid; }
 }
 
+
+/* TOPBAR-FIX：按钮较多时顶部导航横向滚动，避免挤压标题换行 */
+.topbar{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;}
+.topbar .brand{flex:0 0 auto;white-space:nowrap;}
+.topbar .tool,.topbar .burger{flex:0 0 auto;}
+.topbar .spacer{flex:1 1 auto;min-width:0;}
+.topbar::-webkit-scrollbar{height:4px;}
+.topbar::-webkit-scrollbar-thumb{background:rgba(255,255,255,.32);border-radius:4px;}
 </style>
 </head>
 <body>
@@ -439,7 +447,7 @@ code.inline{
     <span>图像识别技术 <span class="sub">· 活页式教材 · 模块二</span></span>
   </div>
   <div class="spacer"></div>
-  <a class="tool" href="index.html">
+  <a class="tool" href="module1.html">
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14l-4-4 4-4"/><path d="M5 10h11a4 4 0 0 1 0 8h-1"/></svg>
     模块一
   </a>

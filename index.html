@@ -1,0 +1,1576 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>《图像识别技术》活页式教材 · 模块一 课程概述与环境搭建</title>
+<style>
+/* ============ 基础变量与重置 ============ */
+:root{
+  --ink:#1A2E4B;          /* 主色：深靛蓝 */
+  --ink-2:#274a73;
+  --accent:#E8720C;       /* 强调：橙 */
+  --bg:#EEF1F6;
+  --paper:#FFFFFF;
+  --paper-2:#F7F9FC;
+  --line:#D6DEE9;
+  --line-2:#E8EDF4;
+  --text:#233040;
+  --text-2:#5A6B82;
+  --k:#2B6CB0;   /* 知识活页 */
+  --w:#E8720C;   /* 工作活页 */
+  --a:#2E7D5B;   /* 活动活页 */
+  --e:#6D5BA6;   /* 评价活页 */
+  --x:#7A8797;   /* 拓展活页 */
+  --code-bg:#0F1D2F;
+  --ok:#2E7D5B;
+  --warn:#B45309;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;scroll-padding-top:74px;}
+body{
+  font-family:"Noto Sans SC","Microsoft YaHei","PingFang SC",system-ui,-apple-system,"Segoe UI",sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.75;
+  font-size:16px;
+}
+a{color:var(--ink-2);text-decoration:none;}
+img{max-width:100%;}
+::selection{background:#FFE2C4;}
+
+/* ============ 顶部导航 ============ */
+.topbar{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  background:rgba(26,46,75,.97);
+  color:#fff;
+  display:flex;align-items:center;gap:14px;
+  padding:0 22px;height:56px;
+  box-shadow:0 2px 10px rgba(26,46,75,.25);
+}
+.topbar .brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:15.5px;letter-spacing:.4px;}
+.topbar .brand svg{flex:none;}
+.topbar .brand .sub{color:#AFC3DE;font-weight:400;font-size:12.5px;}
+.topbar .spacer{flex:1;}
+.topbar .tool{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);
+  color:#fff;padding:7px 14px;border-radius:8px;font-size:13px;cursor:pointer;
+  font-family:inherit;transition:background .2s;min-height:40px;
+}
+.topbar .tool:hover{background:rgba(255,255,255,.22);}
+.burger{display:none;background:none;border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:8px;padding:9px 12px;cursor:pointer;min-height:40px;min-width:42px;}
+@media (max-width:720px){
+  .topbar a.tool{display:none;}
+  .topbar .brand .sub{display:none;}
+  .burger{display:block;}
+  .toc a{padding:9px 22px;}
+  .topbar .tool{padding:9px 14px;}
+}
+
+/* ============ 侧边目录 ============ */
+.toc{
+  position:fixed;top:56px;bottom:0;left:0;width:250px;
+  background:var(--paper);
+  border-right:1px solid var(--line);
+  overflow-y:auto;padding:20px 0 30px;
+  z-index:90;
+}
+.toc .toc-title{
+  font-size:12px;color:var(--text-2);letter-spacing:2px;font-weight:700;
+  padding:0 22px 10px;text-transform:uppercase;
+}
+.toc a{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 22px;font-size:13.5px;color:var(--text-2);
+  border-left:3px solid transparent;transition:all .15s;
+}
+.toc a .dot{width:7px;height:7px;border-radius:50%;flex:none;}
+.toc a:hover{color:var(--ink);background:var(--paper-2);}
+.toc a.active{color:var(--ink);font-weight:700;border-left-color:var(--accent);background:var(--paper-2);}
+.toc a.active .dot{background:var(--accent);}
+.toc .g1{margin-top:14px;font-size:12px;color:var(--text-2);padding:8px 22px 4px;font-weight:700;}
+@media (max-width:960px){ .toc{left:-260px;transition:left .25s;} .toc.open{left:0;box-shadow:4px 0 18px rgba(0,0,0,.18);} }
+.toc-mask{display:none;position:fixed;inset:0;background:rgba(15,25,40,.45);z-index:85;}
+.toc-mask.open{display:block;}
+
+/* ============ 主布局 ============ */
+.wrap{
+  max-width:1000px;margin:0 auto;
+  padding:88px 26px 70px;
+}
+@media (min-width:961px){ .wrap{padding-left:296px;padding-right:46px;max-width:1240px;} }
+@media (max-width:720px){ .wrap{padding:76px 16px 50px;} }
+
+/* ============ 封面 ============ */
+.cover{
+  background:linear-gradient(160deg,#152B49 0%,#1A3A63 58%,#224A7C 100%);
+  color:#fff;border-radius:18px;overflow:hidden;
+  padding:54px 46px 44px;position:relative;
+  margin-bottom:34px;
+}
+.cover::after{
+  content:"";position:absolute;right:-90px;top:-90px;width:300px;height:300px;
+  background:radial-gradient(circle,rgba(232,114,12,.35),transparent 68%);
+}
+.cover .c-flag{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);
+  padding:5px 14px;border-radius:999px;font-size:12.5px;letter-spacing:1.5px;
+  margin-bottom:22px;
+}
+.cover h1{font-size:38px;line-height:1.25;font-weight:900;letter-spacing:1px;margin-bottom:10px;}
+.cover .c-module{font-size:19px;font-weight:700;color:#FFC38A;margin-bottom:18px;}
+.cover .c-desc{max-width:640px;color:#CFDCEE;font-size:15px;margin-bottom:26px;}
+.cover .c-meta{display:flex;flex-wrap:wrap;gap:10px 28px;font-size:13px;color:#B9CAE2;}
+.cover .c-meta b{color:#fff;font-weight:600;}
+.cover .c-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px;}
+.cover .btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:10px 22px;border-radius:10px;font-size:14.5px;font-weight:700;cursor:pointer;
+  border:1px solid transparent;transition:transform .15s,box-shadow .15s;font-family:inherit;
+}
+.cover .btn-primary{background:var(--accent);color:#fff;box-shadow:0 6px 18px rgba(232,114,12,.4);}
+.cover .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(232,114,12,.5);}
+.cover .btn-ghost{background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.3);}
+.cover .btn-ghost:hover{background:rgba(255,255,255,.18);}
+@media (max-width:720px){ .cover{padding:38px 24px 32px;} .cover h1{font-size:28px;} }
+
+/* ============ 章节标题 ============ */
+.sec-title{
+  display:flex;align-items:center;gap:12px;
+  font-size:23px;font-weight:900;color:var(--ink);
+  margin:44px 0 6px;
+}
+.sec-title .bar{width:6px;height:26px;background:var(--accent);border-radius:3px;flex:none;}
+.sec-sub{color:var(--text-2);font-size:14px;margin-bottom:20px;}
+
+/* ============ 活页卡 ============ */
+.leaf{
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:14px;
+  margin:22px 0;
+  position:relative;
+  box-shadow:0 3px 14px rgba(26,46,75,.06);
+  page-break-inside:avoid;
+}
+.leaf .leaf-head{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:14px 20px 12px;
+  border-bottom:1px solid var(--line-2);
+  background:var(--paper-2);
+  border-radius:14px 14px 0 0;
+}
+.leaf .leaf-head .tag{
+  font-size:11.5px;font-weight:800;letter-spacing:1px;color:#fff;
+  padding:3px 10px;border-radius:6px;flex:none;
+}
+.tag.k{background:var(--k);} .tag.w{background:var(--w);} .tag.a{background:var(--a);}
+.tag.e{background:var(--e);} .tag.x{background:var(--x);} .tag.m{background:var(--ink);}
+.leaf .leaf-head .id{
+  font-family:Consolas,"Courier New",monospace;
+  font-size:12px;color:var(--text-2);background:var(--paper);
+  border:1px solid var(--line);padding:2px 9px;border-radius:6px;flex:none;
+}
+.leaf .leaf-head h3{font-size:17px;font-weight:800;color:var(--ink);flex:1;min-width:200px;}
+.leaf .leaf-head .time{
+  font-size:12px;color:var(--text-2);background:var(--paper);
+  border:1px solid var(--line);padding:2px 9px;border-radius:6px;flex:none;
+}
+.leaf .leaf-body{padding:20px 24px 24px;}
+@media (max-width:720px){ .leaf .leaf-body{padding:16px 16px 20px;} }
+
+/* 打孔装饰（活页隐喻） */
+.leaf::before{
+  content:"";position:absolute;left:-13px;top:40px;width:9px;height:9px;border-radius:50%;
+  background:var(--bg);border:1.5px solid var(--line);box-shadow:inset 0 1px 2px rgba(0,0,0,.08);
+}
+.leaf::after{
+  content:"";position:absolute;left:-13px;top:64px;width:9px;height:9px;border-radius:50%;
+  background:var(--bg);border:1.5px solid var(--line);box-shadow:inset 0 1px 2px rgba(0,0,0,.08);
+}
+
+/* ============ 正文排版 ============ */
+.leaf-body h4{
+  font-size:15.5px;font-weight:800;color:var(--ink-2);
+  margin:18px 0 8px;padding-left:11px;border-left:4px solid var(--accent);
+}
+.leaf-body h4:first-child{margin-top:0;}
+.leaf-body p{margin:9px 0;text-align:justify;}
+.leaf-body ul,.leaf-body ol{margin:9px 0 9px 4px;padding-left:22px;}
+.leaf-body li{margin:5px 0;}
+.leaf-body li::marker{color:var(--accent);font-weight:700;}
+.leaf-body strong{color:var(--ink);}
+.leaf-body .note{
+  background:#FFF6EA;border:1px solid #F4D5AE;border-left:4px solid var(--accent);
+  border-radius:8px;padding:11px 15px;margin:12px 0;font-size:14px;color:#6B4A21;
+}
+.leaf-body .tip{
+  background:#EAF4EC;border:1px solid #C9E2CF;border-left:4px solid var(--a);
+  border-radius:8px;padding:11px 15px;margin:12px 0;font-size:14px;color:#2C5540;
+}
+.leaf-body .warnbox{
+  background:#FDF0F0;border:1px solid #F2C7C7;border-left:4px solid #C0392B;
+  border-radius:8px;padding:11px 15px;margin:12px 0;font-size:14px;color:#7A2E28;
+}
+
+/* ============ 表格 ============ */
+.tbl-wrap{overflow-x:auto;margin:12px 0;}
+table.tbl{
+  width:100%;border-collapse:collapse;font-size:14px;
+  background:var(--paper);
+}
+table.tbl th{
+  background:#E4EAF3;color:var(--ink);font-weight:700;text-align:center;
+  padding:9px 12px;border:1px solid var(--line);
+}
+table.tbl td{
+  padding:8px 12px;border:1px solid var(--line-2);vertical-align:middle;
+}
+table.tbl td.c{text-align:center;}
+table.tbl td.r{text-align:right;font-family:Consolas,monospace;}
+table.tbl tr:nth-child(even) td{background:#FAFBFD;}
+table.tbl tr:hover td{background:#F3F6FB;}
+
+/* ============ 代码块 ============ */
+pre.code{
+  background:var(--code-bg);color:#E6EDF7;border-radius:10px;
+  padding:16px 18px;overflow-x:auto;font-size:13px;line-height:1.65;
+  font-family:Consolas,"JetBrains Mono","Courier New",monospace;
+  margin:12px 0;tab-size:4;
+}
+pre.code .c{color:#7E93B0;}          /* 注释 */
+pre.code .fn{color:#82AAFF;}        /* 函数 */
+pre.code .kw{color:#C792EA;}        /* 关键字 */
+pre.code .num{color:#F78C6C;}       /* 数字 */
+pre.code .str{color:#C3E88D;}       /* 字符串 */
+pre.code .hd{color:#FFCB6B;}        /* 头文件 */
+code.inline{
+  background:#EDF1F7;color:#C2410C;padding:1px 7px;border-radius:5px;
+  font-family:Consolas,"Courier New",monospace;font-size:13.5px;
+}
+.cmdline{
+  background:#13263F;color:#9FD0FF;border-radius:8px;padding:8px 14px;
+  font-family:Consolas,"Courier New",monospace;font-size:13px;margin:8px 0;
+  overflow-x:auto;white-space:nowrap;
+}
+.cmdline::before{content:"PS > ";color:#E8720C;font-weight:700;}
+
+/* ============ 步骤 ============ */
+.steps{counter-reset:step;margin:12px 0;}
+.step{
+  position:relative;padding:2px 0 2px 44px;margin:13px 0;
+}
+.step::before{
+  counter-increment:step;content:counter(step);
+  position:absolute;left:0;top:2px;width:28px;height:28px;border-radius:50%;
+  background:var(--ink);color:#fff;font-weight:800;font-size:13.5px;
+  display:flex;align-items:center;justify-content:center;
+}
+.step b{color:var(--ink);}
+.step .step-sub{margin:6px 0 0;padding-left:14px;border-left:2px solid var(--line);font-size:14.5px;}
+
+/* ============ 目标卡片 ============ */
+.goal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0;}
+@media (max-width:720px){ .goal-grid{grid-template-columns:1fr;} }
+.goal{
+  border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:var(--paper-2);
+}
+.goal .g-ic{display:flex;align-items:center;gap:8px;font-weight:800;color:var(--ink);font-size:14.5px;margin-bottom:8px;}
+.goal ul{list-style:none;padding:0;margin:0;}
+.goal li{font-size:13.5px;color:var(--text-2);padding:3px 0 3px 16px;position:relative;}
+.goal li::before{content:"";position:absolute;left:0;top:12px;width:6px;height:6px;border-radius:50%;background:var(--accent);}
+
+/* ============ 任务卡（导入区） ============ */
+.taskcard{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0;
+}
+@media (max-width:720px){ .taskcard{grid-template-columns:repeat(2,1fr);} }
+.tc{
+  border:1px solid var(--line);border-radius:10px;padding:10px 14px;background:var(--paper-2);
+  font-size:13px;
+}
+.tc .tc-k{color:var(--text-2);font-size:12px;letter-spacing:1px;margin-bottom:3px;}
+.tc .tc-v{font-weight:700;color:var(--ink);}
+
+/* ============ 检测/折叠答案 ============ */
+.quiz{margin:10px 0;}
+.qitem{
+  border:1px solid var(--line);border-radius:10px;margin:10px 0;overflow:hidden;
+}
+.qitem .q{
+  padding:11px 16px;background:var(--paper-2);font-size:14.5px;font-weight:600;color:var(--ink);
+}
+.qitem .q .qno{
+  display:inline-block;background:var(--ink);color:#fff;border-radius:6px;
+  font-size:12px;padding:1px 8px;margin-right:8px;font-weight:800;
+}
+.qitem .ans{
+  display:none;padding:10px 16px;border-top:1px dashed var(--line);
+  font-size:13.5px;color:var(--text-2);background:#FBFCFE;
+}
+.qitem.open .ans{display:block;}
+.qitem .q-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  margin-top:8px;background:none;border:1px solid var(--line);border-radius:7px;
+  padding:4px 12px;font-size:12.5px;color:var(--text-2);cursor:pointer;font-family:inherit;
+}
+.qitem .q-btn:hover{color:var(--accent);border-color:var(--accent);}
+
+/* ============ 评价表 ============ */
+.rate{display:flex;gap:8px;justify-content:center;}
+.rate span{
+  width:52px;padding:3px 0;border:1px solid var(--line);border-radius:7px;
+  font-size:12px;text-align:center;color:var(--text-2);background:#FBFCFE;
+}
+.score-td{text-align:center;}
+
+/* ============ 完成勾选 ============ */
+.done-row{display:flex;align-items:center;gap:10px;margin:10px 0 2px;}
+.done-row input{width:17px;height:17px;accent-color:var(--accent);cursor:pointer;}
+.done-row label{font-size:14px;color:var(--text-2);cursor:pointer;}
+.leaf.done{border-color:#9CC9A8;}
+.leaf.done .leaf-head{background:#F0F8F1;}
+.leaf.done .leaf-head h3{color:var(--a);}
+
+/* ============ 流程图（图像识别过程） ============ */
+.flow{
+  display:flex;align-items:stretch;gap:0;margin:16px 0;flex-wrap:wrap;
+}
+.flow .fnode{
+  flex:1;min-width:130px;background:var(--paper-2);border:1.5px solid var(--ink-2);
+  border-radius:10px;padding:12px 10px;text-align:center;position:relative;
+}
+.flow .fnode .f-t{font-weight:800;color:var(--ink);font-size:14px;}
+.flow .fnode .f-s{font-size:12px;color:var(--text-2);margin-top:3px;}
+.flow .fnode.hl{border-color:var(--accent);background:#FFF4E8;}
+.flow .fnode.hl .f-t{color:#B45309;}
+.flow .farr{display:flex;align-items:center;padding:0 7px;color:var(--accent);font-weight:900;}
+@media (max-width:720px){
+  .flow{flex-direction:column;}
+  .flow .farr{transform:rotate(90deg);justify-content:center;padding:2px 0;}
+}
+
+/* ============ 架构图（K210） ============ */
+.arch{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:8px;margin:14px 0;}
+@media (max-width:720px){ .arch{grid-template-columns:1fr;} }
+.arch .anode{
+  border:1.5px solid var(--ink-2);border-radius:9px;padding:9px 6px;text-align:center;
+  background:var(--paper-2);font-size:12.5px;color:var(--ink);font-weight:700;
+}
+.arch .anode small{display:block;font-weight:400;color:var(--text-2);font-size:11px;}
+.arch .anode.core{border-color:var(--ink);background:#E9F0FA;}
+.arch .anode.accel{border-color:var(--accent);background:#FFF1E2;}
+.arch .anode.peri{border-color:var(--a);background:#EAF4EC;}
+.arch .anode.sec{border-color:var(--e);background:#F1EDF9;}
+.arch-label{text-align:center;font-size:12px;color:var(--text-2);margin:6px 0 2px;font-weight:700;letter-spacing:2px;}
+
+/* ============ 芯片规格卡 ============ */
+.spec-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0;}
+@media (max-width:720px){ .spec-grid{grid-template-columns:1fr 1fr;} }
+.spec{
+  border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--paper-2);
+  display:flex;gap:10px;align-items:flex-start;
+}
+.spec svg{flex:none;margin-top:2px;}
+.spec .s-t{font-size:12.5px;color:var(--text-2);}
+.spec .s-v{font-size:13.5px;font-weight:700;color:var(--ink);margin-top:2px;}
+
+/* ============ 检查清单 ============ */
+.checklist{list-style:none;padding:0;margin:10px 0;}
+.checklist li{
+  display:flex;align-items:flex-start;gap:10px;padding:8px 12px;
+  border:1px solid var(--line-2);border-radius:8px;margin:7px 0;font-size:14px;background:var(--paper-2);
+}
+.checklist li input{width:16px;height:16px;accent-color:var(--a);margin-top:4px;flex:none;cursor:pointer;}
+
+/* ============ 时间轴（学习路径） ============ */
+.timeline{display:grid;grid-template-columns:86px 34px 1fr;gap:0;margin:16px 0;max-width:760px;}
+@media (max-width:720px){ .timeline{grid-template-columns:70px 30px 1fr;} }
+.tl-time{text-align:right;padding:6px 12px 6px 0;font-size:13.5px;color:var(--text-2);font-weight:700;}
+.tl-axis{position:relative;}
+.tl-axis::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:2px;background:var(--line);transform:translateX(-50%);}
+.tl-dot{position:absolute;left:50%;top:16px;width:12px;height:12px;border-radius:50%;background:var(--accent);transform:translate(-50%,0);border:2.5px solid #FFE2C4;z-index:1;}
+.tl-content{padding:6px 0 20px 14px;}
+.tl-content b{color:var(--ink);font-size:14.5px;}
+.tl-content .tld{font-size:13px;color:var(--text-2);margin-top:2px;}
+
+/* ============ 页脚 ============ */
+.footer{
+  margin-top:46px;padding:22px;text-align:center;color:var(--text-2);font-size:12.5px;
+  border-top:1px solid var(--line);
+}
+
+/* ============ 打印 ============ */
+@media print{
+  body{background:#fff;font-size:12px;}
+  .topbar,.toc,.toc-mask{display:none !important;}
+  .wrap{padding:0;max-width:none;}
+  .cover{border-radius:0;padding:36px 30px;}
+  .leaf{box-shadow:none;margin:0 0 2px;border-radius:0;break-inside:avoid;}
+  .leaf::before,.leaf::after{display:none;}
+  .leaf .leaf-head{border-radius:0;}
+  .leaf{margin-bottom:10px;}
+  .sec-title{margin-top:26px;}
+  .qitem .ans{display:block;border-top:1px solid var(--line);}
+  .qitem .q-btn{display:none;}
+  a{color:var(--ink);}
+  pre.code{font-size:11px;}
+  table.tbl{font-size:11.5px;}
+}
+
+@media print{
+  /* PDF-break-guard */
+  .tbl-wrap, table.tbl, table.tbl tr, .taskcard, .flow, .steps, .cycle,
+  .timeline, .screen-demo, .quiz .qitem, .note, .tip, .warnbox, .ext-item,
+  .goal, .tc, .checklist { break-inside: avoid; }
+  pre.code { break-inside: avoid; }
+  img { break-inside: avoid; }
+}
+
+</style>
+</head>
+<body>
+
+<!-- ============ 顶部导航 ============ -->
+<header class="topbar">
+  <button class="burger" id="burgerBtn" aria-label="打开目录">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+  </button>
+  <div class="brand">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFC38A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+    <span>图像识别技术 <span class="sub">· 活页式教材 · 模块一</span></span>
+  </div>
+  <div class="spacer"></div>
+  <a class="tool" href="module2.html">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+    模块二
+  </a>
+  <a class="tool" href="module3.html">模块三</a>
+  <a class="tool" href="module4.html">模块四</a>
+  <a class="tool" href="module5.html">模块五</a>
+  <a class="tool" href="module6.html">模块六</a>
+  <a class="tool" href="module7.html">模块七</a>
+  <a class="tool" href="module8.html">模块八</a>
+  <a class="tool" href="module9.html">模块九</a>
+  <a class="tool" href="module10.html">模块十</a>
+  <a class="tool" href="module11.html">模块十一</a>
+  <a class="tool" href="module12.html">模块十二</a>
+  <a class="tool" href="module13.html">模块十三</a>
+  <a class="tool" href="module14.html">模块十四</a>
+  <a class="tool" href="module15.html">模块十五</a>
+  <a class="tool" href="module16.html">模块十六</a>
+  <a class="tool" href="module17.html">模块十七</a>
+  <a class="tool" href="module18.html">模块十八</a>
+  <button class="tool" id="printBtn">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+    打印教材
+  </button>
+</header>
+
+<!-- ============ 侧边目录 ============ -->
+<div class="toc-mask" id="tocMask"></div>
+<nav class="toc" id="toc">
+  <div class="toc-title">活页索引</div>
+  <a href="#cover"><span class="dot" style="background:#1A2E4B"></span>封面与教材信息</a>
+  <a href="#guide"><span class="dot" style="background:#1A2E4B"></span>活页使用说明</a>
+  <a href="#overview"><span class="dot" style="background:#1A2E4B"></span>模块总体设计</a>
+  <div class="g1">任务 1 · 认识图像识别技术</div>
+  <a href="#t1"><span class="dot" style="background:#E8720C"></span>任务卡</a>
+  <a href="#t1k1"><span class="dot" style="background:#2B6CB0"></span>K1 概念与原理</a>
+  <a href="#t1k2"><span class="dot" style="background:#2B6CB0"></span>K2 基本过程</a>
+  <a href="#t1k3"><span class="dot" style="background:#2B6CB0"></span>K3 应用领域</a>
+  <a href="#t1a1"><span class="dot" style="background:#2E7D5B"></span>A1 活动与检测</a>
+  <div class="g1">任务 2 · 认识 K210 芯片</div>
+  <a href="#t2"><span class="dot" style="background:#E8720C"></span>任务卡</a>
+  <a href="#t2k1"><span class="dot" style="background:#2B6CB0"></span>K1 芯片概述</a>
+  <a href="#t2k2"><span class="dot" style="background:#2B6CB0"></span>K2 核心能力</a>
+  <a href="#t2k3"><span class="dot" style="background:#2B6CB0"></span>K3 系统架构</a>
+  <a href="#t2k4"><span class="dot" style="background:#2B6CB0"></span>K4 应用场景</a>
+  <a href="#t2a1"><span class="dot" style="background:#2E7D5B"></span>A1 活动与检测</a>
+  <div class="g1">任务 3 · 搭建开发环境</div>
+  <a href="#t3"><span class="dot" style="background:#E8720C"></span>任务卡</a>
+  <a href="#t3w1"><span class="dot" style="background:#E8720C"></span>W1 驱动与串口</a>
+  <a href="#t3w2"><span class="dot" style="background:#E8720C"></span>W2 安装 CMake</a>
+  <a href="#t3w3"><span class="dot" style="background:#E8720C"></span>W3 安装 Toolchain</a>
+  <a href="#t3w4"><span class="dot" style="background:#E8720C"></span>W4 VSCode 与 SDK</a>
+  <a href="#t3w5"><span class="dot" style="background:#E8720C"></span>W5 检查清单</a>
+  <div class="g1">任务 4 · 编译烧录 Hello World</div>
+  <a href="#t4"><span class="dot" style="background:#E8720C"></span>任务卡</a>
+  <a href="#t4k1"><span class="dot" style="background:#2B6CB0"></span>K1 程序解析</a>
+  <a href="#t4w1"><span class="dot" style="background:#E8720C"></span>W1 编译程序</a>
+  <a href="#t4w2"><span class="dot" style="background:#E8720C"></span>W2 烧录程序</a>
+  <a href="#t4w3"><span class="dot" style="background:#E8720C"></span>W3 验证与排障</a>
+  <div class="g1">评价与拓展</div>
+  <a href="#eval"><span class="dot" style="background:#6D5BA6"></span>E1 模块评价</a>
+  <a href="#ext"><span class="dot" style="background:#7A8797"></span>X1 拓展任务</a>
+</nav>
+
+<main class="wrap">
+
+<!-- ============ 封面 ============ -->
+<section class="cover" id="cover">
+  <div class="c-flag">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#FFC38A" stroke-width="2.4" stroke-linecap="round"><path d="M12 2l2.4 7.2H22l-6 4.6 2.3 7.2-6.3-4.5-6.3 4.5L8 13.8l-6-4.6h7.6z"/></svg>
+    活页式 · 工作手册式教材
+  </div>
+  <h1>图像识别技术</h1>
+  <div class="c-module">模块一 · 课程概述与环境搭建</div>
+  <p class="c-desc">以"认识图像识别技术 → 认识 K210 芯片 → 搭建开发环境 → 点亮第一个程序"为主线，采用任务驱动方式组织学习。每个任务独立成页（活页），可拆装、可重组、可更新，配合学习评价量表实现"学—做—评"一体化。</p>
+  <div class="c-meta">
+    <span>配套课程：<b>图像识别技术（边缘计算 &amp; 机器视觉）</b></span>
+    <span>建议学时：<b>2 学时</b></span>
+    <span>适用对象：<b>电子信息 / 人工智能相关专业</b></span>
+    <span>硬件平台：<b>Kendryte K210 开发板</b></span>
+  </div>
+  <div class="c-actions">
+    <a class="btn btn-primary" href="#guide">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9V3z"/></svg>
+      开始学习
+    </a>
+    <a class="btn btn-ghost" href="#toc">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+      查看活页索引
+    </a>
+  </div>
+</section>
+
+<!-- ============ 使用说明 ============ -->
+<div class="sec-title"><span class="bar"></span><h2 id="guide">活页教材使用说明</h2></div>
+<p class="sec-sub">先读本页，了解活页教材的组织方式、编号规则与使用流程。</p>
+
+<div class="leaf">
+  <div class="leaf-head">
+    <span class="tag m">说明</span><span class="id">M1-00</span>
+    <h3>什么是活页式教材，怎么用？</h3>
+  </div>
+  <div class="leaf-body">
+    <p>本教材采用<strong>活页式、工作手册式</strong>组织方式：整个模块由若干<strong>独立成页的活页</strong>组成，每个活页承载一个完整的学习单元（任务卡、知识链接、工作实施、活动评价等）。活页可以单独取下、重新组合或替换，既方便教师按学情增删内容，也方便学生边学边记录、对照实施。</p>
+    <h4>活页编号规则</h4>
+    <table class="tbl">
+      <tr><th style="width:34%">编号示例</th><th>含义</th></tr>
+      <tr><td class="c"><code class="inline">M1-T2-K3</code></td><td>模块 1 · 任务 2 · 知识活页 3（K = Knowledge 知识）</td></tr>
+      <tr><td class="c"><code class="inline">M1-T3-W1</code></td><td>模块 1 · 任务 3 · 工作活页 1（W = Work 工作/实操）</td></tr>
+      <tr><td class="c"><code class="inline">M1-T1-A1</code></td><td>模块 1 · 任务 1 · 活动活页 1（A = Activity 活动）</td></tr>
+      <tr><td class="c"><code class="inline">M1-E1</code> / <code class="inline">M1-X1</code></td><td>模块评价活页（E = Evaluate）/ 模块拓展活页（X = eXpand）</td></tr>
+    </table>
+    <h4>每个任务的标准学习流程</h4>
+    <div class="flow">
+      <div class="fnode"><div class="f-t">任务卡</div><div class="f-s">明确任务情境、目标与成果</div></div>
+      <div class="farr">→</div>
+      <div class="fnode"><div class="f-t">知识链接</div><div class="f-s">学习完成任务所需知识</div></div>
+      <div class="farr">→</div>
+      <div class="fnode hl"><div class="f-t">工作实施</div><div class="f-s">按步骤动手操作、记录</div></div>
+      <div class="farr">→</div>
+      <div class="fnode"><div class="f-t">检查与评价</div><div class="f-s">对照清单自检、互评、师评</div></div>
+    </div>
+    <div class="tip"><strong>使用建议：</strong>知识型活页课前预习、课中精读；工作型活页边读边做，每完成一步在步骤前的方框中打勾；评价活页在任务完成后填写。打印时建议 A4 单面打印，按活页编号顺序放入活页夹，便于增补与替换。</div>
+  </div>
+</div>
+
+<!-- ============ 模块总体设计 ============ -->
+<div class="sec-title"><span class="bar"></span><h2 id="overview">模块总体设计</h2></div>
+<p class="sec-sub">本模块是全课程的入门模块：先建立"图像识别是什么"的整体认知，再认识课程的核心硬件 K210，最后完成开发环境搭建与第一个程序验证。</p>
+
+<div class="leaf">
+  <div class="leaf-head">
+    <span class="tag m">总览</span><span class="id">M1-01</span>
+    <h3>模块学习目标</h3>
+  </div>
+  <div class="leaf-body">
+    <div class="goal-grid">
+      <div class="goal">
+        <div class="g-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2B6CB0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>知识目标</div>
+        <ul>
+          <li>能说出图像识别的基本概念、基本过程与主要应用领域</li>
+          <li>能描述 K210 芯片的主要特性、核心能力与系统架构组成</li>
+          <li>能说明开发环境的组成（CMake、Toolchain、VSCode、SDK、烧录工具）及各自作用</li>
+        </ul>
+      </div>
+      <div class="goal">
+        <div class="g-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#E8720C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>技能目标</div>
+        <ul>
+          <li>能独立完成 CH340 驱动、CMake、Toolchain、VSCode、SDK 的安装与验证</li>
+          <li>能用串口助手连接开发板并验证通信</li>
+          <li>能编译 K210 官方 SDK 工程，烧录固件并验证双核打印输出</li>
+        </ul>
+      </div>
+      <div class="goal">
+        <div class="g-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2E7D5B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>素养目标</div>
+        <ul>
+          <li>养成规范操作、按步骤实施、及时记录的职业习惯</li>
+          <li>培养排查问题、对照现象分析原因的工程思维</li>
+          <li>初步建立"边缘计算 + 机器视觉"的应用意识与安全意识</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="leaf">
+  <div class="leaf-head">
+    <span class="tag m">总览</span><span class="id">M1-02</span>
+    <h3>任务结构与学时分配</h3>
+  </div>
+  <div class="leaf-body">
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr>
+        <th style="width:26%">任务</th><th style="width:34%">内容</th><th style="width:18%">活页构成</th><th style="width:12%">学时</th><th>学习成果</th>
+      </tr>
+      <tr>
+        <td><strong>任务 1</strong><br>认识图像识别技术</td>
+        <td>图像识别的概念、基本过程、应用领域</td>
+        <td class="c">任务卡 + K×3 + A×1</td>
+        <td class="c">0.5 学时</td>
+        <td>能画出图像识别流程图，能举例说明应用场景</td>
+      </tr>
+      <tr>
+        <td><strong>任务 2</strong><br>认识 K210 芯片</td>
+        <td>K210 特性、机器视觉/听觉能力、系统架构、应用场景</td>
+        <td class="c">任务卡 + K×4 + A×1</td>
+        <td class="c">0.5 学时</td>
+        <td>能填写 K210 特性盘点表，能说出架构组成</td>
+      </tr>
+      <tr>
+        <td><strong>任务 3</strong><br>搭建开发环境</td>
+        <td>CH340 驱动、串口助手、CMake、Toolchain、VSCode、SDK 安装</td>
+        <td class="c">任务卡 + W×5</td>
+        <td class="c">0.5 学时</td>
+        <td>环境全部安装成功并通过命令验证</td>
+      </tr>
+      <tr>
+        <td><strong>任务 4</strong><br>编译烧录 Hello World</td>
+        <td>main.c 程序解析、CMake 编译、kflash 烧录、双核输出验证</td>
+        <td class="c">任务卡 + K×1 + W×3</td>
+        <td class="c">0.5 学时</td>
+        <td>串口输出 "Core 0 / Core 1 Hello world"</td>
+      </tr>
+    </table>
+    </div>
+    <div class="note"><strong>知识前置：</strong>建议先完成 C 语言基础与单片机基本概念的预习；本模块不要求深入理解 K210 内部寄存器细节，重点在"会用、会搭、会验证"。</div>
+  </div>
+</div>
+
+<div class="leaf">
+  <div class="leaf-head">
+    <span class="tag m">总览</span><span class="id">M1-03</span>
+    <h3>模块学习路径</h3>
+  </div>
+  <div class="leaf-body">
+    <div class="timeline">
+      <div class="tl-time">环节 1</div>
+      <div class="tl-axis"><span class="tl-dot"></span></div>
+      <div class="tl-content"><b>任务 1 · 认识图像识别技术</b><div class="tld">建立概念：图像→像素→识别流程→应用领域</div></div>
+
+      <div class="tl-time">环节 2</div>
+      <div class="tl-axis"><span class="tl-dot"></span></div>
+      <div class="tl-content"><b>任务 2 · 认识 K210 芯片</b><div class="tld">认识平台：芯片特性 → 视觉/听觉能力 → 系统架构 → 应用场景</div></div>
+
+      <div class="tl-time">环节 3</div>
+      <div class="tl-axis"><span class="tl-dot"></span></div>
+      <div class="tl-content"><b>任务 3 · 搭建开发环境</b><div class="tld">搭建平台：驱动 → CMake → Toolchain → VSCode → SDK，逐项验证</div></div>
+
+      <div class="tl-time">环节 4</div>
+      <div class="tl-axis"><span class="tl-dot"></span></div>
+      <div class="tl-content"><b>任务 4 · 编译烧录 Hello World</b><div class="tld">验证平台：读懂 main.c → 编译 → 烧录 → 串口输出双核 Hello World</div></div>
+    </div>
+    <div class="note"><strong>本模块在课程中的位置：</strong>本模块是后续所有图像识别任务（图像采集、目标检测、人脸识别、声源定位等）的基础。开发环境与烧录流程在后续每个任务中都会反复使用，务必在本模块做到熟练、规范。</div>
+  </div>
+</div>
+
+<div class="leaf">
+  <div class="leaf-head">
+    <span class="tag m">任务 1</span><span class="id">M1-T1-00</span>
+    <h3>任务卡：认识图像识别技术</h3>
+    <span class="time">约 0.5 学时</span>
+  </div>
+  <div class="leaf-body">
+    <h4>任务情境</h4>
+    <p>在商场、车站、手机中，人脸识别闸机、车牌识别、扫码支付已无处不在。这些应用背后都依赖同一项核心技术——<strong>图像识别</strong>。本任务将从"图像是怎么组成的、计算机怎么认出图像、图像识别用在哪里"三个问题入手，建立对图像识别的整体认知，为后续使用 K210 开发板完成真实识别任务打基础。</p>
+    <div class="taskcard">
+      <div class="tc"><div class="tc-k">学习目标</div><div class="tc-v">说出概念与流程，举例应用</div></div>
+      <div class="tc"><div class="tc-k">核心知识</div><div class="tc-v">图像、像素、识别流程、应用</div></div>
+      <div class="tc"><div class="tc-k">任务成果</div><div class="tc-v">图像识别流程图 + 应用案例表</div></div>
+      <div class="tc"><div class="tc-k">评价方式</div><div class="tc-v">随堂检测 + 小组互评</div></div>
+    </div>
+    <div class="tip"><strong>学习方法：</strong>先精读 K1–K3 三张知识活页，再用自己的话完成 A1 活动活页。检测题做完后点击"查看答案"自评。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t1k1">
+  <div class="leaf-head">
+    <span class="tag k">知识活页</span><span class="id">M1-T1-K1</span>
+    <h3>图像识别的基本概念与原理</h3>
+    <span class="time">约 15 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>1. 图像是怎么组成的</h4>
+    <p>图像是<strong>二维图像用有限数字数值像素的表示</strong>。肉眼看到的一幅图，在计算机里其实是由大量<strong>基本像素点</strong>组成的——每个像素点都携带<strong>色彩种类</strong>与<strong>亮度等级</strong>信息。像素点越密集，图像越清晰；像素值越丰富，色彩与层次越逼真。</p>
+    <p>由像素点构成的、可以用数字数值描述和存储的图像，称为<strong>数字图像</strong>（又称<strong>数码图像、数位图像</strong>）。数字图像是计算机能够处理、识别的前提。</p>
+    <div class="note"><strong>记忆锚点：</strong>图像 = 像素点矩阵；像素 = 色彩 + 亮度信息；数字图像 = 图像的数字表示，是图像识别的输入对象。</div>
+    <h4>2. 什么是图像识别</h4>
+    <p><strong>图像识别</strong>，是指利用计算机对图像进行处理、分析和理解，从而<strong>识别出图像中各种不同模式的目标和对象</strong>的技术。它解决的问题是：让机器"看懂"图像里有什么（轮廓、特征、颜色、物体），并作出判断。</p>
+    <p>图像识别通常包括<strong>轮廓识别、特征识别、色彩识别、物体识别</strong>等类型，其中<strong>轮廓识别是重中之重</strong>——因为物体的形状轮廓是识别其身份的最基础信息。</p>
+  </div>
+</div>
+
+<div class="leaf" id="t1k2">
+  <div class="leaf-head">
+    <span class="tag k">知识活页</span><span class="id">M1-T1-K2</span>
+    <h3>图像识别的基本过程</h3>
+    <span class="time">约 10 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>图像识别的基本流程</h4>
+    <p>无论识别对象是车牌、人脸还是工业零件，图像识别都遵循同一个基本流程：</p>
+    <div class="flow">
+      <div class="fnode hl"><div class="f-t">① 信息获取</div><div class="f-s">图像采集（摄像头等）</div></div>
+      <div class="farr">→</div>
+      <div class="fnode"><div class="f-t">② 图像预处理</div><div class="f-s">得到特征数据</div></div>
+      <div class="farr">→</div>
+      <div class="fnode"><div class="f-t">③ 训练过程</div><div class="f-s">建立识别模型</div></div>
+      <div class="farr">→</div>
+      <div class="fnode hl"><div class="f-t">④ 识别</div><div class="f-s">输出识别结果</div></div>
+    </div>
+    <ul>
+      <li><strong>信息获取（图像采集）：</strong>通过摄像头、扫描仪等设备把现实场景转化为数字图像，是识别过程的起点。</li>
+      <li><strong>图像预处理：</strong>对采集到的图像进行去噪、增强、分割等处理，<strong>提取出具有区分度的特征数据</strong>，为后续识别做准备。</li>
+      <li><strong>训练过程：</strong>用大量带标签的样本特征"教会"识别模型——这是机器学习和卷积神经网络发挥作用的核心环节。</li>
+      <li><strong>识别：</strong>把待识别图像的特征与训练好的模型比对，输出"是什么"的结论。</li>
+    </ul>
+    <div class="tip"><strong>联系本课程：</strong>K210 芯片内置卷积神经网络硬件加速器（KPU），可以<strong>在芯片本地</strong>完成"训练好的模型"的推理识别，这就是"边缘计算"的含义——识别不出云端，直接在设备端完成。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t1k3">
+  <div class="leaf-head">
+    <span class="tag k">知识活页</span><span class="id">M1-T1-K3</span>
+    <h3>图像识别的应用领域</h3>
+    <span class="time">约 15 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>图像识别的三个发展阶段</h4>
+    <p>图像识别技术经历了由浅入深的三个发展阶段：<strong>对文字信息的识别 → 对数字化信息的识别 → 对物体的识别</strong>。随着阶段演进，图像识别不断与各行业技术结合，逐步拓展至交通、安防、医学、农业等众多领域。</p>
+    <h4>主要应用与发展方向</h4>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:16%">领域</th><th style="width:44%">典型应用</th><th>技术要点</th></tr>
+      <tr>
+        <td class="c"><strong>交通</strong></td>
+        <td>智能交通系统（ITS）：道路识别、车辆检测、车牌检测</td>
+        <td>在道路识别、车辆车牌检测等方面展现巨大优势</td>
+      </tr>
+      <tr>
+        <td class="c"><strong>安防</strong></td>
+        <td>视频智能分析系统：人脸识别、人脸支付、智能自动化监控</td>
+        <td>基于图像识别技术的视频智能分析</td>
+      </tr>
+      <tr>
+        <td class="c"><strong>医学</strong></td>
+        <td>CT 成像、微创手术导航、心脏与脑结构等器官识别</td>
+        <td>CT 技术是图像识别技术的拓展应用；手术导航、器官识别地位不可替代</td>
+      </tr>
+      <tr>
+        <td class="c"><strong>农业</strong></td>
+        <td>病虫害诊断、农作物生长检测</td>
+        <td>在农业领域发挥巨大作用</td>
+      </tr>
+    </table>
+    </div>
+    <p>除此之外，图像识别的主要应用与发展方向还包括<strong>字符识别（OCR）、机器视觉识别、图形图像识别、生物医学</strong>等。本课程后续将重点围绕<strong>智能识别车牌</strong>与<strong>人脸识别</strong>两大典型应用展开，K210 正是实现这类端侧识别的主流硬件平台。</p>
+  </div>
+</div>
+
+<div class="leaf" id="t1a1">
+  <div class="leaf-head">
+    <span class="tag a">活动活页</span><span class="id">M1-T1-A1</span>
+    <h3>活动：案例分析与随堂检测</h3>
+    <span class="time">约 20 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>活动一：身边的图像识别（小组讨论）</h4>
+    <p>4 人一组，每组从下列场景中任选 1 个，讨论并填写：<strong>① 识别对象是什么；② 按"采集→预处理→训练→识别"四步描述其工作流程；③ 属于哪个应用领域。</strong></p>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th>可选场景</th><th>识别对象</th><th>工作流程（采集→预处理→训练→识别）</th><th>所属领域</th></tr>
+      <tr><td class="c">高速公路 ETC 车牌识别</td><td></td><td></td><td></td></tr>
+      <tr><td class="c">手机人脸解锁</td><td></td><td></td><td></td></tr>
+      <tr><td class="c">超市扫码枪识别条形码</td><td></td><td></td><td></td></tr>
+      <tr><td class="c">农业无人机识别病虫害叶片</td><td></td><td></td><td></td></tr>
+    </table>
+    </div>
+    <div class="note"><strong>提示：</strong>填写时注意区分"采集的是什么图像"与"识别出什么结论"——例如车牌识别中，采集的是整幅道路图像，识别结论是"车牌号码"。完成后小组内互相补充，并选一名代表分享。</div>
+
+    <h4>活动二：随堂检测（自测）</h4>
+    <div class="quiz">
+      <div class="qitem">
+        <div class="q"><span class="qno">1</span>数字图像最基本的组成单元是？</div>
+        <div class="ans">答案：B。数字图像由大量携带色彩种类与亮度等级信息的像素点组成；分辨率越高，像素点越多。</div>
+        <button class="q-btn" onclick="toggleAns(this)">查看答案</button>
+      </div>
+      <div class="qitem">
+        <div class="q"><span class="qno">2</span>图像识别的基本流程顺序正确的是？</div>
+        <div class="ans">答案：C。信息获取（图像采集）→ 图像预处理得到特征数据 → 训练过程 → 识别。</div>
+        <button class="q-btn" onclick="toggleAns(this)">查看答案</button>
+      </div>
+      <div class="qitem">
+        <div class="q"><span class="qno">3</span>下列哪种识别类型被强调为"重中之重"？</div>
+        <div class="ans">答案：A。轮廓识别是图像识别的重中之重，物体的形状轮廓是识别其身份的最基础信息。</div>
+        <button class="q-btn" onclick="toggleAns(this)">查看答案</button>
+      </div>
+      <div class="qitem">
+        <div class="q"><span class="qno">4</span>在医学领域，下列哪项属于图像识别技术的应用？</div>
+        <div class="ans">答案：D。CT 技术是图像识别技术的拓展应用，微创手术导航、心脏和脑结构识别也运用了图像识别技术。</div>
+        <button class="q-btn" onclick="toggleAns(this)">查看答案</button>
+      </div>
+    </div>
+    <div class="done-row"><input type="checkbox" id="done-t1" class="doneck" data-key="done-t1"><label for="done-t1">我已完成任务 1 的学习并自测通过（勾选后本任务标记完成）</label></div>
+  </div>
+</div>
+
+<div class="leaf">
+  <div class="leaf-head">
+    <span class="tag m">任务 2</span><span class="id">M1-T2-00</span>
+    <h3>任务卡：认识 K210 芯片</h3>
+    <span class="time">约 0.5 学时</span>
+  </div>
+  <div class="leaf-body">
+    <h4>任务情境</h4>
+    <p>本课程后续所有图像识别任务（车牌识别、人脸识别等）都要在一块名为 <strong>Kendryte K210</strong> 的芯片上完成。它凭什么能在低功耗的端侧跑卷积神经网络？它"看"和"听"的能力从哪里来？本任务将全面认识这位"主角"——它的出身、特性、能力、架构与应用。</p>
+    <div class="taskcard">
+      <div class="tc"><div class="tc-k">学习目标</div><div class="tc-v">描述特性、能力与架构组成</div></div>
+      <div class="tc"><div class="tc-k">核心知识</div><div class="tc-v">芯片参数、机器视觉/听觉、KPU/APU、应用</div></div>
+      <div class="tc"><div class="tc-k">任务成果</div><div class="tc-v">K210 特性盘点表（活动活页）</div></div>
+      <div class="tc"><div class="tc-k">评价方式</div><div class="tc-v">知识检测 + 盘点表互评</div></div>
+    </div>
+    <div class="tip"><strong>学习方法：</strong>K1–K4 为知识活页，建议边读边在 A1 盘点表中做摘录；架构部分重在"记住有哪些组成、各干什么"，不要求背寄存器地址。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t2k1">
+  <div class="leaf-head">
+    <span class="tag k">知识活页</span><span class="id">M1-T2-K1</span>
+    <h3>K210 芯片概述</h3>
+    <span class="time">约 20 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>1. 芯片定位与出身</h4>
+    <p><strong>Kendryte K210</strong> 是一款集成了<strong>机器视觉</strong>与<strong>机器听觉</strong>能力的<strong>系统级芯片（SoC）</strong>。它采用台积电（TSMC）<strong>超低功耗 28nm 先进制程</strong>，搭载<strong>双核 64 位 CPU</strong>，拥有较好的功耗性能、稳定性与可靠性。该方案主打<strong>零门槛开发</strong>，可在最短时间内部署到产品中，为产品赋予人工智能功能。</p>
+    <p>K210 既是一款<strong>定位于 AI 和 IoT 领域的 SoC</strong>，也是一款<strong>使用非常方便的 MCU（微控制器）</strong>——开发门槛低，非常适合作教学与快速原型开发。</p>
+    <div class="spec-grid">
+      <div class="spec"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A2E4B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg><div><div class="s-t">芯片类型</div><div class="s-v">SoC（系统级芯片）+ MCU</div></div></div>
+      <div class="spec"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A2E4B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20M4 20V8l6 4V8l10 8V4h2v16"/></svg><div><div class="s-t">制造工艺</div><div class="s-v">TSMC 28nm 超低功耗制程</div></div></div>
+      <div class="spec"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A2E4B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/></svg><div><div class="s-t">处理器</div><div class="s-v">双核 64 位 RISC-V CPU（每核含 FPU）</div></div></div>
+      <div class="spec"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A2E4B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg><div><div class="s-t">工作温度</div><div class="s-v">-40°C ～ 125°C，稳定可靠</div></div></div>
+      <div class="spec"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A2E4B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><div><div class="s-t">应用定位</div><div class="s-v">AI 与 IoT 领域，零门槛 AI 开发</div></div></div>
+      <div class="spec"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A2E4B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l3-9 4 18 3-9h4"/></svg><div><div class="s-t">名称由来</div><div class="s-v">Kendryte（勘智）= 勘物探智</div></div></div>
+    </div>
+    <h4>2. 名字里的含义：勘物探智</h4>
+    <p>"Kendryte"中文含义为<strong>"勘智"</strong>，取自<strong>"勘物探智"</strong>：</p>
+    <ul>
+      <li><strong>勘物</strong>——芯片主要应用于<strong>物联网（IoT）领域</strong>，探测感知万物；</li>
+      <li><strong>探智</strong>——芯片主要提供<strong>人工智能解决方案</strong>，在人工智能领域探索。</li>
+    </ul>
+    <h4>3. K210 的主要特性</h4>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:6%">序号</th><th style="width:38%">特性</th><th>说明</th></tr>
+      <tr><td class="c">1</td><td>机器视觉能力</td><td>低功耗下完成卷积神经网络计算</td></tr>
+      <tr><td class="c">2</td><td>机器听觉能力</td><td>自带高性能麦克风阵列音频处理</td></tr>
+      <tr><td class="c">3</td><td>低功耗视觉处理</td><td>更好的视觉处理速度与准确率</td></tr>
+      <tr><td class="c">4</td><td>KPU 硬件加速</td><td>卷积人工神经网络硬件加速器，可高性能进行卷积运算</td></tr>
+      <tr><td class="c">5</td><td>宽温稳定</td><td>TSMC 28nm 制程，温度范围 -40°C ～ 125°C</td></tr>
+      <tr><td class="c">6</td><td>固件加密</td><td>支持固件加密，难以用普通方法破解</td></tr>
+      <tr><td class="c">7</td><td>可编程 IO 阵列</td><td>独特的 FPIOA，使产品设计更加灵活</td></tr>
+      <tr><td class="c">8</td><td>低电压低功耗</td><td>与相同处理能力的系统相比功耗更低</td></tr>
+      <tr><td class="c">9</td><td>双电压支持</td><td>3.3V / 1.8V 双电压，无需电平转换，节约成本</td></tr>
+    </table>
+    </div>
+  </div>
+</div>
+
+<div class="leaf" id="t2k2">
+  <div class="leaf-head">
+    <span class="tag k">知识活页</span><span class="id">M1-T2-K2</span>
+    <h3>K210 的核心能力：机器视觉与机器听觉</h3>
+    <span class="time">约 20 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>1. 机器视觉（看的能力）</h4>
+    <p>K210 是<strong>零门槛机器视觉嵌入式解决方案</strong>，可以在<strong>低功耗</strong>情况下进行卷积神经网络计算，实现：</p>
+    <div class="goal-grid">
+      <div class="goal"><div class="g-ic">视觉能力</div><ul>
+        <li>基于卷积神经网络的一般目标检测</li>
+        <li>基于卷积神经网络的图像分类任务</li>
+        <li>人脸检测和人脸识别</li>
+        <li>实时获取被检测目标的种类</li>
+        <li>实时获取被检测目标的大小与坐标</li>
+      </ul></div>
+    </div>
+    <h4>2. 机器听觉（听的能力）</h4>
+    <p>芯片上自带<strong>高性能麦克风阵列音频处理器</strong>，可以进行<strong>实时声源定向与波束形成</strong>，实现：</p>
+    <div class="goal-grid">
+      <div class="goal"><div class="g-ic">听觉能力</div><ul>
+        <li>声源定向</li>
+        <li>声场成像</li>
+        <li>波束形成</li>
+        <li>语音唤醒</li>
+        <li>语音识别</li>
+      </ul></div>
+    </div>
+    <h4>3. 视觉 + 听觉的综合应用</h4>
+    <p>K210 可结合机器视觉和机器听觉能力，提供更强大的功能：</p>
+    <ul>
+      <li>通过<strong>声源定位和声场成像</strong>辅助机器视觉对目标的跟踪；</li>
+      <li>通过<strong>一般目标检测</strong>获得目标方位后，辅助机器听觉对该方位进行<strong>波束形成</strong>；</li>
+      <li>根据摄像头传来的图像获得人的方向，使麦克风阵列通过<strong>波束形成指向该人</strong>；</li>
+      <li>根据麦克风阵列确定说话人的方向，<strong>转动摄像头指向该人</strong>。</li>
+    </ul>
+    <div class="note"><strong>一句话记忆：</strong>视觉负责"看"（检测、分类、人脸），听觉负责"听"（定向、成像、识别），两者配合可实现"看声辨位、闻声转头"的智能交互。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t2k3">
+  <div class="leaf-head">
+    <span class="tag k">知识活页</span><span class="id">M1-T2-K3</span>
+    <h3>K210 的系统架构</h3>
+    <span class="time">约 30 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>1. 功能框图</h4>
+    <p>K210 包含<strong>RISC-V 64 位双核 CPU</strong>，每个核心内置独立 FPU（浮点运算单元）。核心功能是机器视觉与听觉：</p>
+    <div class="arch">
+      <div class="anode core">CPU 单元<small>RISC-V 64 位双核<br>每核独立 FPU</small></div>
+      <div class="anode accel">KPU<small>CNN 卷积神经网络加速器</small></div>
+      <div class="anode accel">APU<small>音频加速器（麦克风阵列）</small></div>
+      <div class="anode accel">FFT<small>快速傅里叶变换加速器</small></div>
+      <div class="anode sec">AES / SHA256<small>加密与哈希硬件加速</small></div>
+      <div class="anode">SRAM + DMA<small>高性能低功耗存储<br>强大的数据吞吐</small></div>
+    </div>
+    <ul>
+      <li><strong>KPU：</strong>卷积人工神经网络（CNN）硬件加速器，可高性能进行卷积运算，是机器视觉的"引擎"。</li>
+      <li><strong>APU：</strong>处理麦克风阵列输入的音频加速器，是机器听觉的"引擎"。</li>
+      <li><strong>FFT：</strong>快速傅里叶变换加速器，可进行高性能复数 FFT 计算，因此对大多数机器学习算法，K210 都具备高性能处理能力。</li>
+      <li><strong>AES / SHA256：</strong>内嵌硬件加速器，提供基本安全功能（数据加密与完整性校验）。</li>
+      <li><strong>SRAM 与 DMA：</strong>高性能、低功耗的 SRAM，配合功能强大的 DMA，数据吞吐能力性能优异。</li>
+    </ul>
+    <h4>2. 丰富的外设单元</h4>
+    <p>K210 具备丰富的外设单元，可满足海量应用场景：</p>
+    <div class="arch">
+      <div class="anode peri">DVP<small>摄像头接口</small></div>
+      <div class="anode peri">GPIO<small>通用输入输出</small></div>
+      <div class="anode peri">UART<small>串口通信 ×3</small></div>
+      <div class="anode peri">SPI<small>串行外设接口</small></div>
+      <div class="anode peri">I²C<small>双线通信 ×3</small></div>
+      <div class="anode peri">I²S<small>音频总线</small></div>
+      <div class="anode peri">Timer / PWM<small>定时与脉宽调制</small></div>
+      <div class="anode peri">RTC<small>实时时钟</small></div>
+      <div class="anode peri">WDT<small>看门狗</small></div>
+      <div class="anode peri">JTAG / OTP / FPIOA<small>调试 / 一次性编程 / 可编程 IO 阵列</small></div>
+    </div>
+    <h4>3. 时钟树</h4>
+    <p>K210 使用<strong>一路外部低频时钟</strong>，并使用<strong>三路 PLL</strong>提供高频时钟：</p>
+    <ul>
+      <li><strong>PLL0</strong>：为 <strong>CPU 与大部分外设</strong>提供时钟；</li>
+      <li><strong>PLL1</strong>：为 <strong>AI 加速核</strong>提供时钟；</li>
+      <li><strong>PLL2</strong>：为 <strong>I²S 音频</strong>提供时钟。</li>
+    </ul>
+    <p>其中，<strong>AI 只能选择 PLL1 作为时钟源</strong>，<strong>I²S MCLK 只能选择 PLL2 作为时钟源</strong>；其余外设可以在外部时钟与 PLL0 之间选择（通过 PLL BYPASS 选择外部时钟）。PLL2 可以与 PLL0 级联，以获得更精准的音频采样频率。</p>
+    <div class="tip"><strong>与后面任务的联系：</strong>任务 4 的 main.c 中调用 <code class="inline">sysctl_pll_set_freq(SYSCTL_PLL0, 800000000)</code>，就是把 PLL0 配置为 800 MHz——你将在第一个程序里亲手设置时钟。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t2k4">
+  <div class="leaf-head">
+    <span class="tag k">知识活页</span><span class="id">M1-T2-K4</span>
+    <h3>K210 的应用场景</h3>
+    <span class="time">约 15 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <p>K210 可应用于<strong>人脸识别、图像识别</strong>场景和<strong>声源定位</strong>场景，典型应用包括：</p>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:20%">应用领域</th><th>典型应用</th></tr>
+      <tr><td class="c"><strong>智能家居</strong></td><td>智能门锁（人脸识别开门）</td></tr>
+      <tr><td class="c"><strong>智慧楼宇</strong></td><td>人脸门禁识别、无感门禁</td></tr>
+      <tr><td class="c"><strong>智慧工厂</strong></td><td>生产线包装袋计数</td></tr>
+      <tr><td class="c"><strong>智慧抄表</strong></td><td>图像识别抄表</td></tr>
+      <tr><td class="c"><strong>智慧医疗</strong></td><td>戴口罩场景识别</td></tr>
+      <tr><td class="c"><strong>教育领域</strong></td><td>STEAM 教育、AI 教学实验平台</td></tr>
+    </table>
+    </div>
+    <p>应用电路方面，K210 开发板通过<strong>电源管理模块</strong>提供 0.9V（内核）、1.8V（VDDIO18）、3.3V/1.8V（VDDIOxx）等多路电源；通过 <strong>QSPI</strong> 连接外部 FLASH（存放固件），通过 <strong>DVP</strong> 接口连接摄像头，通过 <strong>OSPI</strong> 接口连接 LCD 显示屏。详细电路请参考 K210 开发板原理图。</p>
+  </div>
+</div>
+
+<div class="leaf" id="t2a1">
+  <div class="leaf-head">
+    <span class="tag a">活动活页</span><span class="id">M1-T2-A1</span>
+    <h3>活动：特性盘点与随堂检测</h3>
+    <span class="time">约 25 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>活动一：K210 特性盘点表（个人完成，课后互评）</h4>
+    <p>不翻看 K1–K4 活页，凭记忆完成下表（每空 1 分，共 10 分）：</p>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:34%">盘点项</th><th>我的答案</th></tr>
+      <tr><td>K210 是集成哪两类能力的 SoC？</td><td></td></tr>
+      <tr><td>制造工艺（代工厂 + 制程）</td><td></td></tr>
+      <tr><td>CPU 规格（核数 + 位数 + 架构）</td><td></td></tr>
+      <tr><td>工作温度范围</td><td></td></tr>
+      <tr><td>双电压支持分别是</td><td></td></tr>
+      <tr><td>机器视觉的硬件加速器名称</td><td></td></tr>
+      <tr><td>机器听觉的硬件加速器名称</td><td></td></tr>
+      <tr><td>三路 PLL 分别服务谁（PLL0/PLL1/PLL2）</td><td></td></tr>
+      <tr><td>名称"勘智"取自哪个成语</td><td></td></tr>
+      <tr><td>列举 2 个 K210 应用场景</td><td></td></tr>
+    </table>
+    </div>
+    <h4>活动二：随堂检测（自测）</h4>
+    <div class="quiz">
+      <div class="qitem">
+        <div class="q"><span class="qno">1</span>K210 中负责卷积神经网络硬件加速的单元是？</div>
+        <div class="ans">答案：KPU（卷积人工神经网络硬件加速器），可高性能进行卷积运算。</div>
+        <button class="q-btn" onclick="toggleAns(this)">查看答案</button>
+      </div>
+      <div class="qitem">
+        <div class="q"><span class="qno">2</span>K210 的机器听觉能力包括下列哪项？</div>
+        <div class="ans">答案：声源定向、声场成像、波束形成、语音唤醒、语音识别。</div>
+        <button class="q-btn" onclick="toggleAns(this)">查看答案</button>
+      </div>
+      <div class="qitem">
+        <div class="q"><span class="qno">3</span>AI 加速核（KPU）只能选择哪路 PLL 作为时钟源？</div>
+        <div class="ans">答案：PLL1。AI 只能选择 PLL1；I²S MCLK 只能选择 PLL2；CPU 与大部分外设使用 PLL0。</div>
+        <button class="q-btn" onclick="toggleAns(this)">查看答案</button>
+      </div>
+      <div class="qitem">
+        <div class="q"><span class="qno">4</span>下列哪项属于 K210 在智慧工厂中的典型应用？</div>
+        <div class="ans">答案：生产线包装袋计数。</div>
+        <button class="q-btn" onclick="toggleAns(this)">查看答案</button>
+      </div>
+    </div>
+    <div class="done-row"><input type="checkbox" id="done-t2" class="doneck" data-key="done-t2"><label for="done-t2">我已完成任务 2 的学习并自测通过（勾选后本任务标记完成）</label></div>
+  </div>
+</div>
+
+<div class="leaf">
+  <div class="leaf-head">
+    <span class="tag m">任务 3</span><span class="id">M1-T3-00</span>
+    <h3>任务卡：搭建开发环境</h3>
+    <span class="time">约 0.5 学时</span>
+  </div>
+  <div class="leaf-body">
+    <h4>任务情境</h4>
+    <p>要"点亮"K210，需要先搭好一套完整开发环境。本课程在 <strong>Windows 10 x64</strong> 系统下，通过 <strong>VSCode 编辑器</strong>搭建 K210 开发环境，共需要五大工具：</p>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:18%">工具</th><th>作用</th></tr>
+      <tr><td><strong>CMake</strong></td><td>众多 Make 工具的一种，具有跨平台、跨编译器特性，负责生成工程构建文件</td></tr>
+      <tr><td><strong>Toolchain</strong></td><td>交叉编译器工具链，内附 GCC 等编译器，可进行程序编译、跨平台编译</td></tr>
+      <tr><td><strong>VSCode</strong></td><td>微软出品开源代码编辑器，支持插件、代码高亮、自动补全，可扩展性强</td></tr>
+      <tr><td><strong>K210-SDK</strong></td><td>K210 官方 SDK，是开发 K210 的基础，内含芯片的各种驱动</td></tr>
+      <tr><td><strong>flash</strong></td><td>K210 芯片烧录程序（固件）的工具</td></tr>
+    </table>
+    </div>
+    <div class="taskcard">
+      <div class="tc"><div class="tc-k">学习目标</div><div class="tc-v">独立完成 5 项工具安装并验证</div></div>
+      <div class="tc"><div class="tc-k">实施方式</div><div class="tc-v">边读边做，逐项打勾</div></div>
+      <div class="tc"><div class="tc-k">任务成果</div><div class="tc-v">环境检查清单全部通过</div></div>
+      <div class="tc"><div class="tc-k">评价方式</div><div class="tc-v">教师巡检 + 命令输出核验</div></div>
+    </div>
+    <div class="warnbox"><strong>安全提醒：</strong>所有安装文件请从课程资料（学习通"资料-环境搭建工具"）或官方渠道下载；安装路径<strong>不要包含中文</strong>，建议统一放在 <code class="inline">C:\K210</code> 目录下，便于管理和配置环境变量。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t3w1">
+  <div class="leaf-head">
+    <span class="tag w">工作活页</span><span class="id">M1-T3-W1</span>
+    <h3>安装 CH340 驱动与串口验证</h3>
+    <span class="time">约 25 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <p>CH340 是 K210 开发板与电脑之间 USB 转串口的桥接芯片，只有装好驱动，电脑才能"看见"开发板。本步骤以 <strong>win10 x64 系统</strong>为例；已安装过 CH340 驱动的可跳过安装步骤。</p>
+    <div class="steps">
+      <div class="step"><b>解压驱动并运行安装程序。</b><div class="step-sub">解压 <code class="inline">Uart drive(CH340).zip</code>，双击打开其中的 <code class="inline">CH341SER.EXE</code>。</div></div>
+      <div class="step"><b>点击"安装"。</b><div class="step-sub">弹出驱动安装界面（驱动安装 X64），点击"安装"，完成后提示安装成功。</div></div>
+      <div class="step"><b>连接开发板，检查端口。</b><div class="step-sub">用 Type-C 数据线连接 K210 开发板与电脑；右击桌面"此电脑"→ 属性 → 设备管理器 → 展开"端口（COM 和 LPT）"，识别到 <code class="inline">USB-SERIAL CH340 (COMxx)</code> 即成功。每台电脑的端口号不同，只要识别到 CH340 就是需要的端口。</div></div>
+      <div class="step"><b>打开串口助手并配置参数。</b><div class="step-sub">双击打开串口助手软件（UartAssist）：串口号选择 K210 开发板对应的 COM 口，波特率 <strong>115200</strong>，校验位 <strong>NONE</strong>，数据位 <strong>8</strong>，停止位 <strong>1</strong>，流控制 <strong>NONE</strong>。点击"打开"，按钮变为"关闭"、图标由黑色变红色，表示串口已打开。</div></div>
+      <div class="step"><b>复位开发板，观察打印。</b><div class="step-sub">放大串口助手界面，将底部 <strong>4.DTR</strong> 和 <strong>7.RTS</strong> 由红色点成绿色，然后按一下 K210 开发板的复位键。若开发板内固件有打印信息，会显示在接收区。</div></div>
+    </div>
+    <div class="note"><strong>现象判断：</strong>如果按下复位键后串口助手没有显示任何内容，说明开发板内尚未烧录带打印功能的固件——这不代表环境有问题，任务 4 烧录 Hello World 后即可看到输出。若根本打不开串口，请回到第 3 步检查端口是否识别、参数是否与上述一致。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t3w2">
+  <div class="leaf-head">
+    <span class="tag w">工作活页</span><span class="id">M1-T3-W2</span>
+    <h3>安装 CMake</h3>
+    <span class="time">约 20 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <div class="steps">
+      <div class="step"><b>下载 CMake。</b><div class="step-sub">访问官网 <code class="inline">https://cmake.org/download/</code>，以 win10 x64 为例，下载 <code class="inline">cmake-3.17.2-win64-x64.msi</code>（32 位系统下载 win32-x86 版本）。<br>.msi 是安装程序，推荐使用；.zip 是绿色程序包。若无法下载，可使用课程资料中提供的版本。</div></div>
+      <div class="step"><b>双击运行安装。</b><div class="step-sub">勾选同意许可协议并点击 Next。</div></div>
+      <div class="step"><b>关键一步：添加系统环境变量。</b><div class="step-sub">在 Install Options 界面选择 <strong>"Add CMake to the system PATH for all users"</strong>（必须勾选，否则后面需手动添加）。安装路径可自定义，但<strong>不要有中文</strong>（示例：<code class="inline">C:\K210\CMake</code>）。点击 Install 开始安装。</div></div>
+      <div class="step"><b>验证安装。</b><div class="step-sub">打开 CMD 命令行，输入 <code class="inline">cmake -version</code>，能显示版本号（如 cmake version 3.17.2）即安装成功。</div></div>
+    </div>
+    <div class="warnbox"><strong>常见问题：</strong>若出现"找不到 cmake 命令"，是因为安装时未勾选添加环境变量或下载了 .zip 版本。补救方法：右击桌面"此电脑"→ 属性 → 高级系统设置 → 环境变量 → 双击系统变量 <code class="inline">Path</code> → 新建，添加 CMake 的 <code class="inline">bin</code> 目录路径（如 <code class="inline">C:\K210\CMake\bin</code>）→ 确定。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t3w3">
+  <div class="leaf-head">
+    <span class="tag w">工作活页</span><span class="id">M1-T3-W3</span>
+    <h3>安装交叉编译器 Toolchain</h3>
+    <span class="time">约 20 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <p>Toolchain（工具链）是用于调试开发板的工具和相关库组合起来的集合，内附编译器（如 GCC），可进行程序编译和跨平台编译。K210 是 RISC-V 架构，需要用 <strong>RISC-V 交叉编译器</strong>把代码编译成 K210 能运行的机器码。</p>
+    <div class="steps">
+      <div class="step"><b>下载勘智版本工具链。</b><div class="step-sub">从学习通"资料-环境搭建工具-VsCode开发环境搭建"下载工具，解压得到 <code class="inline">kendryte-toolchain-win-amd64-8.2.0-20190213.zip</code>。</div></div>
+      <div class="step"><b>解压并移动文件。</b><div class="step-sub">把解压得到的 <code class="inline">kendryte-toolchain</code> 文件夹移动到 <code class="inline">C:\K210</code> 目录下（其他路径也可以，但必须记住路径，因为要添加进环境变量）。</div></div>
+      <div class="step"><b>添加工具链到系统环境变量。</b><div class="step-sub">右击"此电脑"→ 属性 → 高级系统设置 → 环境变量 → 双击系统变量 Path → 新建，添加 <code class="inline">C:\K210\kendryte-toolchain\bin</code> → 确定。</div></div>
+      <div class="step"><b>新建 make 程序。</b><div class="step-sub">进入 <code class="inline">kendryte-toolchain\bin</code> 目录，找到 <code class="inline">mingw32-make.exe</code>，复制粘贴一份，把副本重命名为 <code class="inline">make.exe</code>（若未开启显示文件后缀名，看到的是 mingw32-make，同样复制粘贴并把副本重命名为 make）。</div></div>
+      <div class="step"><b>验证工具链。</b><div class="step-sub">打开 CMD，输入 <code class="inline">make -v</code>，看到 <strong>GNU Make 版本信息</strong>（如 GNU Make 4.2.1）即安装成功。</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="leaf" id="t3w4">
+  <div class="leaf-head">
+    <span class="tag w">工作活页</span><span class="id">M1-T3-W4</span>
+    <h3>安装 VSCode 编辑器与 K210 SDK</h3>
+    <span class="time">约 25 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>1. 安装 VSCode</h4>
+    <div class="steps">
+      <div class="step"><b>下载。</b><div class="step-sub">访问官网 <code class="inline">https://code.visualstudio.com/Download</code>，根据系统版本选择，本课程选择 <strong>System Installer 64bit</strong>（下载的是 .exe，可直接安装，可给所有用户使用）。</div></div>
+      <div class="step"><b>安装（注意勾选项）。</b><div class="step-sub">双击安装包，路径可修改也可保持默认，一路下一步。在"选择其他任务"页面重点勾选（红框第一、二项必勾）：<br>① 将"通过 Code 打开"操作添加到<strong>文件</strong>上下文菜单；<br>② 将"通过 Code 打开"操作添加到<strong>目录</strong>上下文菜单；<br>③ 将 Code 注册为受支持文件类型的编辑器（可不勾选）；<br>④ <strong>添加到 PATH</strong>（重启后生效，可在 CMD 中用 code 命令打开 VSCode）。</div></div>
+    </div>
+    <h4>2. 下载 K210 软件 SDK</h4>
+    <p>K210 官方提供两个 SDK：<strong>裸机版 SDK</strong> 和 <strong>FreeRTOS 系统 SDK</strong>，本课程以裸机版 SDK 为例。</p>
+    <div class="steps">
+      <div class="step"><b>下载 SDK。</b><div class="step-sub">访问 <code class="inline">https://github.com/kendryte/kendryte-standalone-sdk</code>，点击右侧 <strong>Clone or download</strong> → <strong>Download ZIP</strong> 下载（也可从学习通资料下载）。</div></div>
+      <div class="step"><b>放置并解压。</b><div class="step-sub">把 SDK 压缩包移动到 <code class="inline">C:\K210\SDK</code> 路径下并解压（其他路径也可以）。解压后目录为 <code class="inline">C:\K210\SDK\kendryte-standalone-sdk-develop</code>。</div></div>
+    </div>
+    <h4>3. SDK 文件架构简介</h4>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:30%">文件 / 文件夹</th><th>作用</th></tr>
+      <tr><td><code class="inline">src</code></td><td>用户项目目录（本课程的程序都写在这里，如 hello_world）</td></tr>
+      <tr><td><code class="inline">lib</code></td><td>K210 的库文件</td></tr>
+      <tr><td><code class="inline">cmake</code></td><td>保存 cmake 的编译文件</td></tr>
+      <tr><td><code class="inline">lds</code></td><td>ld 链接脚本文件</td></tr>
+      <tr><td><code class="inline">scripts</code></td><td>保存格式化代码的脚本</td></tr>
+      <tr><td><code class="inline">third_party</code></td><td>第三方部分</td></tr>
+      <tr><td><code class="inline">CMakeLists.txt</code></td><td>cmake 的入口文件</td></tr>
+      <tr><td><code class="inline">kendryte-package.json</code></td><td>kendryteIDE 的配置文件</td></tr>
+      <tr><td><code class="inline">package.json</code> / <code class="inline">README.md</code> / <code class="inline">LICENSE</code></td><td>记录版本信息 / SDK 简介 / 许可证</td></tr>
+      <tr><td><code class="inline">CHANGELOG.md</code></td><td>记录不同版本的更新内容</td></tr>
+    </table>
+    </div>
+    <div class="tip"><strong>检查点：</strong>本活页完成后，你的 <code class="inline">C:\K210</code> 目录下应有 <code class="inline">CMake</code>、<code class="inline">kendryte-toolchain</code>、<code class="inline">SDK</code> 三个文件夹（K-Flash 将在任务 4 安装）。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t3w5">
+  <div class="leaf-head">
+    <span class="tag w">工作活页</span><span class="id">M1-T3-W5</span>
+    <h3>环境检查清单</h3>
+    <span class="time">约 10 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <p>逐项检查并在方框中打勾；全部通过后请教师复核（教师签名）。</p>
+    <ul class="checklist">
+      <li><input type="checkbox" class="ck"><span>设备管理器中能识别 <code class="inline">USB-SERIAL CH340 (COMxx)</code> 端口</span></li>
+      <li><input type="checkbox" class="ck"><span>CMD 中 <code class="inline">cmake -version</code> 能显示 CMake 版本号</span></li>
+      <li><input type="checkbox" class="ck"><span>CMD 中 <code class="inline">make -v</code> 能显示 GNU Make 版本号</span></li>
+      <li><input type="checkbox" class="ck"><span>系统环境变量 Path 中包含 <code class="inline">C:\K210\CMake\bin</code> 与 <code class="inline">C:\K210\kendryte-toolchain\bin</code></span></li>
+      <li><input type="checkbox" class="ck"><span><code class="inline">kendryte-toolchain\bin</code> 下存在 <code class="inline">make.exe</code></span></li>
+      <li><input type="checkbox" class="ck"><span>VSCode 已安装，右键文件夹菜单中出现"通过 Code 打开"</span></li>
+      <li><input type="checkbox" class="ck"><span>SDK 已解压到 <code class="inline">C:\K210\SDK\kendryte-standalone-sdk-develop</code></span></li>
+      <li><input type="checkbox" class="ck"><span>串口助手能打开 CH340 对应串口（波特率 115200）</span></li>
+    </ul>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:25%">检查项</th><th style="width:25%">自评（通过/未通过）</th><th style="width:25%">互评（通过/未通过）</th><th>教师复核</th></tr>
+      <tr><td class="c">8 项清单全部通过</td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
+      <tr><td class="c">操作规范、能复述每步作用</td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
+      <tr><td class="c">遇到问题能记录并尝试排查</td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
+    </table>
+    </div>
+    <div class="done-row"><input type="checkbox" id="done-t3" class="doneck" data-key="done-t3"><label for="done-t3">我的开发环境已全部搭建完成并通过检查</label></div>
+  </div>
+</div>
+
+<div class="leaf">
+  <div class="leaf-head">
+    <span class="tag m">任务 4</span><span class="id">M1-T4-00</span>
+    <h3>任务卡：编译与烧录 Hello World</h3>
+    <span class="time">约 0.5 学时</span>
+  </div>
+  <div class="leaf-body">
+    <h4>任务情境</h4>
+    <p>环境搭好了，是时候"点亮"K210 了。本任务将读懂官方 SDK 中的 <strong>hello_world</strong> 示例程序（双核 Hello World），用 CMake + make 把它编译成固件，再通过 <strong>kflash</strong> 烧录到开发板，最后在串口终端看到 <strong>Core 0 / Core 1 两条 Hello World</strong>——这是你与 K210 的第一次"对话"，也是后续所有图像识别任务的标准工作流：<strong>改代码 → 编译 → 烧录 → 验证</strong>。</p>
+    <div class="taskcard">
+      <div class="tc"><div class="tc-k">学习目标</div><div class="tc-v">读懂程序、完成编译烧录验证</div></div>
+      <div class="tc"><div class="tc-k">核心技术</div><div class="tc-v">CMake 编译、kflash 烧录、双核</div></div>
+      <div class="tc"><div class="tc-k">任务成果</div><div class="tc-v">串口输出双核 Hello World</div></div>
+      <div class="tc"><div class="tc-k">评价方式</div><div class="tc-v">成果展示 + 故障排查口述</div></div>
+    </div>
+    <div class="tip"><strong>学习方法：</strong>先在 K1 活页读懂程序每行代码的作用，再按 W1–W3 工作活页逐步操作；遇到问题先对照 W3 的故障排查表自行定位。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t4k1">
+  <div class="leaf-head">
+    <span class="tag k">知识活页</span><span class="id">M1-T4-K1</span>
+    <h3>Hello World 程序解析</h3>
+    <span class="time">约 20 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <p>程序位于 SDK 的 <code class="inline">src/hello_world/main.c</code>，运行时会从 USB 串口打印数据。完整源码如下：</p>
+    <pre class="code"><span class="c">/* Copyright 2018 Canaan Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */</span>
+<span class="hd">#include</span> <span class="str">&lt;bsp.h&gt;</span>
+<span class="hd">#include</span> <span class="str">&lt;sysctl.h&gt;</span>
+
+<span class="kw">int</span> <span class="fn">core1_function</span>(<span class="kw">void</span> *ctx)
+{
+    <span class="kw">uint64_t</span> core = <span class="fn">current_coreid</span>();
+    <span class="fn">printf</span>(<span class="str">"Core %ld Hello world\n"</span>, core);
+    <span class="kw">while</span>(<span class="num">1</span>);
+}
+
+<span class="kw">int</span> <span class="fn">main</span>(<span class="kw">void</span>)
+{
+    <span class="fn">sysctl_pll_set_freq</span>(SYSCTL_PLL0, <span class="num">800000000</span>);
+    <span class="kw">uint64_t</span> core = <span class="fn">current_coreid</span>();
+    <span class="kw">int</span> data;
+    <span class="fn">printf</span>(<span class="str">"Core %ld Hello world\n"</span>, core);
+    <span class="fn">register_core1</span>(core1_function, <span class="kw">NULL</span>);
+
+    <span class="c">/* Clear stdin buffer before scanf */</span>
+    <span class="fn">sys_stdin_flush</span>();
+
+    <span class="fn">scanf</span>(<span class="str">"%d"</span>, &amp;data);
+    <span class="fn">printf</span>(<span class="str">"\nData is %d\n"</span>, data);
+    <span class="kw">while</span>(<span class="num">1</span>)
+        <span class="kw">continue</span>;
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+    <h4>逐段解读</h4>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:38%">代码</th><th>作用</th></tr>
+      <tr><td><code class="inline">#include &lt;bsp.h&gt;</code><br><code class="inline">#include &lt;sysctl.h&gt;</code></td><td>引入板级支持包与系统控制（时钟）头文件，获得系统 API 与宏定义</td></tr>
+      <tr><td><code class="inline">core1_function(void *ctx)</code></td><td><strong>核心 1 上运行的函数</strong>：获取当前核心编号并打印 "Core 1 Hello world"，随后死循环</td></tr>
+      <tr><td><code class="inline">sysctl_pll_set_freq(SYSCTL_PLL0, 800000000)</code></td><td>设置 PLL0 频率为 <strong>800 MHz</strong>（对应知识活页 K2-3 的时钟树，PLL0 为 CPU 提供时钟）</td></tr>
+      <tr><td><code class="inline">current_coreid()</code></td><td>返回当前运行核心的编号（main 运行在核心 0）</td></tr>
+      <tr><td><code class="inline">printf("Core %ld Hello world\n", core)</code></td><td>在核心 0 打印 <strong>Core 0 Hello world</strong></td></tr>
+      <tr><td><code class="inline">register_core1(core1_function, NULL)</code></td><td>把 <code class="inline">core1_function</code> 注册到<strong>核心 1</strong>，核心 1 随即开始执行并打印 "Core 1 Hello world"</td></tr>
+      <tr><td><code class="inline">sys_stdin_flush()</code></td><td>清空标准输入缓冲区，保证 scanf 前缓冲区干净（注释 "Clear stdin buffer before scanf"）</td></tr>
+      <tr><td><code class="inline">scanf("%d", &amp;data)</code></td><td>等待用户在串口终端输入一个整数</td></tr>
+      <tr><td><code class="inline">printf("\nData is %d\n", data)</code></td><td>回显用户输入的整数</td></tr>
+      <tr><td><code class="inline">while(1) continue;</code></td><td>主循环空转，防止程序退出</td></tr>
+    </table>
+    </div>
+    <div class="note"><strong>重点理解——双核：</strong>K210 是双核芯片。程序启动后核心 0 执行 <code class="inline">main</code>，核心 1 执行 <code class="inline">core1_function</code>，所以串口会依次打印 <strong>Core 0 Hello world</strong> 和 <strong>Core 1 Hello world</strong>。这验证了芯片双核 CPU 与多核编程的基础机制。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t4w1">
+  <div class="leaf-head">
+    <span class="tag w">工作活页</span><span class="id">M1-T4-W1</span>
+    <h3>编译程序：生成 hello_world.bin</h3>
+    <span class="time">约 20 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <div class="steps">
+      <div class="step"><b>用 VSCode 打开 SDK。</b><div class="step-sub">在 <code class="inline">kendryte-standalone-sdk</code> 文件夹上右键 → 选择<strong>"通过 Code 打开"</strong>。</div></div>
+      <div class="step"><b>查看工程源码。</b><div class="step-sub">在左侧资源管理器展开 <code class="inline">src → hello_world</code>，打开 <code class="inline">main.c</code>，确认内容与 K1 活页一致。</div></div>
+      <div class="step"><b>打开终端。</b><div class="step-sub">点击菜单栏 <strong>Terminal → New Terminal</strong>，底部出现 PowerShell 终端（当前路径应为 SDK 根目录）。</div></div>
+      <div class="step"><b>创建并进入 build 目录。</b><div class="step-sub">build 文件夹用于保存 cmake 编译产生的文件，在终端依次输入：</div>
+        <div class="cmdline">mkdir build</div>
+        <div class="cmdline">cd build</div>
+      </div>
+      <div class="step"><b>CMake 配置工程。</b><div class="step-sub">输入以下命令，指定编译目标为 hello_world、生成器为 MinGW Makefiles：</div>
+        <div class="cmdline">cmake .. -DPROJ=hello_world -G "MinGW Makefiles"</div>
+        <div class="step-sub">成功标志：输出中出现 <code class="inline">PROJ = hello_world</code>、<code class="inline">Using C:/K210/kendryte-toolchain/bin RISCV toolchain</code>、<code class="inline">Generating done</code> 等，说明已找到 RISC-V 工具链并生成 Makefile。</div>
+      </div>
+      <div class="step"><b>make 编译。</b><div class="step-sub">输入 <code class="inline">make</code>，等待编译链接完成：</div>
+        <div class="cmdline">make</div>
+        <div class="step-sub">成功标志：最后出现 <code class="inline">[100%] Built target hello_world</code> 和 <code class="inline">Generating .bin file ...</code>。</div>
+      </div>
+      <div class="step"><b>查看生成的文件。</b><div class="step-sub">在终端输入 <code class="inline">ls</code>，在 build 目录中应能看到 <strong><code class="inline">hello_world.bin</code></strong>（约 900 KB），这就是要烧录的固件文件。</div></div>
+    </div>
+    <div class="warnbox"><strong>注意事项：</strong>如果点击了 VSCode 底部的 <strong>PROBLEMS</strong> 栏，可能因为安装了 C/C++ 插件检测头文件路径而报错（如"无法打开源文件 machine/syscall.h"），<strong>实际并没有错误</strong>，不用理会，以 TERMINAL 终端输出的信息为准。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t4w2">
+  <div class="leaf-head">
+    <span class="tag w">工作活页</span><span class="id">M1-T4-W2</span>
+    <h3>烧录程序：用 kflash 写入固件</h3>
+    <span class="time">约 15 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <div class="steps">
+      <div class="step"><b>下载烧录工具 kflash。</b><div class="step-sub">K210 的烧录工具为 kflash，下载地址：<code class="inline">https://github.com/kendryte/kendryte-flash-windows/releases</code>，选择最新版本（当前最新版本为 <strong>v0.4.1</strong>）。也可从学习通资料下载。</div></div>
+      <div class="step"><b>解压到固定目录。</b><div class="step-sub">下载完成后解压到 <code class="inline">C:\K210\K-Flash</code> 目录下，其中包含 <code class="inline">K-Flash.exe</code>。</div></div>
+      <div class="step"><b>打开烧录工具并连接开发板。</b><div class="step-sub">双击打开 <code class="inline">K-Flash.exe</code>，通过 Type-C 数据线连接电脑与 K210 开发板。</div></div>
+      <div class="step"><b>配置烧录参数。</b><div class="step-sub">
+        <ul>
+          <li><strong>Device：</strong>选择 K210 开发板对应的串口号（CH340）；</li>
+          <li><strong>Baud rate：</strong>选择波特率；</li>
+          <li><strong>Chip：</strong>选择 <strong>in-Chip</strong> 则烧录到芯片 Flash，开机自动启动、断电保存；选择 <strong>in-Memory</strong> 则烧录到 SRAM，断电后不保存；</li>
+          <li><strong>Firmware：</strong>选择程序固件（.bin 文件），这里选之前编译生成的 <code class="inline">hello_world.bin</code>；</li>
+          <li>勾选 <strong>Open terminal after flash</strong>，表示烧录完成后自动打开终端。</li>
+        </ul>
+      </div></div>
+      <div class="step"><b>点击 Flash 开始烧录。</b><div class="step-sub">等待进度条完成，烧录完成后会自动打开 CMD 终端。</div></div>
+    </div>
+    <div class="tip"><strong>推荐：</strong>日常实验建议选择 <strong>in-Chip</strong>，烧录一次即可开机自启，断电后固件保留，下次使用直接按复位键运行。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t4w3">
+  <div class="leaf-head">
+    <span class="tag w">工作活页</span><span class="id">M1-T4-W3</span>
+    <h3>结果验证与故障排查</h3>
+    <span class="time">约 15 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>1. 预期结果</h4>
+    <p>烧录完成自动打开的 CMD 终端中，应打印以下信息：</p>
+    <pre class="code"><span class="str">Core 0 Hello world</span>
+<span class="str">Core 1 Hello world</span></pre>
+    <p>两条打印分别来自<strong>核心 0</strong>（main）与<strong>核心 1</strong>（core1_function），看到它们就说明：驱动正常、串口正常、编译成功、烧录成功、双核机制工作正常。<strong>截图保存此输出，作为本任务成果。</strong></p>
+    <h4>2. 常见故障排查表</h4>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:30%">现象</th><th style="width:34%">可能原因</th><th>处理方法</th></tr>
+      <tr><td>烧录后终端无任何输出</td><td>未复位开发板；DTR / RTS 未设置；串口未打开</td><td>将串口助手底部 4.DTR、7.RTS 点成绿色，按一下开发板复位键；确认串口已打开</td></tr>
+      <tr><td>串口打不开 / 无法识别设备</td><td>CH340 驱动未装好；端口被占用</td><td>检查设备管理器端口；关闭其他占用串口的软件；重新插拔 Type-C</td></tr>
+      <tr><td>cmake 不是内部或外部命令</td><td>CMake 未添加系统环境变量</td><td>手动添加 <code class="inline">C:\K210\CMake\bin</code> 到系统变量 Path，重开终端</td></tr>
+      <tr><td>make 不是内部或外部命令</td><td>make.exe 未创建</td><td>复制 <code class="inline">mingw32-make.exe</code> 并重命名为 <code class="inline">make.exe</code></td></tr>
+      <tr><td>cmake 提示找不到 RISC-V toolchain</td><td>工具链 bin 目录未加入 Path</td><td>添加 <code class="inline">C:\K210\kendryte-toolchain\bin</code> 到系统变量 Path</td></tr>
+      <tr><td>烧录失败或 Flash 按钮无响应</td><td>Device 串口号选错；固件路径不对</td><td>Device 选择 CH340 对应端口；Firmware 重新选择 build 目录下的 <code class="inline">hello_world.bin</code></td></tr>
+      <tr><td>VSCode 提示头文件找不到</td><td>C/C++ 插件误报（includePath 未配置）</td><td>以 TERMINAL 终端编译输出为准，忽略 PROBLEMS 面板提示</td></tr>
+    </table>
+    </div>
+    <h4>3. 排查记录（遇到问题时填写）</h4>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:22%">记录项</th><th>内容</th></tr>
+      <tr><td>问题现象</td><td></td></tr>
+      <tr><td>我的排查步骤</td><td></td></tr>
+      <tr><td>最终解决方式</td><td></td></tr>
+    </table>
+    </div>
+    <div class="done-row"><input type="checkbox" id="done-t4" class="doneck" data-key="done-t4"><label for="done-t4">我已成功看到 "Core 0 / Core 1 Hello world" 输出并保存截图</label></div>
+  </div>
+</div>
+
+<!-- ============ 模块评价 ============ -->
+<div class="sec-title"><span class="bar"></span><h2 id="eval">模块学习评价</h2></div>
+<p class="sec-sub">完成四个任务后，按下表进行过程性评价。等级标准：优秀（完全达成）／良好（基本达成）／合格（部分达成）／待改进（未达成）。</p>
+
+<div class="leaf">
+  <div class="leaf-head">
+    <span class="tag e">评价活页</span><span class="id">M1-E1</span>
+    <h3>模块过程性评价量表</h3>
+    <span class="time">课后完成</span>
+  </div>
+  <div class="leaf-body">
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr>
+        <th style="width:34%">评价维度</th>
+        <th style="width:15%">自评</th>
+        <th style="width:15%">互评</th>
+        <th style="width:15%">师评</th>
+        <th>达成标准（要点）</th>
+      </tr>
+      <tr>
+        <td>1. 图像识别概念与流程（任务 1）</td>
+        <td class="score-td"></td><td class="score-td"></td><td class="score-td"></td>
+        <td>能说出图像由像素组成；能画出"采集→预处理→训练→识别"流程；能举例说明 2 个以上应用领域</td>
+      </tr>
+      <tr>
+        <td>2. K210 特性与架构（任务 2）</td>
+        <td class="score-td"></td><td class="score-td"></td><td class="score-td"></td>
+        <td>能说出 K210 的 5 项以上特性；能说明 KPU、APU、双核 CPU 的作用；能说出三路 PLL 的分工</td>
+      </tr>
+      <tr>
+        <td>3. 开发环境搭建（任务 3）</td>
+        <td class="score-td"></td><td class="score-td"></td><td class="score-td"></td>
+        <td>5 项工具全部安装成功；cmake -version、make -v 验证通过；环境变量配置正确</td>
+      </tr>
+      <tr>
+        <td>4. 编译烧录与验证（任务 4）</td>
+        <td class="score-td"></td><td class="score-td"></td><td class="score-td"></td>
+        <td>能读懂 main.c 逐段作用；能独立完成 cmake、make、kflash 操作；输出双核 Hello World 并截图</td>
+      </tr>
+      <tr>
+        <td>5. 规范操作与安全意识</td>
+        <td class="score-td"></td><td class="score-td"></td><td class="score-td"></td>
+        <td>接线规范、按步骤操作、不随意拔插；遇到问题先记录再排查；爱护设备</td>
+      </tr>
+      <tr>
+        <td>6. 协作与表达能力</td>
+        <td class="score-td"></td><td class="score-td"></td><td class="score-td"></td>
+        <td>小组讨论主动参与；能向他人讲清自己的操作流程与排障过程</td>
+      </tr>
+    </table>
+    </div>
+    <p><strong>等级折算参考：</strong>每个维度按 4/3/2/1 计分，总分 24 分。≥21 优秀，17–20 良好，13–16 合格，&lt;13 需补做相关任务活页。</p>
+    <h4>综合评价与留言</h4>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:20%">角色</th><th>评语 / 建议</th></tr>
+      <tr><td class="c">学生自评</td><td></td></tr>
+      <tr><td class="c">小组互评</td><td></td></tr>
+      <tr><td class="c">教师评价</td><td></td></tr>
+    </table>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 拓展与资料 ============ -->
+<div class="sec-title"><span class="bar"></span><h2 id="ext">拓展任务与参考资料</h2></div>
+<p class="sec-sub">学有余力的同学选做以下拓展任务，进一步巩固本模块技能。</p>
+
+<div class="leaf">
+  <div class="leaf-head">
+    <span class="tag x">拓展活页</span><span class="id">M1-X1</span>
+    <h3>拓展任务与参考资料</h3>
+    <span class="time">选做</span>
+  </div>
+  <div class="leaf-body">
+    <h4>拓展任务（按难度递进）</h4>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:8%">序号</th><th style="width:30%">任务</th><th>操作提示</th></tr>
+      <tr><td class="c">1</td><td>个性化 Hello World</td><td>修改 <code class="inline">main.c</code> 中的 printf 内容（如加入自己的姓名、学号），重新编译烧录，验证新输出</td></tr>
+      <tr><td class="c">2</td><td>与程序交互</td><td>烧录后在串口助手发送区输入一个整数并发送，观察终端回显 <code class="inline">Data is X</code>，体会 scanf 的作用</td></tr>
+      <tr><td class="c">3</td><td>更换主频</td><td>把 <code class="inline">sysctl_pll_set_freq(SYSCTL_PLL0, 800000000)</code> 中的频率改为 400000000，重新编译烧录，观察是否仍正常打印（体会时钟树配置）</td></tr>
+      <tr><td class="c">4</td><td>命令行烧录（进阶）</td><td>查看 kflash 工具目录下的使用说明，尝试用命令行完成烧录，理解其与图形界面的对应关系</td></tr>
+      <tr><td class="c">5</td><td>预览后续任务</td><td>浏览 SDK 中 <code class="inline">src</code> 目录下其他示例工程（如 camera、face_detect 等），记录它们用到了哪些外设接口（DVP/SPI 等），为图像采集任务做准备</td></tr>
+    </table>
+    </div>
+    <h4>参考资料</h4>
+    <ul>
+      <li>K210 开发板原理图：学习通 → 课程资料 → K210 开发板原理图</li>
+      <li>K210 裸机版 SDK：<code class="inline">https://github.com/kendryte/kendryte-standalone-sdk</code></li>
+      <li>烧录工具 kflash：<code class="inline">https://github.com/kendryte/kendryte-flash-windows/releases</code></li>
+      <li>CMake 官网：<code class="inline">https://cmake.org/download/</code>；VSCode 官网：<code class="inline">https://code.visualstudio.com/Download</code></li>
+      <li>开发环境搭建工具：学习通 → 资料 → 环境搭建工具 → VsCode 开发环境搭建</li>
+    </ul>
+    <div class="note"><strong>下个模块预告：</strong>环境就绪、流程打通，下一模块将让 K210 真正"看见"——接入摄像头（DVP 接口）完成图像采集与显示，并在此基础上开展目标检测与人脸识别任务。</div>
+  </div>
+</div>
+
+<div class="footer">
+  《图像识别技术》活页式教材 · 模块一 课程概述与环境搭建<br>
+  内容依据课程数字化教材 1.1 小节与 Kendryte Standalone SDK 官方示例整理 · 仅用于教学
+</div>
+
+</main>
+
+<script>
+/* ============ 目录抽屉（移动端） ============ */
+var burgerBtn = document.getElementById('burgerBtn');
+var toc = document.getElementById('toc');
+var tocMask = document.getElementById('tocMask');
+function openToc(){ toc.classList.add('open'); tocMask.classList.add('open'); }
+function closeToc(){ toc.classList.remove('open'); tocMask.classList.remove('open'); }
+burgerBtn.addEventListener('click', function(){ if(toc.classList.contains('open')) closeToc(); else openToc(); });
+tocMask.addEventListener('click', closeToc);
+toc.querySelectorAll('a').forEach(function(a){ a.addEventListener('click', closeToc); });
+
+/* ============ 打印 ============ */
+document.getElementById('printBtn').addEventListener('click', function(){ window.print(); });
+
+/* ============ 查看答案 ============ */
+function toggleAns(btn){
+  var item = btn.parentElement;
+  item.classList.toggle('open');
+  btn.textContent = item.classList.contains('open') ? '收起答案' : '查看答案';
+}
+
+/* ============ 滚动高亮当前活页 ============ */
+var tocLinks = Array.prototype.slice.call(toc.querySelectorAll('a'));
+var sections = tocLinks.map(function(a){
+  var id = a.getAttribute('href').slice(1);
+  return document.getElementById(id);
+}).filter(Boolean);
+function onScroll(){
+  var pos = window.scrollY + 120;
+  var current = sections[0] ? sections[0].id : '';
+  sections.forEach(function(sec){
+    if(sec.offsetTop <= pos) current = sec.id;
+  });
+  tocLinks.forEach(function(a){
+    if(a.getAttribute('href') === '#' + current) a.classList.add('active');
+    else a.classList.remove('active');
+  });
+}
+window.addEventListener('scroll', onScroll, {passive:true});
+onScroll();
+
+/* ============ 完成勾选（localStorage 持久化） ============ */
+function saveDone(){
+  var state = {};
+  document.querySelectorAll('.doneck').forEach(function(cb){ state[cb.dataset.key] = cb.checked; });
+  try{ localStorage.setItem('k210-m1-done', JSON.stringify(state)); }catch(e){}
+}
+function loadDone(){
+  var state = {};
+  try{ state = JSON.parse(localStorage.getItem('k210-m1-done') || '{}'); }catch(e){}
+  document.querySelectorAll('.doneck').forEach(function(cb){
+    cb.checked = !!state[cb.dataset.key];
+    if(cb.checked) cb.closest('.leaf').classList.add('done');
+    cb.addEventListener('change', function(){
+      if(cb.checked) cb.closest('.leaf').classList.add('done');
+      else cb.closest('.leaf').classList.remove('done');
+      saveDone();
+    });
+  });
+}
+loadDone();
+
+/* ============ 检查清单勾选持久化 ============ */
+function saveCk(){
+  var state = {};
+  document.querySelectorAll('.ck').forEach(function(cb, i){ state['ck'+i] = cb.checked; });
+  try{ localStorage.setItem('k210-m1-ck', JSON.stringify(state)); }catch(e){}
+}
+try{
+  var ckState = JSON.parse(localStorage.getItem('k210-m1-ck') || '{}');
+  document.querySelectorAll('.ck').forEach(function(cb, i){
+    cb.checked = !!ckState['ck'+i];
+    cb.addEventListener('change', saveCk);
+  });
+}catch(e){}
+</script>
+
+</body>
+</html>
+

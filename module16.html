@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>模块十六 · Python 环境移植与 IDE 操作 — 图像识别技术活页式教材</title>
+<style>
+
+
+/* ============ 基础变量与重置 ============ */
+:root{
+  --ink:#1A2E4B;          /* 主色：深靛蓝 */
+  --ink-2:#274a73;
+  --accent:#E8720C;       /* 强调：橙 */
+  --bg:#EEF1F6;
+  --paper:#FFFFFF;
+  --paper-2:#F7F9FC;
+  --line:#D6DEE9;
+  --line-2:#E8EDF4;
+  --text:#233040;
+  --text-2:#5A6B82;
+  --k:#2B6CB0;   /* 知识活页 */
+  --w:#E8720C;   /* 工作活页 */
+  --a:#2E7D5B;   /* 活动活页 */
+  --e:#6D5BA6;   /* 评价活页 */
+  --x:#7A8797;   /* 拓展活页 */
+  --code-bg:#0F1D2F;
+  --ok:#2E7D5B;
+  --warn:#B45309;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;scroll-padding-top:74px;}
+body{
+  font-family:"Noto Sans SC","Microsoft YaHei","PingFang SC",system-ui,-apple-system,"Segoe UI",sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.75;
+  font-size:16px;
+}
+a{color:var(--ink-2);text-decoration:none;}
+img{max-width:100%;}
+::selection{background:#FFE2C4;}
+
+/* ============ 顶部导航 ============ */
+.topbar{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  background:rgba(26,46,75,.97);
+  color:#fff;
+  display:flex;align-items:center;gap:14px;
+  padding:0 22px;height:56px;
+  box-shadow:0 2px 10px rgba(26,46,75,.25);
+}
+.topbar .brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:15.5px;letter-spacing:.4px;}
+.topbar .brand svg{flex:none;}
+.topbar .brand .sub{color:#AFC3DE;font-weight:400;font-size:12.5px;}
+.topbar .spacer{flex:1;}
+.topbar .tool{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);
+  color:#fff;padding:7px 14px;border-radius:8px;font-size:13px;cursor:pointer;
+  font-family:inherit;transition:background .2s;min-height:40px;
+}
+.topbar .tool:hover{background:rgba(255,255,255,.22);}
+.topbar a.tool{text-decoration:none;}
+.burger{display:none;background:none;border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:8px;padding:9px 12px;cursor:pointer;min-height:40px;min-width:42px;}
+@media (max-width:720px){
+  .topbar a.tool{display:none;}
+  .topbar .brand .sub{display:none;}
+  .burger{display:block;}
+  .toc a{padding:9px 22px;}
+  .topbar .tool{padding:9px 14px;}
+}
+
+/* ============ 侧边目录 ============ */
+.toc{
+  position:fixed;top:56px;bottom:0;left:0;width:250px;
+  background:var(--paper);
+  border-right:1px solid var(--line);
+  overflow-y:auto;padding:20px 0 30px;
+  z-index:90;
+}
+.toc .toc-title{
+  font-size:12px;color:var(--text-2);letter-spacing:2px;font-weight:700;
+  padding:0 22px 10px;text-transform:uppercase;
+}
+.toc a{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 22px;font-size:13.5px;color:var(--text-2);
+  border-left:3px solid transparent;transition:all .15s;
+}
+.toc a .dot{width:7px;height:7px;border-radius:50%;flex:none;}
+.toc a:hover{color:var(--ink);background:var(--paper-2);}
+.toc a.active{color:var(--ink);font-weight:700;border-left-color:var(--accent);background:var(--paper-2);}
+.toc a.active .dot{background:var(--accent);}
+.toc .g1{margin-top:14px;font-size:12px;color:var(--text-2);padding:8px 22px 4px;font-weight:700;}
+@media (max-width:960px){ .toc{left:-260px;transition:left .25s;} .toc.open{left:0;box-shadow:4px 0 18px rgba(0,0,0,.18);} }
+.toc-mask{display:none;position:fixed;inset:0;background:rgba(15,25,40,.45);z-index:85;}
+.toc-mask.open{display:block;}
+
+/* ============ 主布局 ============ */
+.wrap{
+  max-width:1000px;margin:0 auto;
+  padding:88px 26px 70px;
+}
+@media (min-width:961px){ .wrap{padding-left:296px;padding-right:46px;max-width:1240px;} }
+@media (max-width:720px){ .wrap{padding:76px 16px 50px;} }
+
+/* ============ 封面 ============ */
+.cover{
+  background:linear-gradient(160deg,#152B49 0%,#1A3A63 58%,#224A7C 100%);
+  color:#fff;border-radius:18px;overflow:hidden;
+  padding:54px 46px 44px;position:relative;
+  margin-bottom:34px;
+}
+.cover::after{
+  content:"";position:absolute;right:-90px;top:-90px;width:300px;height:300px;
+  background:radial-gradient(circle,rgba(232,114,12,.35),transparent 68%);
+}
+.cover .c-flag{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);
+  padding:5px 14px;border-radius:999px;font-size:12.5px;letter-spacing:1.5px;
+  margin-bottom:22px;
+}
+.cover h1{font-size:38px;line-height:1.25;font-weight:900;letter-spacing:1px;margin-bottom:10px;}
+.cover .c-module{font-size:19px;font-weight:700;color:#FFC38A;margin-bottom:18px;}
+.cover .c-desc{max-width:640px;color:#CFDCEE;font-size:15px;margin-bottom:26px;}
+.cover .c-meta{display:flex;flex-wrap:wrap;gap:10px 28px;font-size:13px;color:#B9CAE2;}
+.cover .c-meta b{color:#fff;font-weight:600;}
+.cover .c-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px;}
+.cover .btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:10px 22px;border-radius:10px;font-size:14.5px;font-weight:700;cursor:pointer;
+  border:1px solid transparent;transition:transform .15s,box-shadow .15s;font-family:inherit;
+}
+.cover .btn-primary{background:var(--accent);color:#fff;box-shadow:0 6px 18px rgba(232,114,12,.4);}
+.cover .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(232,114,12,.5);}
+.cover .btn-ghost{background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.3);}
+.cover .btn-ghost:hover{background:rgba(255,255,255,.18);}
+@media (max-width:720px){ .cover{padding:38px 24px 32px;} .cover h1{font-size:28px;} }
+
+/* ============ 章节标题 ============ */
+.sec-title{
+  display:flex;align-items:center;gap:12px;
+  font-size:23px;font-weight:900;color:var(--ink);
+  margin:44px 0 6px;
+}
+.sec-title .bar{width:6px;height:26px;background:var(--accent);border-radius:3px;flex:none;}
+.sec-sub{color:var(--text-2);font-size:14px;margin-bottom:20px;}
+
+/* ============ 活页卡 ============ */
+.leaf{
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:14px;
+  margin:22px 0;
+  position:relative;
+  box-shadow:0 3px 14px rgba(26,46,75,.06);
+  page-break-inside:avoid;
+}
+.leaf .leaf-head{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:14px 20px 12px;
+  border-bottom:1px solid var(--line-2);
+  background:var(--paper-2);
+  border-radius:14px 14px 0 0;
+}
+.leaf .leaf-head .tag{
+  font-size:11.5px;font-weight:800;letter-spacing:1px;color:#fff;
+  padding:3px 10px;border-radius:6px;flex:none;
+}
+.tag.k{background:var(--k);} .tag.w{background:var(--w);} .tag.a{background:var(--a);}
+.tag.e{background:var(--e);} .tag.x{background:var(--x);} .tag.m{background:var(--ink);}
+.leaf .leaf-head .id{
+  font-family:Consolas,"Courier New",monospace;
+  font-size:12px;color:var(--text-2);background:var(--paper);
+  border:1px solid var(--line);padding:2px 9px;border-radius:6px;flex:none;
+}
+.leaf .leaf-head h3{font-size:17px;font-weight:800;color:var(--ink);flex:1;min-width:200px;}
+.leaf .leaf-head .time{
+  font-size:12px;color:var(--text-2);background:var(--paper);
+  border:1px solid var(--line);padding:2px 9px;border-radius:6px;flex:none;
+}
+.leaf .leaf-body{padding:20px 24px 24px;}
+@media (max-width:720px){ .leaf .leaf-body{padding:16px 16px 20px;} }
+
+/* 打孔装饰（活页隐喻） */
+.leaf::before{
+  content:"";position:absolute;left:-13px;top:40px;width:9px;height:9px;border-radius:50%;
+  background:var(--bg);border:1.5px solid var(--line);box-shadow:inset 0 1px 2px rgba(0,0,0,.08);
+}
+.leaf::after{
+  content:"";position:absolute;left:-13px;top:64px;width:9px;height:9px;border-radius:50%;
+  background:var(--bg);border:1.5px solid var(--line);box-shadow:inset 0 1px 2px rgba(0,0,0,.08);
+}
+
+/* ============ 正文排版 ============ */
+.leaf-body h4{
+  font-size:15.5px;font-weight:800;color:var(--ink-2);
+  margin:18px 0 8px;padding-left:11px;border-left:4px solid var(--accent);
+}
+.leaf-body h4:first-child{margin-top:0;}
+.leaf-body p{margin:9px 0;text-align:justify;}
+.leaf-body ul,.leaf-body ol{margin:9px 0 9px 4px;padding-left:22px;}
+.leaf-body li{margin:5px 0;}
+.leaf-body li::marker{color:var(--accent);font-weight:700;}
+.leaf-body strong{color:var(--ink);}
+.leaf-body .note{
+  background:#FFF6EA;border:1px solid #F4D5AE;border-left:4px solid var(--accent);
+  border-radius:8px;padding:11px 15px;margin:12px 0;font-size:14px;color:#6B4A21;
+}
+.leaf-body .tip{
+  background:#EAF4EC;border:1px solid #C9E2CF;border-left:4px solid var(--a);
+  border-radius:8px;padding:11px 15px;margin:12px 0;font-size:14px;color:#2C5540;
+}
+.leaf-body .warnbox{
+  background:#FDF0F0;border:1px solid #F2C7C7;border-left:4px solid #C0392B;
+  border-radius:8px;padding:11px 15px;margin:12px 0;font-size:14px;color:#7A2E28;
+}
+
+/* ============ 表格 ============ */
+.tbl-wrap{overflow-x:auto;margin:12px 0;}
+table.tbl{
+  width:100%;border-collapse:collapse;font-size:14px;
+  background:var(--paper);
+}
+table.tbl th{
+  background:#E4EAF3;color:var(--ink);font-weight:700;text-align:center;
+  padding:9px 12px;border:1px solid var(--line);
+}
+table.tbl td{
+  padding:8px 12px;border:1px solid var(--line-2);vertical-align:middle;
+}
+table.tbl td.c{text-align:center;}
+table.tbl td.r{text-align:right;font-family:Consolas,monospace;}
+table.tbl tr:nth-child(even) td{background:#FAFBFD;}
+table.tbl tr:hover td{background:#F3F6FB;}
+
+/* ============ 代码块 ============ */
+pre.code{
+  background:var(--code-bg);color:#E6EDF7;border-radius:10px;
+  padding:16px 18px;overflow-x:auto;font-size:13px;line-height:1.65;
+  font-family:Consolas,"JetBrains Mono","Courier New",monospace;
+  margin:12px 0;tab-size:4;
+}
+pre.code .c{color:#7E93B0;}          /* 注释 */
+pre.code .fn{color:#82AAFF;}        /* 函数 */
+pre.code .kw{color:#C792EA;}        /* 关键字 */
+pre.code .num{color:#F78C6C;}       /* 数字 */
+pre.code .str{color:#C3E88D;}       /* 字符串 */
+pre.code .hd{color:#FFCB6B;}        /* 头文件 */
+pre.code .pp{color:#F78C6C;}        /* 宏 */
+code.inline{
+  background:#EDF1F7;color:#C2410C;padding:1px 7px;border-radius:5px;
+  font-family:Consolas,"Courier New",monospace;font-size:13.5px;
+}
+.cmdline{
+  background:#13263F;color:#9FD0FF;border-radius:8px;padding:8px 14px;
+  font-family:Consolas,"Courier New",monospace;font-size:13px;margin:8px 0;
+  overflow-x:auto;white-space:nowrap;
+}
+.cmdline::before{content:"PS > ";color:#E8720C;font-weight:700;}
+
+/* ============ 步骤 ============ */
+.steps{counter-reset:step;margin:12px 0;}
+.step{
+  position:relative;padding:2px 0 2px 44px;margin:13px 0;
+}
+.step::before{
+  counter-increment:step;content:counter(step);
+  position:absolute;left:0;top:2px;width:28px;height:28px;border-radius:50%;
+  background:var(--ink);color:#fff;font-weight:800;font-size:13.5px;
+  display:flex;align-items:center;justify-content:center;
+}
+.step b{color:var(--ink);}
+.step .step-sub{margin:6px 0 0;padding-left:14px;border-left:2px solid var(--line);font-size:14.5px;}
+
+/* ============ 目标卡片 ============ */
+.goal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0;}
+@media (max-width:720px){ .goal-grid{grid-template-columns:1fr;} }
+.goal{
+  border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:var(--paper-2);
+}
+.goal .g-ic{display:flex;align-items:center;gap:8px;font-weight:800;color:var(--ink);font-size:14.5px;margin-bottom:8px;}
+.goal ul{list-style:none;padding:0;margin:0;}
+.goal li{font-size:13.5px;color:var(--text-2);padding:3px 0 3px 16px;position:relative;}
+.goal li::before{content:"";position:absolute;left:0;top:12px;width:6px;height:6px;border-radius:50%;background:var(--accent);}
+
+/* ============ 任务卡（导入区） ============ */
+.taskcard{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0;}
+@media (max-width:720px){ .taskcard{grid-template-columns:repeat(2,1fr);} }
+.tc{
+  border:1px solid var(--line);border-radius:10px;padding:10px 14px;background:var(--paper-2);
+  font-size:13px;
+}
+.tc .tc-k{color:var(--text-2);font-size:12px;letter-spacing:1px;margin-bottom:3px;}
+.tc .tc-v{font-weight:700;color:var(--ink);}
+
+/* ============ 检测/折叠答案 ============ */
+.quiz{margin:10px 0;}
+.qitem{
+  border:1px solid var(--line);border-radius:10px;margin:10px 0;overflow:hidden;
+}
+.qitem .q{
+  padding:11px 16px;background:var(--paper-2);font-size:14.5px;font-weight:600;color:var(--ink);
+}
+.qitem .q .qno{
+  display:inline-block;background:var(--ink);color:#fff;border-radius:6px;
+  font-size:12px;padding:1px 8px;margin-right:8px;font-weight:800;
+}
+.qitem .ans{
+  display:none;padding:10px 16px;border-top:1px dashed var(--line);
+  font-size:13.5px;color:var(--text-2);background:#FBFCFE;
+}
+.qitem.open .ans{display:block;}
+.qitem .q-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  margin-top:8px;background:none;border:1px solid var(--line);border-radius:7px;
+  padding:4px 12px;font-size:12.5px;color:var(--text-2);cursor:pointer;font-family:inherit;
+}
+.qitem .q-btn:hover{color:var(--accent);border-color:var(--accent);}
+
+/* ============ 评价表 ============ */
+.score-td{text-align:center;}
+
+/* ============ 完成勾选 ============ */
+.done-row{display:flex;align-items:center;gap:10px;margin:10px 0 2px;}
+.done-row input{width:17px;height:17px;accent-color:var(--accent);cursor:pointer;}
+.done-row label{font-size:14px;color:var(--text-2);cursor:pointer;}
+.leaf.done{border-color:#9CC9A8;}
+.leaf.done .leaf-head{background:#F0F8F1;}
+.leaf.done .leaf-head h3{color:var(--a);}
+
+/* ============ 流程图（引脚映射） ============ */
+.flow{
+  display:flex;align-items:stretch;gap:0;margin:16px 0;flex-wrap:wrap;
+}
+.flow .fnode{
+  flex:1;min-width:130px;background:var(--paper-2);border:1.5px solid var(--ink-2);
+  border-radius:10px;padding:12px 10px;text-align:center;position:relative;
+}
+.flow .fnode .f-t{font-weight:800;color:var(--ink);font-size:14px;}
+.flow .fnode .f-s{font-size:12px;color:var(--text-2);margin-top:3px;}
+.flow .fnode.hl{border-color:var(--accent);background:#FFF4E8;}
+.flow .fnode.hl .f-t{color:#B45309;}
+.flow .farr{display:flex;align-items:center;padding:0 7px;color:var(--accent);font-weight:900;}
+@media (max-width:720px){
+  .flow{flex-direction:column;}
+  .flow .farr{transform:rotate(90deg);justify-content:center;padding:2px 0;}
+}
+
+/* ============ 时序逻辑（交替点亮推导） ============ */
+.cycle{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0;}
+@media (max-width:720px){ .cycle{grid-template-columns:repeat(2,1fr);} }
+.cy{
+  border:1px solid var(--line);border-radius:10px;padding:10px;text-align:center;
+  background:var(--paper-2);font-size:13px;
+}
+.cy .cy-t{font-weight:800;color:var(--ink);margin-bottom:4px;}
+.cy .led-line{display:flex;justify-content:center;gap:10px;margin-top:6px;}
+.cy .led{width:26px;height:26px;border-radius:50%;border:2px solid #B9C4D4;display:inline-flex;align-items:center;justify-content:center;}
+.cy .led.red-on{background:#E03131;border-color:#E03131;box-shadow:0 0 10px rgba(224,49,49,.6);}
+.cy .led.green-on{background:#2F9E44;border-color:#2F9E44;box-shadow:0 0 10px rgba(47,158,68,.6);}
+.cy .led.off{background:#EEF1F6;}
+.cy .led.blue-on{background:#1971C2;border-color:#1971C2;box-shadow:0 0 10px rgba(25,113,194,.65);}
+.cy .led-lab{font-size:10px;color:var(--text-2);}
+
+/* ============ 规格卡 ============ */
+.spec-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0;}
+@media (max-width:720px){ .spec-grid{grid-template-columns:1fr 1fr;} }
+.spec{
+  border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--paper-2);
+  display:flex;gap:10px;align-items:flex-start;
+}
+.spec svg{flex:none;margin-top:2px;}
+.spec .s-t{font-size:12.5px;color:var(--text-2);}
+.spec .s-v{font-size:13.5px;font-weight:700;color:var(--ink);margin-top:2px;}
+
+/* ============ 检查清单 ============ */
+.checklist{list-style:none;padding:0;margin:10px 0;}
+.checklist li{
+  display:flex;align-items:flex-start;gap:10px;padding:8px 12px;
+  border:1px solid var(--line-2);border-radius:8px;margin:7px 0;font-size:14px;background:var(--paper-2);
+}
+.checklist li input{width:16px;height:16px;accent-color:var(--a);margin-top:4px;flex:none;cursor:pointer;}
+
+/* ============ 时间轴 ============ */
+.timeline{display:grid;grid-template-columns:86px 34px 1fr;gap:0;margin:16px 0;max-width:760px;}
+@media (max-width:720px){ .timeline{grid-template-columns:70px 30px 1fr;} }
+.tl-time{text-align:right;padding:6px 12px 6px 0;font-size:13.5px;color:var(--text-2);font-weight:700;}
+.tl-axis{position:relative;}
+.tl-axis::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:2px;background:var(--line);transform:translateX(-50%);}
+.tl-dot{position:absolute;left:50%;top:16px;width:12px;height:12px;border-radius:50%;background:var(--accent);transform:translate(-50%,0);border:2.5px solid #FFE2C4;z-index:1;}
+.tl-content{padding:6px 0 20px 14px;}
+.tl-content b{color:var(--ink);font-size:14.5px;}
+.tl-content .tld{font-size:13px;color:var(--text-2);margin-top:2px;}
+
+/* ============ 页脚 ============ */
+.footer{
+  margin-top:46px;padding:22px;text-align:center;color:var(--text-2);font-size:12.5px;
+  border-top:1px solid var(--line);
+}
+
+/* ============ 打印 ============ */
+@media print{
+  body{background:#fff;font-size:12px;}
+  .topbar,.toc,.toc-mask{display:none !important;}
+  .wrap{padding:0;max-width:none;}
+  .cover{border-radius:0;padding:36px 30px;}
+  .leaf{box-shadow:none;margin:0 0 2px;border-radius:0;break-inside:avoid;}
+  .leaf::before,.leaf::after{display:none;}
+  .leaf .leaf-head{border-radius:0;}
+  .leaf{margin-bottom:10px;}
+  .sec-title{margin-top:26px;}
+  .qitem .ans{display:block;border-top:1px solid var(--line);}
+  .qitem .q-btn{display:none;}
+  a{color:var(--ink);}
+  pre.code{font-size:11px;}
+  table.tbl{font-size:11.5px;}
+}
+
+
+.subline{font-weight:700;color:#1A2E4B;background:#F1F4F9;border-left:4px solid #E8720C;padding:8px 12px;border-radius:6px;margin:0 0 10px;font-size:14px;}
+
+@media print{
+  /* PDF-break-guard */
+  .tbl-wrap, table.tbl, table.tbl tr, .taskcard, .flow, .steps, .cycle,
+  .timeline, .screen-demo, .quiz .qitem, .note, .tip, .warnbox, .ext-item,
+  .goal, .tc, .checklist { break-inside: avoid; }
+  pre.code { break-inside: avoid; }
+  img { break-inside: avoid; }
+}
+
+</style>
+</head>
+<body>
+
+<!-- ============ 顶部导航 ============ -->
+<header class="topbar">
+  <button class="burger" id="burgerBtn" aria-label="打开目录">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+  </button>
+  <div class="brand">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFC38A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg>
+    <span>图像识别技术 <span class="sub">· 活页式教材 · 模块十六</span></span>
+  </div>
+  <div class="spacer"></div>
+  <a class="tool" href="index.html">模块一</a>
+  <a class="tool" href="module2.html">模块二</a>
+  <a class="tool" href="module3.html">模块三</a>
+  <a class="tool" href="module4.html">模块四</a>
+  <a class="tool" href="module5.html">模块五</a>
+  <a class="tool" href="module6.html">模块六</a>
+  <a class="tool" href="module7.html">模块七</a>
+  <a class="tool" href="module8.html">模块八</a>
+  <a class="tool" href="module9.html">模块九</a>
+  <a class="tool" href="module10.html">模块十</a>
+  <a class="tool" href="module11.html">模块十一</a>
+  <a class="tool" href="module12.html">模块十二</a>
+  <a class="tool" href="module13.html">模块十三</a>
+  <a class="tool" href="module14.html">模块十四</a>
+  <a class="tool" href="module15.html">模块十五</a>
+  <a class="tool" href="module17.html">模块十七</a>
+  <a class="tool" href="module18.html">模块十八</a>
+  <button class="tool" id="printBtn">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+    打印教材
+  </button>
+</header>
+
+<!-- ============ 侧边目录 ============ -->
+<div class="toc-mask" id="tocMask"></div>
+<nav class="toc" id="toc">
+  <div class="toc-title">活页索引</div>
+  <a href="#cover"><span class="dot" style="background:#1A2E4B"></span>封面与模块信息</a>
+  <a href="#overview"><span class="dot" style="background:#1A2E4B"></span>模块总体设计</a>
+  <div class="g1">任务 1 · 两种开发方式与系统移植</div>
+  <a href="#t1"><span class="dot" style="background:#E8720C"></span>任务卡</a>
+  <a href="#t1k1"><span class="dot" style="background:#2B6CB0"></span>K1 C 与 Python 开发对比</a>
+  <a href="#t1k2"><span class="dot" style="background:#2B6CB0"></span>K2 MicroPython 系统移植</a>
+  <a href="#t1k3"><span class="dot" style="background:#2B6CB0"></span>K3 固件烧录步骤</a>
+  <a href="#t1a1"><span class="dot" style="background:#2E7D5B"></span>A1 活动与检测</a>
+  <div class="g1">任务 2 · MaixPy IDE 与人脸检测部署</div>
+  <a href="#t2"><span class="dot" style="background:#E8720C"></span>任务卡</a>
+  <a href="#t2k1"><span class="dot" style="background:#2B6CB0"></span>K1 MaixPy IDE 使用</a>
+  <a href="#t2k2"><span class="dot" style="background:#2B6CB0"></span>K2 Python 人脸检测部署</a>
+  <a href="#t2w1"><span class="dot" style="background:#E8720C"></span>W1 烧录与联机实操</a>
+  <a href="#t2w2"><span class="dot" style="background:#E8720C"></span>W2 检测验证</a>
+  <div class="g1">评价与拓展</div>
+  <a href="#eval"><span class="dot" style="background:#6D5BA6"></span>E1 模块评价</a>
+  <a href="#ext"><span class="dot" style="background:#7A8797"></span>X1 拓展任务</a>
+</nav>
+
+<main class="wrap">
+
+<!-- ============ 封面 ============ -->
+<section class="cover" id="cover">
+  <div class="c-flag">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#FFC38A" stroke-width="2.4" stroke-linecap="round"><path d="M12 2l2.4 7.2H22l-6 4.6 2.3 7.2-6.3-4.5-6.3 4.5L8 13.8l-6-4.6h7.6z"/></svg>
+    活页式 · 工作手册式教材
+  </div>
+  <h1>图像识别技术</h1>
+  <div class="c-module">模块十六 · Python 环境移植与 IDE 操作</div>
+  <p class="c-desc">前十五模块都在 <strong>C 环境（VSCode）</strong> 下开发；本模块换一条路：<strong>刷 MaixPy 固件</strong>把 MicroPython 运行环境移植到 K210，用 <strong>MaixPy IDE</strong> 写 Python、联机运行，最后把模块十三的<strong>人脸检测模型包</strong>用 Python 部署起来——开发更快、改起来更省事。</p>
+  <div class="c-meta">
+    <span>配套课程：<b>图像识别技术（边缘计算 &amp; 机器视觉）</b></span>
+    <span>建议学时：<b>2 学时</b></span>
+    <span>前置模块：<b>模块一 ~ 模块十五</b></span>
+    <span>硬件平台：<b>Kendryte K210 开发板</b></span>
+  </div>
+  <div class="c-actions">
+    <a class="btn btn-primary" href="#overview">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9V3z"/></svg>
+      开始学习
+    </a>
+    <a class="btn btn-ghost" href="#toc">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+      查看活页索引
+    </a>
+  </div>
+</section>
+
+<!-- ============ 模块总体设计 ============ -->
+<div class="sec-title"><span class="bar"></span><h2 id="overview">模块总体设计</h2></div>
+<p class="sec-sub"><strong>换一种开发方式</strong>：从"C 编译烧录"切换到"<strong>刷固件 + Python 脚本</strong>"——把矽速科技的 <strong>MaixPy 固件</strong>烧进 K210（相当于把 MicroPython 运行环境移植到开发板），用 <strong>MaixPy IDE</strong> 联机编写运行 Python，部署<strong>人脸检测模型</strong>（kfpkg 烧到 0x300000），体会 Python 方式的快速开发。</p>
+
+<div class="leaf">
+  <div class="leaf-head">
+    <span class="tag m">总览</span><span class="id">M16-01</span>
+    <h3>模块学习目标</h3>
+  </div>
+  <div class="leaf-body">
+    <div class="goal-grid">
+      <div class="goal">
+        <div class="g-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2B6CB0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>知识目标</div>
+        <ul>
+          <li>能说出 C 与 Python（MaixPy）两种开发方式的区别</li>
+          <li>能说出固件概念、系统移植原理与 Flash 地址规划</li>
+          <li>能说出 MaixPy IDE 操作与 Python 模型部署流程</li>
+        </ul>
+      </div>
+      <div class="goal">
+        <div class="g-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#E8720C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>技能目标</div>
+        <ul>
+          <li>能刷写 MaixPy 固件（kflash_gui + KD233）</li>
+          <li>能用 MaixPy IDE 连接、运行、调试、保存程序</li>
+          <li>能部署 Python 人脸检测并处理反色问题</li>
+        </ul>
+      </div>
+      <div class="goal">
+        <div class="g-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2E7D5B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>素养目标</div>
+        <ul>
+          <li>理解"语言是工具、硬件是目标"的工程思维</li>
+          <li>体会 C 与 Python 各擅其长的选型意识</li>
+          <li>形成"固件-驱动-地址"联动的系统观</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="leaf">
+  <div class="leaf-head">
+    <span class="tag m">总览</span><span class="id">M16-02</span>
+    <h3>任务结构与学时分配</h3>
+  </div>
+  <div class="leaf-body">
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr>
+        <th style="width:26%">任务</th><th style="width:34%">内容</th><th style="width:18%">活页构成</th><th style="width:12%">学时</th><th>学习成果</th>
+      </tr>
+      <tr>
+        <td><strong>任务 1</strong><br>两种开发方式与系统移植</td>
+        <td>C/Python 对比、固件原理、烧录 6 步、Flash 规划</td>
+        <td class="c">任务卡 + K×3 + A×1</td>
+        <td class="c">1 学时</td>
+        <td>能说出移植原理与烧录</td>
+      </tr>
+      <tr>
+        <td><strong>任务 2</strong><br>MaixPy IDE 与人脸检测部署</td>
+        <td>IDE 操作 4 步、反色处理、Python 部署 5 步、检测验证</td>
+        <td class="c">任务卡 + K×2 + W×2</td>
+        <td class="c">1 学时</td>
+        <td>IDE 跑通人脸检测</td>
+      </tr>
+    </table>
+    </div>
+    <div class="note"><strong>知识前置：</strong>人脸检测模型包（模块十三 face_detect.zip：main.py + kfpkg）复用；C 环境人脸检测原理（模块十一）对照理解；本模块新增"固件烧录、MaixPy IDE、Python 脚本部署"。</div>
+  </div>
+</div>
+
+<div class="leaf">
+  <div class="leaf-head">
+    <span class="tag m">总览</span><span class="id">M16-03</span>
+    <h3>模块学习路径</h3>
+  </div>
+  <div class="leaf-body">
+    <div class="timeline">
+      <div class="tl-time">第 1 学时</div>
+      <div class="tl-axis"><span class="tl-dot"></span></div>
+      <div class="tl-content"><b>任务 1 · 两种开发方式与系统移植</b><div class="tld">C/Python 对比 → 固件原理 → 烧录 6 步（CH340 → KD233 → 固件）</div></div>
+
+      <div class="tl-time">第 2 学时</div>
+      <div class="tl-axis"><span class="tl-dot"></span></div>
+      <div class="tl-content"><b>任务 2 · MaixPy IDE 与人脸检测部署</b><div class="tld">IDE 连接运行 → 反色处理 → kfpkg 烧模型 → Python 检测验证</div></div>
+    </div>
+    <div class="note"><strong>本模块在课程中的位置：</strong>C 开发（模块二~十五）与 Python 开发（本模块）两条路线并轨；为后续"同一模型两套部署方式"对比与综合项目打基础。</div>
+  </div>
+</div>
+
+
+<div class="leaf" id="t1">
+  <div class="leaf-head">
+    <span class="tag m">任务 1</span><span class="id">M16-T1-00</span>
+    <h3>任务卡：两种开发方式与系统移植</h3>
+    <span class="time">1 学时</span>
+  </div>
+  <div class="leaf-body">
+    <h4>任务情境</h4>
+    <p>K210 有<strong>两条开发路线</strong>：前面用的 C/C++（VSCode）要编译烧录；Python（MaixPy）只要<strong>刷固件 + 写脚本</strong>。本任务弄清两种方式的区别、固件是什么、怎么把 MaixPy 环境"移植"到开发板上——任务 2 动手刷固件并用 IDE 跑人脸检测。</p>
+    <div class="taskcard">
+      <div class="tc"><div class="tc-k">学习目标</div><div class="tc-v">说出移植原理与烧录</div></div>
+      <div class="tc"><div class="tc-k">核心知识</div><div class="tc-v">C/Python 对比、固件、烧录</div></div>
+      <div class="tc"><div class="tc-k">任务成果</div><div class="tc-v">开发方式对比表</div></div>
+      <div class="tc"><div class="tc-k">评价方式</div><div class="tc-v">随堂检测 + 小组互评</div></div>
+    </div>
+    <div class="tip"><strong>学习方法：</strong>一句话记核心——<strong>C 是"编译好下载运行"，Python 是"刷个环境再跑脚本"</strong>；固件 = 上电第一个启动、直接控制硬件的程序。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t1k1">
+  <div class="leaf-head">
+    <span class="tag k">知识活页</span><span class="id">M16-T1-K1</span>
+    <h3>K210 两种开发方式的对比</h3>
+    <span class="time">约 20 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>1. MaixPy 是什么</h4>
+    <p><strong>MaixPy 是矽速科技公司将 MicroPython 移植到 K210 的项目</strong>，支持 MCU 常规操作，用于快速开发具有<strong>极低成本和体积实用的 AIOT（人工智能物联网）领域智能应用</strong>。</p>
+    <h4>2. 两种开发方式</h4>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:24%">方式</th><th>工作原理</th></tr>
+      <tr><td class="c"><strong>C/C++ 方式</strong><br>（VSCode 环境）</td><td>编辑代码后需要<strong>编译和调试</strong>，验证没有问题后生成 <strong>bin 或 hex 文件</strong>，然后通过下载器下载到芯片或开发板的 <strong>FLASH</strong> 中，通电后自动执行代码</td></tr>
+      <tr><td class="c"><strong>Python 方式</strong><br>（MaixPy 环境）</td><td>基于<strong>脚本的运行原理</strong>，在开发板上<strong>构建一个运行环境（刷固件）</strong>，相当于将 MicroPython 的运行环境移植到开发板上，固件还包括对开发板硬件的支持。<strong>Py 文件有两种执行方式</strong>：使用 MaixPy IDE 运行，或将程序保存到开发板/Flash 中</td></tr>
+    </table>
+    </div>
+    <h4>3. 优缺点对比</h4>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:24%">对比项</th><th style="width:38%">C 方式</th><th>Python（MaixPy）方式</th></tr>
+      <tr><td class="c">优点</td><td><strong>执行效率高</strong>、<strong>模型加载容量大</strong>（可加载约 <strong>6MB</strong> 模型）</td><td><strong>开发快速</strong>、<strong>开源项目多</strong>、<strong>模型资料丰富</strong>，适合快速原型开发</td></tr>
+      <tr><td class="c">缺点</td><td>开发周期较长</td><td>需要一定的 Python 基础；加载的模型大小受限（MaixPy（mini）可加载约 <strong>3MB</strong> 模型）</td></tr>
+    </table>
+    </div>
+    <div class="note"><strong>记忆锚点：</strong>C = 高效 + 大模型 + 周期长；Python = 快速 + 资源多 + 模型小（约 6MB vs 3MB）。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t1k2">
+  <div class="leaf-head">
+    <span class="tag k">知识活页</span><span class="id">M16-T1-K2</span>
+    <h3>MicroPython 系统移植</h3>
+    <span class="time">约 15 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>1. 系统移植原理</h4>
+    <p>微控制器通常以 C 编程，可以<strong>直接访问和控制寄存器</strong>来使用外围设备。<strong>MicroPython 则集成了这些步骤</strong>，可以通过 Python 脚本语言实现<strong>硬件底层的访问和控制</strong>，比如控制 LED、LCD 显示器、读取电压、控制电机、访问 SD 卡等。</p>
+    <div class="flow">
+      <div class="fnode"><div class="f-t">C 编程</div><div class="f-s">直接操作寄存器</div></div>
+      <div class="farr">→</div>
+      <div class="fnode hl"><div class="f-t">MicroPython 移植</div><div class="f-s">集成底层步骤</div></div>
+      <div class="farr">→</div>
+      <div class="fnode"><div class="f-t">Python 脚本控制</div><div class="f-s">LED/LCD/电机/SD 卡</div></div>
+    </div>
+    <h4>2. 固件（Firmware）是什么</h4>
+    <div class="note"><strong>固件：</strong>就是写入 ROM（只读存储器）中的程序，担任系统<strong>最基础最底层</strong>的工作，<strong>直接控制硬件</strong>，是微处理器<strong>上电后第一个启动</strong>的程序。<strong>固件是与硬件一一对应的</strong>，一套硬件方案对应一个固件，否则系统无法正常工作。固件一般由硬件生产厂家提供。</div>
+    <h4>3. 16MB Flash 空间地址规划</h4>
+    <p>刷写成功后，开发板重新启动：<strong>有 SD 卡就提示用 SD 卡运行 Python 程序，没有 SD 卡则使用 Flash</strong>。注意 16MB Flash 空间的地址规划，通常包括：</p>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:34%">区域</th><th>用途</th></tr>
+      <tr><td class="c">固件区</td><td>存放 MaixPy 固件（系统运行环境）</td></tr>
+      <tr><td class="c">模型区</td><td>存放 kmodel/kfpkg 模型（如 0x300000）</td></tr>
+      <tr><td class="c">文件系统区</td><td>存放 .py 脚本与用户文件（Flash/SD 卡）</td></tr>
+    </table>
+    </div>
+    <div class="note"><strong>记忆锚点：</strong>固件 = 底层 + 第一个启动 + 一一对应；Flash 三段 = 固件区 / 模型区 / 文件系统区。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t1k3">
+  <div class="leaf-head">
+    <span class="tag k">知识活页</span><span class="id">M16-T1-K3</span>
+    <h3>固件烧录步骤</h3>
+    <span class="time">约 15 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>准备工作</h4>
+    <p>在刷写固件前，需要准备<strong>适配的固件文件（矽速科技官方提供的 MaixPy 固件）</strong>和<strong>烧录工具（kflash_gui）</strong>。本模块配套固件：<code class="inline">maixpy_v0.6.2_84_g8fcd84a58_openmv_kmodel_v4_with_ide_support.bin</code>（MaixPy v0.6.2，openmv kmodel v4，带 IDE 支持）。</p>
+    <h4>烧录步骤（6 步）</h4>
+    <div class="steps">
+      <div class="step"><b>1 安装驱动：</b>安装 <strong>CH340 串口驱动</strong>，使电脑能够识别开发板。</div>
+      <div class="step"><b>2 连接开发板：</b>使用 Type-C 数据线连接 K210 开发板与电脑。</div>
+      <div class="step"><b>3 选择端口：</b>打开 kflash_gui 烧录工具，选择串口端口。</div>
+      <div class="step"><b>4 选择型号：</b>开发板型号选择 <strong>KD233</strong>。</div>
+      <div class="step"><b>5 选择固件：</b>打开需要烧录的 MaixPy 固件文件。</div>
+      <div class="step"><b>6 点击烧录：</b>点击烧录，等待固件下载完成。</div>
+    </div>
+    <div class="note"><strong>验证：</strong>固件下载成功后，开发板将重新启动，并有相应的提示信息。<strong>出现开机画面说明固件刷写成功</strong>。</div>
+    <div class="warnbox"><strong>注意：</strong>若开发板已刷过 C 程序（模块二~十五），本步骤会用 MaixPy 固件<strong>覆盖系统区</strong>——之后板子按 Python 方式工作；如需回到 C 环境，再烧回原来的 C 固件即可。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t1a1">
+  <div class="leaf-head">
+    <span class="tag a">活动活页</span><span class="id">M16-T1-A1</span>
+    <h3>活动：方式辨析与随堂检测</h3>
+    <span class="time">约 15 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>活动一：开发方式归类（个人完成）</h4>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:36%">描述</th><th style="width:28%">C/C++ 方式</th><th>Python 方式</th></tr>
+      <tr><td>编译生成 bin 后下载到 FLASH</td><td class="c">□</td><td class="c">□</td></tr>
+      <tr><td>刷固件后直接运行 .py 脚本</td><td class="c">□</td><td class="c">□</td></tr>
+      <tr><td>执行效率高、可加载约 6MB 模型</td><td class="c">□</td><td class="c">□</td></tr>
+      <tr><td>开发快速、开源项目多</td><td class="c">□</td><td class="c">□</td></tr>
+    </table>
+    </div>
+    <div class="note"><strong>参考答案：</strong>① C ② Python ③ C ④ Python。</div>
+    <h4>活动二：随堂检测（自测）</h4>
+    <div class="quiz">
+      <div class="qitem">
+        <div class="q"><span class="qno">1</span>MaixPy 是什么？</div>
+        <div class="ans">答案：矽速科技公司将 MicroPython 移植到 K210 的项目，支持 MCU 常规操作，用于快速开发 AIOT 领域智能应用。</div>
+        <button class="q-btn" onclick="toggleAns(this)">查看答案</button>
+      </div>
+      <div class="qitem">
+        <div class="q"><span class="qno">2</span>C 与 Python 两种开发方式各自的优缺点？</div>
+        <div class="ans">答案：C 执行效率高、模型加载容量大（约 6MB），但开发周期长；Python 开发快速、开源项目多、模型资料丰富，但需 Python 基础且模型受限（mini 约 3MB）。</div>
+        <button class="q-btn" onclick="toggleAns(this)">查看答案</button>
+      </div>
+      <div class="qitem">
+        <div class="q"><span class="qno">3</span>固件（Firmware）是什么？有什么特点？</div>
+        <div class="ans">答案：写入 ROM 中的程序，担任系统最基础最底层的工作，直接控制硬件，是微处理器上电后第一个启动的程序；与硬件一一对应，一般由硬件生产厂家提供。</div>
+        <button class="q-btn" onclick="toggleAns(this)">查看答案</button>
+      </div>
+      <div class="qitem">
+        <div class="q"><span class="qno">4</span>固件烧录 6 步是什么？</div>
+        <div class="ans">答案：装 CH340 驱动 → Type-C 连接 → kflash_gui 选串口 → 型号选 KD233 → 打开 MaixPy 固件 → 点击烧录等待完成。</div>
+        <button class="q-btn" onclick="toggleAns(this)">查看答案</button>
+      </div>
+      <div class="qitem">
+        <div class="q"><span class="qno">5</span>16MB Flash 通常如何规划？</div>
+        <div class="ans">答案：固件区（MaixPy 固件）、模型区（kmodel/kfpkg，如 0x300000）、文件系统区（.py 脚本与用户文件）。</div>
+        <button class="q-btn" onclick="toggleAns(this)">查看答案</button>
+      </div>
+    </div>
+    <div class="done-row"><input type="checkbox" id="done-t1" class="doneck" data-key="done-t1"><label for="done-t1">我已完成任务 1 的学习并自测通过（勾选后本任务标记完成）</label></div>
+  </div>
+</div>
+
+<div class="leaf" id="t2">
+  <div class="leaf-head">
+    <span class="tag m">任务 2</span><span class="id">M16-T2-00</span>
+    <h3>任务卡：MaixPy IDE 与人脸检测部署</h3>
+    <span class="time">1 学时</span>
+  </div>
+  <div class="leaf-body">
+    <h4>任务情境</h4>
+    <p>动手实操：<strong>刷 MaixPy 固件 → 装 MaixPy IDE → 联机运行 hello world → 烧录人脸检测模型包（face_detect.zip）→ 用 Python 代码实现人脸检测</strong>，在开发板和 IDE 中同时看到检测效果。</p>
+    <div class="taskcard">
+      <div class="tc"><div class="tc-k">学习目标</div><div class="tc-v">IDE 跑通人脸检测</div></div>
+      <div class="tc"><div class="tc-k">实验材料</div><div class="tc-v">MaixPy 固件 + face_detect.zip</div></div>
+      <div class="tc"><div class="tc-k">任务成果</div><div class="tc-v">Python 人脸检测效果</div></div>
+      <div class="tc"><div class="tc-k">评价方式</div><div class="tc-v">成果展示 + 口述流程</div></div>
+    </div>
+    <div class="tip"><strong>学习方法：</strong>与 C 环境对照着学——C 是 kpu_load_kmodel + 区域层回调，Python 是一行 <code class="inline">nn.YOLO2(0x300000, 0.5, 0.3)</code> + 循环 detect，体会"脚本化"的简洁。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t2k1">
+  <div class="leaf-head">
+    <span class="tag k">知识活页</span><span class="id">M16-T2-K1</span>
+    <h3>MaixPy IDE 的使用</h3>
+    <span class="time">约 20 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>1. MaixPy IDE 的安装</h4>
+    <p>从<strong>矽速科技官网</strong>下载并安装 MaixPy IDE。安装完成后打开 IDE，<strong>默认显示 hello world 程序</strong>。在 IDE 中可以编写、运行和调试 Python 程序，并通过<strong>串口与开发板进行联机交互</strong>。</p>
+    <h4>2. MaixPy IDE 的基本操作（4 步）</h4>
+    <div class="steps">
+      <div class="step"><b>1 连接开发板：</b>在 IDE 中选择开发板型号（K210），点击左下角"连接"，建立串口连接。</div>
+      <div class="step"><b>2 运行程序：</b>点击"运行"，IDE 左上角会显示开发板摄像头的实时画面。</div>
+      <div class="step"><b>3 联机调试：</b>IDE 通过串口与开发板通讯，在 IDE 中可以直接运行程序并查看串口输出。</div>
+      <div class="step"><b>4 保存程序：</b>为防止串口线松动导致程序中断，可将程序保存到开发板（Flash/SD 卡）中，实现上电自动运行。</div>
+    </div>
+    <h4>3. 屏幕颜色反色问题</h4>
+    <div class="warnbox"><strong>注意：</strong>由于不同厂商开发板的硬件细微差异，在 MaixPy IDE 中运行程序时，开发板屏幕显示的颜色<strong>可能是反的</strong>，这是<strong>硬件不兼容</strong>引起的。需要根据具体开发板进行调整，参考 MaixPy API 手册（https://wiki.sipeed.com/soft/maixpy/zh/index.html），在 <strong>LCD 初始化时加入反色设置</strong>。</div>
+    <div class="note"><strong>记忆锚点：</strong>IDE 四步 = 连接 → 运行 → 调试 → 保存；反色 = LCD 初始化加反色设置（硬件差异所致）。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t2k2">
+  <div class="leaf-head">
+    <span class="tag k">知识活页</span><span class="id">M16-T2-K2</span>
+    <h3>Python 环境下部署人脸检测模型</h3>
+    <span class="time">约 20 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>部署流程（5 步）</h4>
+    <div class="steps">
+      <div class="step"><b>1 解压模型包：</b>解压人脸检测模型包（face_detect.zip），获取 <strong>kfpkg 文件</strong>和 <strong>main.py 程序</strong>。</div>
+      <div class="step"><b>2 烧录 kfpkg：</b>将 <strong>kfpkg 文件烧录进 Flash</strong>。kfpkg 文件指定了模型的烧录地址，也可以直接将 kmodel 文件烧录在指定地址，但同时要保证<strong>程序中设定的模型烧录地址与烧录实际地址一致</strong>。</div>
+      <div class="step"><b>3 打开 main.py 并加反色：</b>使用 MaixPy IDE 打开 main.py 文件，在 <code class="inline">lcd.init()</code> 中加入<strong>颜色反色设置</strong>（根据开发板硬件调整）。</div>
+      <div class="step"><b>4 设定模型地址：</b>设定模型文件存储在 Flash 的 <strong>0x300000</strong> 位置（可通过注释切换为 SD 卡存储方式）。</div>
+      <div class="step"><b>5 连接运行：</b>连接并运行程序，在开发板和 IDE 中同时看到人脸检测的效果。</div>
+    </div>
+    <h4>人脸检测的 Python 核心代码</h4>
+    <pre class="code"><span class="fn">from maix import camera, display, nn</span>
+<span class="c"># 加载人脸检测模型：地址 0x300000、阈值 0.5、NMS 0.3</span>
+<span class="fn">face_detect</span> = <span class="fn">nn.YOLO2</span>(<span class="num">0x300000</span>, <span class="num">0.5</span>, <span class="num">0.3</span>)
+<span class="fn">while True</span>:
+    <span class="fn">img</span> = <span class="fn">camera.capture</span>()          <span class="c"># 采集摄像头图像</span>
+    <span class="fn">faces</span> = <span class="fn">face_detect.detect</span>(<span class="fn">img</span>) <span class="c"># 运行检测</span>
+    <span class="fn">for f in faces</span>:
+        <span class="fn">img.draw_rect</span>(<span class="fn">f.x</span>, <span class="fn">f.y</span>, <span class="fn">f.w</span>, <span class="fn">f.h</span>, (<span class="num">255</span>, <span class="num">0</span>, <span class="num">0</span>)) <span class="c"># 框出人脸</span>
+        <span class="fn">img.draw_string</span>(<span class="fn">f.x</span> + <span class="num">3</span>, <span class="fn">f.y</span> + <span class="num">3</span>, <span class="str">"face"</span>, (<span class="num">255</span>, <span class="num">0</span>, <span class="num">0</span>))
+    <span class="fn">display.show</span>(<span class="fn">img</span>)               <span class="c"># 显示结果</span></pre>
+    <div class="note"><strong>与 C 版本对照：</strong>nn.YOLO2 一行 = C 里 INCBIN + kpu_load_kmodel + region_layer_init（锚框/阈值/NMS）；detect() 返回框列表 = C 里回调画框；<strong>同一模型（0x300000）两套语言都能跑</strong>。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t2w1">
+  <div class="leaf-head">
+    <span class="tag w">工作活页</span><span class="id">M16-T2-W1</span>
+    <h3>固件烧录与 IDE 联机实操</h3>
+    <span class="time">约 15 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>任务：完成固件烧录与 IDE 联机</h4>
+    <div class="steps">
+      <div class="step"><b>装驱动。</b>安装 CH340 串口驱动，插入开发板后设备管理器出现 COM 端口。</div>
+      <div class="step"><b>烧固件。</b>打开 kflash_gui → 选择串口 → 型号选 KD233 → 打开固件 <code class="inline">maixpy_v0.6.2_..._with_ide_support.bin</code> → 点击烧录，等待完成。</div>
+      <div class="step"><b>验证开机。</b>烧录完成后开发板重启，出现开机画面说明 MaixPy 固件刷写成功。</div>
+      <div class="step"><b>装 IDE。</b>从矽速科技官网下载安装 MaixPy IDE，打开后默认显示 hello world 程序。</div>
+      <div class="step"><b>连接。</b>IDE 中选择开发板型号 K210，点击左下角"连接"，建立串口连接。</div>
+      <div class="step"><b>跑 hello world。</b>点击"运行"，IDE 左上角显示摄像头实时画面、串口输出运行信息。</div>
+      <div class="step"><b>保存程序。</b>把 hello world 保存到开发板（Flash/SD 卡），拔掉串口线后重新上电，程序自动运行。</div>
+    </div>
+    <div class="warnbox"><strong>常见问题：</strong>① IDE 连不上——检查 CH340 驱动、串口端口是否选对、开发板是否已刷 MaixPy 固件。② 屏幕颜色反了——硬件不兼容所致，在 lcd.init() 中加入反色设置（查 MaixPy API 手册）。③ 运行报错——检查固件版本与 IDE 版本匹配（本固件为 v0.6.2、kmodel v4）。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t2w2">
+  <div class="leaf-head">
+    <span class="tag w">工作活页</span><span class="id">M16-T2-W2</span>
+    <h3>Python 人脸检测验证</h3>
+    <span class="time">约 20 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>1. 预期实验现象</h4>
+    <div class="note"><strong>现象描述：</strong>运行 main.py 后，开发板 LCD 与 IDE 同时显示摄像头画面；人脸出现在镜头前时，<strong>红色矩形框住人脸并在框旁标注 "face"</strong>；无人脸时画面无框。模型加载自 Flash 0x300000。</div>
+    <div class="cycle">
+      <div class="cy"><div class="cy-t">人脸检测</div><div class="screen-demo"><div class="scr-inner scr-py"><div class="face-box"></div></div></div><div>红框 + face</div></div>
+      <div class="cy"><div class="cy-t">无目标</div><div class="screen-demo"><div class="scr-inner scr-py"></div></div><div>无框</div></div>
+      <div class="cy"><div class="cy-t">IDE 联机</div><div class="screen-demo"><div class="scr-inner scr-py"><div class="face-box fb2"></div></div></div><div>板屏同显</div></div>
+    </div>
+    <h4>2. 现象与代码对应（口述自检）</h4>
+    <p>nn.YOLO2(0x300000, 0.5, 0.3) 加载模型（地址/阈值/NMS）→ camera.capture() 采集 → detect(img) 运行检测返回框列表 → 遍历 faces 用 draw_rect 画红框 + draw_string 写 "face" → display.show(img) 上屏。检测效果与 C 版本一致（同一模型），但代码量大幅减少。</p>
+    <h4>3. 实验检查清单</h4>
+    <ul class="checklist">
+      <li><input type="checkbox" id="ck1"><label for="ck1">MaixPy 固件已烧录成功（开发板出现开机画面）</label></li>
+      <li><input type="checkbox" id="ck2"><label for="ck2">MaixPy IDE 已安装并与开发板建立串口连接，hello world 运行正常</label></li>
+      <li><input type="checkbox" id="ck3"><label for="ck3">人脸检测模型包已解压，kfpkg 烧录进 Flash（地址 0x300000 与程序一致）</label></li>
+      <li><input type="checkbox" id="ck4"><label for="ck4">main.py 已按开发板调整（lcd.init() 反色设置，如需）并运行</label></li>
+      <li><input type="checkbox" id="ck5"><label for="ck5">人脸出现在镜头前，LCD 与 IDE 同时显示红框 + "face"标注</label></li>
+      <li><input type="checkbox" id="ck6"><label for="ck6">能口述 Python 检测流程并与 C 版本对照（同一模型两套实现）</label></li>
+    </ul>
+    <div class="done-row"><input type="checkbox" id="done-t2" class="doneck" data-key="done-t2"><label for="done-t2">我已完成任务 2 的实验并记录现象（勾选后本任务标记完成）</label></div>
+  </div>
+</div>
+
+<div class="leaf" id="eval">
+  <div class="leaf-head">
+    <span class="tag e">评价</span><span class="id">M16-E1</span>
+    <h3>模块十六 · Python 环境移植与 IDE 操作 评价量表</h3>
+    <span class="time">约 10 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <p>对照评价量表逐项自评（自己评）、互评（同桌评）、师评（教师评），在对应栏填 <strong>★</strong>（优秀 5-4 分 / 合格 3 分 / 待改进 2-1 分）。</p>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:7%">序号</th><th style="width:61%">评价维度</th><th style="width:10%">自评</th><th style="width:10%">互评</th><th>师评</th></tr>
+      <tr><td class="c">1</td><td>能说出 C 与 Python（MaixPy）两种开发方式的工作原理与优缺点</td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
+      <tr><td class="c">2</td><td>能说出固件概念（ROM、底层、上电第一个启动、硬件一一对应）</td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
+      <tr><td class="c">3</td><td>能说出固件烧录 6 步（CH340 → 连接 → 端口 → KD233 → 固件 → 烧录）</td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
+      <tr><td class="c">4</td><td>能说出 16MB Flash 三段规划（固件区/模型区/文件系统区）</td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
+      <tr><td class="c">5</td><td>能说出 MaixPy IDE 四步操作与屏幕反色问题的处理</td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
+      <tr><td class="c">6</td><td>能读懂 Python 核心代码（nn.YOLO2 / capture / detect / draw_rect）</td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
+      <tr><td class="c">7</td><td>能独立完成刷固件 → IDE 联机 → 烧模型 → 运行人脸检测</td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
+      <tr><td class="c">8</td><td>能与 C 版本对照理解同一模型两套部署方式（0x300000）</td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
+    </table>
+    </div>
+    <h4>课后反思（各写一句话）</h4>
+    <ul class="reflect">
+      <li>我学得最好的是：____________________</li>
+      <li>我还需要加强的是：____________________</li>
+      <li>我想对老师说：____________________</li>
+    </ul>
+  </div>
+</div>
+
+<div class="leaf" id="ext">
+  <div class="leaf-head">
+    <span class="tag x">拓展</span><span class="id">M16-X1</span>
+    <h3>拓展任务：把 Python 开发玩转</h3>
+    <span class="time">选做</span>
+  </div>
+  <div class="leaf-body">
+    <p>完成必学内容后选做，围绕"脚本改造、双路线对比、更多模型"继续探究。</p>
+    <div class="ext-item"><b>拓展 1：改检测阈值与 NMS。</b>把 nn.YOLO2(0x300000, 0.5, 0.3) 的阈值改为 0.3 / 0.7，观察误检与漏检变化；NMS 改为 0.1 / 0.6 观察重叠框——与模块十三 C 环境调参结论对照。</div>
+    <div class="ext-item"><b>拓展 2：加显示信息。</b>在 draw_string 中同时画出人脸坐标与耗时（参考 main.py 里 "t:%dms"），让 LCD 显示推理耗时，对比 C 版本的实时性。</div>
+    <div class="ext-item"><b>拓展 3：SD 卡方式加载。</b>把 main.py 中的模型加载从 0x300000 改为 SD 卡路径（如 /sd/m.kmodel），把 kmodel 复制到 SD 卡，验证"注释切换存储方式"。</div>
+    <div class="ext-item"><b>拓展 4：跑五分类花 Python 版。</b>在 MaixPy 环境用 Python 实现五分类花（模块十四）：class.kmodel 烧录后，用 nn.Classifier 或 YOLO2 方式加载，输出类别名称，对比 C 与 Python 实现差异。</div>
+    <div class="ext-item"><b>拓展 5（进阶）：双固件切换。</b>尝试把 C 固件（模块二~十五）与 MaixPy 固件都保存好，写一份"C/Python 双环境切换"操作卡：什么时候刷回 C 固件、什么时候刷 MaixPy 固件、各自注意什么。</div>
+    <div class="note"><strong>完成标准：</strong>至少完成拓展 1-3 中的两个，并在活页空白处记录现象；拓展 4-5 可作为小组探究课题。</div>
+  </div>
+</div>
+
+<footer class="foot">
+  <div class="f-inner">
+    <div><b>《图像识别技术》活页式教材 · 模块十六 Python 环境移植与 IDE 操作</b> · 建议学时 2 学时</div>
+    <div>配套硬件：Kendryte K210 开发板 · 配套固件：MaixPy v0.6.2（with IDE support）· 配套工程：face_detect（main.py + kfpkg）</div>
+  </div>
+</footer>
+
+</main>
+
+<script>
+var PRFX = 'm16:';
+function toggleAns(btn){ var a = btn.previousElementSibling; if(a.classList.contains('ans')){ a.style.display = (a.style.display === 'block') ? 'none' : 'block'; btn.textContent = (a.style.display === 'block') ? '收起答案' : '查看答案'; } }
+var burgers = document.getElementById('burgerBtn'), mask = document.getElementById('tocMask'), toc = document.getElementById('toc');
+if (burgers) burgers.onclick = function(){ toc.classList.add('open'); mask.classList.add('open'); };
+if (mask) mask.onclick = function(){ toc.classList.remove('open'); mask.classList.remove('open'); };
+var printBtn = document.getElementById('printBtn');
+if (printBtn) printBtn.onclick = function(){ window.print(); };
+/* 侧边目录滚动高亮 */
+var links = toc ? toc.querySelectorAll('a') : [];
+var secs = [];
+links.forEach(function(a){ var id = a.getAttribute('href'); if(id && id.length > 1){ var el = document.querySelector(id); if(el) secs.push([el, a]); } });
+window.addEventListener('scroll', function(){
+  var y = window.scrollY + 120, cur = null;
+  secs.forEach(function(p){ if(p[0].offsetTop <= y) cur = p[1]; });
+  links.forEach(function(a){ a.classList.remove('active'); });
+  if(cur) cur.classList.add('active');
+}, {passive:true});
+/* 完成勾选持久化（localStorage 键前缀 m16:） */
+var cks = document.querySelectorAll('.doneck');
+cks.forEach(function(c){ var k = PRFX + c.getAttribute('data-key'); try { c.checked = localStorage.getItem(k) === '1'; } catch(e){} c.addEventListener('change', function(){ try { localStorage.setItem(k, c.checked ? '1' : '0'); } catch(e){} }); });
+</script>
+
+</body>
+</html>

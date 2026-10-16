@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>模块十 · 神经网络加速器 KPU — 图像识别技术活页式教材</title>
+<style>
+
+/* ============ 基础变量与重置 ============ */
+:root{
+  --ink:#1A2E4B;          /* 主色：深靛蓝 */
+  --ink-2:#274a73;
+  --accent:#E8720C;       /* 强调：橙 */
+  --bg:#EEF1F6;
+  --paper:#FFFFFF;
+  --paper-2:#F7F9FC;
+  --line:#D6DEE9;
+  --line-2:#E8EDF4;
+  --text:#233040;
+  --text-2:#5A6B82;
+  --k:#2B6CB0;   /* 知识活页 */
+  --w:#E8720C;   /* 工作活页 */
+  --a:#2E7D5B;   /* 活动活页 */
+  --e:#6D5BA6;   /* 评价活页 */
+  --x:#7A8797;   /* 拓展活页 */
+  --code-bg:#0F1D2F;
+  --ok:#2E7D5B;
+  --warn:#B45309;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;scroll-padding-top:74px;}
+body{
+  font-family:"Noto Sans SC","Microsoft YaHei","PingFang SC",system-ui,-apple-system,"Segoe UI",sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.75;
+  font-size:16px;
+}
+a{color:var(--ink-2);text-decoration:none;}
+img{max-width:100%;}
+::selection{background:#FFE2C4;}
+
+/* ============ 顶部导航 ============ */
+.topbar{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  background:rgba(26,46,75,.97);
+  color:#fff;
+  display:flex;align-items:center;gap:14px;
+  padding:0 22px;height:56px;
+  box-shadow:0 2px 10px rgba(26,46,75,.25);
+}
+.topbar .brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:15.5px;letter-spacing:.4px;}
+.topbar .brand svg{flex:none;}
+.topbar .brand .sub{color:#AFC3DE;font-weight:400;font-size:12.5px;}
+.topbar .spacer{flex:1;}
+.topbar .tool{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);
+  color:#fff;padding:7px 14px;border-radius:8px;font-size:13px;cursor:pointer;
+  font-family:inherit;transition:background .2s;min-height:40px;
+}
+.topbar .tool:hover{background:rgba(255,255,255,.22);}
+.topbar a.tool{text-decoration:none;}
+.burger{display:none;background:none;border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:8px;padding:9px 12px;cursor:pointer;min-height:40px;min-width:42px;}
+@media (max-width:720px){
+  .topbar a.tool{display:none;}
+  .topbar .brand .sub{display:none;}
+  .burger{display:block;}
+  .toc a{padding:9px 22px;}
+  .topbar .tool{padding:9px 14px;}
+}
+
+/* ============ 侧边目录 ============ */
+.toc{
+  position:fixed;top:56px;bottom:0;left:0;width:250px;
+  background:var(--paper);
+  border-right:1px solid var(--line);
+  overflow-y:auto;padding:20px 0 30px;
+  z-index:90;
+}
+.toc .toc-title{
+  font-size:12px;color:var(--text-2);letter-spacing:2px;font-weight:700;
+  padding:0 22px 10px;text-transform:uppercase;
+}
+.toc a{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 22px;font-size:13.5px;color:var(--text-2);
+  border-left:3px solid transparent;transition:all .15s;
+}
+.toc a .dot{width:7px;height:7px;border-radius:50%;flex:none;}
+.toc a:hover{color:var(--ink);background:var(--paper-2);}
+.toc a.active{color:var(--ink);font-weight:700;border-left-color:var(--accent);background:var(--paper-2);}
+.toc a.active .dot{background:var(--accent);}
+.toc .g1{margin-top:14px;font-size:12px;color:var(--text-2);padding:8px 22px 4px;font-weight:700;}
+@media (max-width:960px){ .toc{left:-260px;transition:left .25s;} .toc.open{left:0;box-shadow:4px 0 18px rgba(0,0,0,.18);} }
+.toc-mask{display:none;position:fixed;inset:0;background:rgba(15,25,40,.45);z-index:85;}
+.toc-mask.open{display:block;}
+
+/* ============ 主布局 ============ */
+.wrap{
+  max-width:1000px;margin:0 auto;
+  padding:88px 26px 70px;
+}
+@media (min-width:961px){ .wrap{padding-left:296px;padding-right:46px;max-width:1240px;} }
+@media (max-width:720px){ .wrap{padding:76px 16px 50px;} }
+
+/* ============ 封面 ============ */
+.cover{
+  background:linear-gradient(160deg,#152B49 0%,#1A3A63 58%,#224A7C 100%);
+  color:#fff;border-radius:18px;overflow:hidden;
+  padding:54px 46px 44px;position:relative;
+  margin-bottom:34px;
+}
+.cover::after{
+  content:"";position:absolute;right:-90px;top:-90px;width:300px;height:300px;
+  background:radial-gradient(circle,rgba(232,114,12,.35),transparent 68%);
+}
+.cover .c-flag{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);
+  padding:5px 14px;border-radius:999px;font-size:12.5px;letter-spacing:1.5px;
+  margin-bottom:22px;
+}
+.cover h1{font-size:38px;line-height:1.25;font-weight:900;letter-spacing:1px;margin-bottom:10px;}
+.cover .c-module{font-size:19px;font-weight:700;color:#FFC38A;margin-bottom:18px;}
+.cover .c-desc{max-width:640px;color:#CFDCEE;font-size:15px;margin-bottom:26px;}
+.cover .c-meta{display:flex;flex-wrap:wrap;gap:10px 28px;font-size:13px;color:#B9CAE2;}
+.cover .c-meta b{color:#fff;font-weight:600;}
+.cover .c-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px;}
+.cover .btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:10px 22px;border-radius:10px;font-size:14.5px;font-weight:700;cursor:pointer;
+  border:1px solid transparent;transition:transform .15s,box-shadow .15s;font-family:inherit;
+}
+.cover .btn-primary{background:var(--accent);color:#fff;box-shadow:0 6px 18px rgba(232,114,12,.4);}
+.cover .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(232,114,12,.5);}
+.cover .btn-ghost{background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.3);}
+.cover .btn-ghost:hover{background:rgba(255,255,255,.18);}
+@media (max-width:720px){ .cover{padding:38px 24px 32px;} .cover h1{font-size:28px;} }
+
+/* ============ 章节标题 ============ */
+.sec-title{
+  display:flex;align-items:center;gap:12px;
+  font-size:23px;font-weight:900;color:var(--ink);
+  margin:44px 0 6px;
+}
+.sec-title .bar{width:6px;height:26px;background:var(--accent);border-radius:3px;flex:none;}
+.sec-sub{color:var(--text-2);font-size:14px;margin-bottom:20px;}
+
+/* ============ 活页卡 ============ */
+.leaf{
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:14px;
+  margin:22px 0;
+  position:relative;
+  box-shadow:0 3px 14px rgba(26,46,75,.06);
+  page-break-inside:avoid;
+}
+.leaf .leaf-head{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:14px 20px 12px;
+  border-bottom:1px solid var(--line-2);
+  background:var(--paper-2);
+  border-radius:14px 14px 0 0;
+}
+.leaf .leaf-head .tag{
+  font-size:11.5px;font-weight:800;letter-spacing:1px;color:#fff;
+  padding:3px 10px;border-radius:6px;flex:none;
+}
+.tag.k{background:var(--k);} .tag.w{background:var(--w);} .tag.a{background:var(--a);}
+.tag.e{background:var(--e);} .tag.x{background:var(--x);} .tag.m{background:var(--ink);}
+.leaf .leaf-head .id{
+  font-family:Consolas,"Courier New",monospace;
+  font-size:12px;color:var(--text-2);background:var(--paper);
+  border:1px solid var(--line);padding:2px 9px;border-radius:6px;flex:none;
+}
+.leaf .leaf-head h3{font-size:17px;font-weight:800;color:var(--ink);flex:1;min-width:200px;}
+.leaf .leaf-head .time{
+  font-size:12px;color:var(--text-2);background:var(--paper);
+  border:1px solid var(--line);padding:2px 9px;border-radius:6px;flex:none;
+}
+.leaf .leaf-body{padding:20px 24px 24px;}
+@media (max-width:720px){ .leaf .leaf-body{padding:16px 16px 20px;} }
+
+/* 打孔装饰（活页隐喻） */
+.leaf::before{
+  content:"";position:absolute;left:-13px;top:40px;width:9px;height:9px;border-radius:50%;
+  background:var(--bg);border:1.5px solid var(--line);box-shadow:inset 0 1px 2px rgba(0,0,0,.08);
+}
+.leaf::after{
+  content:"";position:absolute;left:-13px;top:64px;width:9px;height:9px;border-radius:50%;
+  background:var(--bg);border:1.5px solid var(--line);box-shadow:inset 0 1px 2px rgba(0,0,0,.08);
+}
+
+/* ============ 正文排版 ============ */
+.leaf-body h4{
+  font-size:15.5px;font-weight:800;color:var(--ink-2);
+  margin:18px 0 8px;padding-left:11px;border-left:4px solid var(--accent);
+}
+.leaf-body h4:first-child{margin-top:0;}
+.leaf-body p{margin:9px 0;text-align:justify;}
+.leaf-body ul,.leaf-body ol{margin:9px 0 9px 4px;padding-left:22px;}
+.leaf-body li{margin:5px 0;}
+.leaf-body li::marker{color:var(--accent);font-weight:700;}
+.leaf-body strong{color:var(--ink);}
+.leaf-body .note{
+  background:#FFF6EA;border:1px solid #F4D5AE;border-left:4px solid var(--accent);
+  border-radius:8px;padding:11px 15px;margin:12px 0;font-size:14px;color:#6B4A21;
+}
+.leaf-body .tip{
+  background:#EAF4EC;border:1px solid #C9E2CF;border-left:4px solid var(--a);
+  border-radius:8px;padding:11px 15px;margin:12px 0;font-size:14px;color:#2C5540;
+}
+.leaf-body .warnbox{
+  background:#FDF0F0;border:1px solid #F2C7C7;border-left:4px solid #C0392B;
+  border-radius:8px;padding:11px 15px;margin:12px 0;font-size:14px;color:#7A2E28;
+}
+
+/* ============ 表格 ============ */
+.tbl-wrap{overflow-x:auto;margin:12px 0;}
+table.tbl{
+  width:100%;border-collapse:collapse;font-size:14px;
+  background:var(--paper);
+}
+table.tbl th{
+  background:#E4EAF3;color:var(--ink);font-weight:700;text-align:center;
+  padding:9px 12px;border:1px solid var(--line);
+}
+table.tbl td{
+  padding:8px 12px;border:1px solid var(--line-2);vertical-align:middle;
+}
+table.tbl td.c{text-align:center;}
+table.tbl td.r{text-align:right;font-family:Consolas,monospace;}
+table.tbl tr:nth-child(even) td{background:#FAFBFD;}
+table.tbl tr:hover td{background:#F3F6FB;}
+
+/* ============ 代码块 ============ */
+pre.code{
+  background:var(--code-bg);color:#E6EDF7;border-radius:10px;
+  padding:16px 18px;overflow-x:auto;font-size:13px;line-height:1.65;
+  font-family:Consolas,"JetBrains Mono","Courier New",monospace;
+  margin:12px 0;tab-size:4;
+}
+pre.code .c{color:#7E93B0;}          /* 注释 */
+pre.code .fn{color:#82AAFF;}        /* 函数 */
+pre.code .kw{color:#C792EA;}        /* 关键字 */
+pre.code .num{color:#F78C6C;}       /* 数字 */
+pre.code .str{color:#C3E88D;}       /* 字符串 */
+pre.code .hd{color:#FFCB6B;}        /* 头文件 */
+pre.code .pp{color:#F78C6C;}        /* 宏 */
+code.inline{
+  background:#EDF1F7;color:#C2410C;padding:1px 7px;border-radius:5px;
+  font-family:Consolas,"Courier New",monospace;font-size:13.5px;
+}
+.cmdline{
+  background:#13263F;color:#9FD0FF;border-radius:8px;padding:8px 14px;
+  font-family:Consolas,"Courier New",monospace;font-size:13px;margin:8px 0;
+  overflow-x:auto;white-space:nowrap;
+}
+.cmdline::before{content:"PS > ";color:#E8720C;font-weight:700;}
+
+/* ============ 步骤 ============ */
+.steps{counter-reset:step;margin:12px 0;}
+.step{
+  position:relative;padding:2px 0 2px 44px;margin:13px 0;
+}
+.step::before{
+  counter-increment:step;content:counter(step);
+  position:absolute;left:0;top:2px;width:28px;height:28px;border-radius:50%;
+  background:var(--ink);color:#fff;font-weight:800;font-size:13.5px;
+  display:flex;align-items:center;justify-content:center;
+}
+.step b{color:var(--ink);}
+.step .step-sub{margin:6px 0 0;padding-left:14px;border-left:2px solid var(--line);font-size:14.5px;}
+
+/* ============ 目标卡片 ============ */
+.goal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0;}
+@media (max-width:720px){ .goal-grid{grid-template-columns:1fr;} }
+.goal{
+  border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:var(--paper-2);
+}
+.goal .g-ic{display:flex;align-items:center;gap:8px;font-weight:800;color:var(--ink);font-size:14.5px;margin-bottom:8px;}
+.goal ul{list-style:none;padding:0;margin:0;}
+.goal li{font-size:13.5px;color:var(--text-2);padding:3px 0 3px 16px;position:relative;}
+.goal li::before{content:"";position:absolute;left:0;top:12px;width:6px;height:6px;border-radius:50%;background:var(--accent);}
+
+/* ============ 任务卡（导入区） ============ */
+.taskcard{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0;}
+@media (max-width:720px){ .taskcard{grid-template-columns:repeat(2,1fr);} }
+.tc{
+  border:1px solid var(--line);border-radius:10px;padding:10px 14px;background:var(--paper-2);
+  font-size:13px;
+}
+.tc .tc-k{color:var(--text-2);font-size:12px;letter-spacing:1px;margin-bottom:3px;}
+.tc .tc-v{font-weight:700;color:var(--ink);}
+
+/* ============ 检测/折叠答案 ============ */
+.quiz{margin:10px 0;}
+.qitem{
+  border:1px solid var(--line);border-radius:10px;margin:10px 0;overflow:hidden;
+}
+.qitem .q{
+  padding:11px 16px;background:var(--paper-2);font-size:14.5px;font-weight:600;color:var(--ink);
+}
+.qitem .q .qno{
+  display:inline-block;background:var(--ink);color:#fff;border-radius:6px;
+  font-size:12px;padding:1px 8px;margin-right:8px;font-weight:800;
+}
+.qitem .ans{
+  display:none;padding:10px 16px;border-top:1px dashed var(--line);
+  font-size:13.5px;color:var(--text-2);background:#FBFCFE;
+}
+.qitem.open .ans{display:block;}
+.qitem .q-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  margin-top:8px;background:none;border:1px solid var(--line);border-radius:7px;
+  padding:4px 12px;font-size:12.5px;color:var(--text-2);cursor:pointer;font-family:inherit;
+}
+.qitem .q-btn:hover{color:var(--accent);border-color:var(--accent);}
+
+/* ============ 评价表 ============ */
+.score-td{text-align:center;}
+
+/* ============ 完成勾选 ============ */
+.done-row{display:flex;align-items:center;gap:10px;margin:10px 0 2px;}
+.done-row input{width:17px;height:17px;accent-color:var(--accent);cursor:pointer;}
+.done-row label{font-size:14px;color:var(--text-2);cursor:pointer;}
+.leaf.done{border-color:#9CC9A8;}
+.leaf.done .leaf-head{background:#F0F8F1;}
+.leaf.done .leaf-head h3{color:var(--a);}
+
+/* ============ 流程图（引脚映射） ============ */
+.flow{
+  display:flex;align-items:stretch;gap:0;margin:16px 0;flex-wrap:wrap;
+}
+.flow .fnode{
+  flex:1;min-width:130px;background:var(--paper-2);border:1.5px solid var(--ink-2);
+  border-radius:10px;padding:12px 10px;text-align:center;position:relative;
+}
+.flow .fnode .f-t{font-weight:800;color:var(--ink);font-size:14px;}
+.flow .fnode .f-s{font-size:12px;color:var(--text-2);margin-top:3px;}
+.flow .fnode.hl{border-color:var(--accent);background:#FFF4E8;}
+.flow .fnode.hl .f-t{color:#B45309;}
+.flow .farr{display:flex;align-items:center;padding:0 7px;color:var(--accent);font-weight:900;}
+@media (max-width:720px){
+  .flow{flex-direction:column;}
+  .flow .farr{transform:rotate(90deg);justify-content:center;padding:2px 0;}
+}
+
+/* ============ 时序逻辑（交替点亮推导） ============ */
+.cycle{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0;}
+@media (max-width:720px){ .cycle{grid-template-columns:repeat(2,1fr);} }
+.cy{
+  border:1px solid var(--line);border-radius:10px;padding:10px;text-align:center;
+  background:var(--paper-2);font-size:13px;
+}
+.cy .cy-t{font-weight:800;color:var(--ink);margin-bottom:4px;}
+.cy .led-line{display:flex;justify-content:center;gap:10px;margin-top:6px;}
+.cy .led{width:26px;height:26px;border-radius:50%;border:2px solid #B9C4D4;display:inline-flex;align-items:center;justify-content:center;}
+.cy .led.red-on{background:#E03131;border-color:#E03131;box-shadow:0 0 10px rgba(224,49,49,.6);}
+.cy .led.green-on{background:#2F9E44;border-color:#2F9E44;box-shadow:0 0 10px rgba(47,158,68,.6);}
+.cy .led.off{background:#EEF1F6;}
+.cy .led.blue-on{background:#1971C2;border-color:#1971C2;box-shadow:0 0 10px rgba(25,113,194,.65);}
+.cy .led-lab{font-size:10px;color:var(--text-2);}
+
+/* ============ 规格卡 ============ */
+.spec-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0;}
+@media (max-width:720px){ .spec-grid{grid-template-columns:1fr 1fr;} }
+.spec{
+  border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--paper-2);
+  display:flex;gap:10px;align-items:flex-start;
+}
+.spec svg{flex:none;margin-top:2px;}
+.spec .s-t{font-size:12.5px;color:var(--text-2);}
+.spec .s-v{font-size:13.5px;font-weight:700;color:var(--ink);margin-top:2px;}
+
+/* ============ 检查清单 ============ */
+.checklist{list-style:none;padding:0;margin:10px 0;}
+.checklist li{
+  display:flex;align-items:flex-start;gap:10px;padding:8px 12px;
+  border:1px solid var(--line-2);border-radius:8px;margin:7px 0;font-size:14px;background:var(--paper-2);
+}
+.checklist li input{width:16px;height:16px;accent-color:var(--a);margin-top:4px;flex:none;cursor:pointer;}
+
+/* ============ 时间轴 ============ */
+.timeline{display:grid;grid-template-columns:86px 34px 1fr;gap:0;margin:16px 0;max-width:760px;}
+@media (max-width:720px){ .timeline{grid-template-columns:70px 30px 1fr;} }
+.tl-time{text-align:right;padding:6px 12px 6px 0;font-size:13.5px;color:var(--text-2);font-weight:700;}
+.tl-axis{position:relative;}
+.tl-axis::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:2px;background:var(--line);transform:translateX(-50%);}
+.tl-dot{position:absolute;left:50%;top:16px;width:12px;height:12px;border-radius:50%;background:var(--accent);transform:translate(-50%,0);border:2.5px solid #FFE2C4;z-index:1;}
+.tl-content{padding:6px 0 20px 14px;}
+.tl-content b{color:var(--ink);font-size:14.5px;}
+.tl-content .tld{font-size:13px;color:var(--text-2);margin-top:2px;}
+
+/* ============ 页脚 ============ */
+.footer{
+  margin-top:46px;padding:22px;text-align:center;color:var(--text-2);font-size:12.5px;
+  border-top:1px solid var(--line);
+}
+
+/* ============ 打印 ============ */
+@media print{
+  body{background:#fff;font-size:12px;}
+  .topbar,.toc,.toc-mask{display:none !important;}
+  .wrap{padding:0;max-width:none;}
+  .cover{border-radius:0;padding:36px 30px;}
+  .leaf{box-shadow:none;margin:0 0 2px;border-radius:0;break-inside:avoid;}
+  .leaf::before,.leaf::after{display:none;}
+  .leaf .leaf-head{border-radius:0;}
+  .leaf{margin-bottom:10px;}
+  .sec-title{margin-top:26px;}
+  .qitem .ans{display:block;border-top:1px solid var(--line);}
+  .qitem .q-btn{display:none;}
+  a{color:var(--ink);}
+  pre.code{font-size:11px;}
+  table.tbl{font-size:11.5px;}
+}
+
+
+@media print{
+  /* PDF-break-guard */
+  .tbl-wrap, table.tbl, table.tbl tr, .taskcard, .flow, .steps, .cycle,
+  .timeline, .screen-demo, .quiz .qitem, .note, .tip, .warnbox, .ext-item,
+  .goal, .tc, .checklist { break-inside: avoid; }
+  pre.code { break-inside: avoid; }
+  img { break-inside: avoid; }
+}
+
+</style>
+</head>
+<body>
+
+<!-- ============ 顶部导航 ============ -->
+<header class="topbar">
+  <button class="burger" id="burgerBtn" aria-label="打开目录">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+  </button>
+  <div class="brand">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFC38A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg>
+    <span>图像识别技术 <span class="sub">· 活页式教材 · 模块十</span></span>
+  </div>
+  <div class="spacer"></div>
+  <a class="tool" href="index.html">模块一</a>
+  <a class="tool" href="module2.html">模块二</a>
+  <a class="tool" href="module3.html">模块三</a>
+  <a class="tool" href="module4.html">模块四</a>
+  <a class="tool" href="module5.html">模块五</a>
+  <a class="tool" href="module6.html">模块六</a>
+  <a class="tool" href="module7.html">模块七</a>
+  <a class="tool" href="module8.html">模块八</a>
+  <a class="tool" href="module9.html">模块九</a>
+  <a class="tool" href="module11.html">模块十一</a>
+  <a class="tool" href="module12.html">模块十二</a>
+  <a class="tool" href="module13.html">模块十三</a>
+  <a class="tool" href="module14.html">模块十四</a>
+  <a class="tool" href="module15.html">模块十五</a>
+  <a class="tool" href="module16.html">模块十六</a>
+  <a class="tool" href="module17.html">模块十七</a>
+  <a class="tool" href="module18.html">模块十八</a>
+  <button class="tool" id="printBtn">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+    打印教材
+  </button>
+</header>
+
+<!-- ============ 侧边目录 ============ -->
+<div class="toc-mask" id="tocMask"></div>
+<nav class="toc" id="toc">
+  <div class="toc-title">活页索引</div>
+  <a href="#cover"><span class="dot" style="background:#1A2E4B"></span>封面与模块信息</a>
+  <a href="#overview"><span class="dot" style="background:#1A2E4B"></span>模块总体设计</a>
+  <div class="g1">任务 1 · 认识神经网络与 KPU</div>
+  <a href="#t1"><span class="dot" style="background:#E8720C"></span>任务卡</a>
+  <a href="#t1k1"><span class="dot" style="background:#2B6CB0"></span>K1 从人工智能到深度学习</a>
+  <a href="#t1k2"><span class="dot" style="background:#2B6CB0"></span>K2 神经网络与 CNN</a>
+  <a href="#t1k3"><span class="dot" style="background:#2B6CB0"></span>K3 KPU 加速器与工具链</a>
+  <a href="#t1a1"><span class="dot" style="background:#2E7D5B"></span>A1 活动与检测</a>
+  <div class="g1">任务 2 · 基于 KPU 的图像滤波实验</div>
+  <a href="#t2"><span class="dot" style="background:#E8720C"></span>任务卡</a>
+  <a href="#t2k1"><span class="dot" style="background:#2B6CB0"></span>K1 工程结构与主程序</a>
+  <a href="#t2k2"><span class="dot" style="background:#2B6CB0"></span>K2 关键代码详解</a>
+  <a href="#t2w1"><span class="dot" style="background:#E8720C"></span>W1 编译与烧录</a>
+  <a href="#t2w2"><span class="dot" style="background:#E8720C"></span>W2 验证与故障排查</a>
+  <div class="g1">评价与拓展</div>
+  <a href="#eval"><span class="dot" style="background:#6D5BA6"></span>E1 模块评价</a>
+  <a href="#ext"><span class="dot" style="background:#7A8797"></span>X1 拓展任务</a>
+</nav>
+
+<main class="wrap">
+
+<!-- ============ 封面 ============ -->
+<section class="cover" id="cover">
+  <div class="c-flag">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#FFC38A" stroke-width="2.4" stroke-linecap="round"><path d="M12 2l2.4 7.2H22l-6 4.6 2.3 7.2-6.3-4.5-6.3 4.5L8 13.8l-6-4.6h7.6z"/></svg>
+    活页式 · 工作手册式教材
+  </div>
+  <h1>图像识别技术</h1>
+  <div class="c-module">模块十 · 神经网络加速器 KPU</div>
+  <p class="c-desc">从本章起进入<strong>"识别"阶段</strong>：先讲清 <strong>AI / ML / DL</strong> 与<strong>人工神经网络、卷积神经网络</strong>的原理，再认识 K210 内置的 <strong>KPU 神经网络加速器</strong>，最后用 KPU 对摄像头实时画面做<strong>卷积滤波</strong>（边沿检测 / 浮雕 / 锐化），按键切换模式，直观感受"神经网络处理器做图像运算"。</p>
+  <div class="c-meta">
+    <span>配套课程：<b>图像识别技术（边缘计算 &amp; 机器视觉）</b></span>
+    <span>建议学时：<b>2 学时</b></span>
+    <span>前置模块：<b>模块一 ~ 模块九</b></span>
+    <span>硬件平台：<b>Kendryte K210 开发板</b></span>
+  </div>
+  <div class="c-actions">
+    <a class="btn btn-primary" href="#overview">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9V3z"/></svg>
+      开始学习
+    </a>
+    <a class="btn btn-ghost" href="#toc">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+      查看活页索引
+    </a>
+  </div>
+</section>
+
+<!-- ============ 模块总体设计 ============ -->
+<div class="sec-title"><span class="bar"></span><h2 id="overview">模块总体设计</h2></div>
+<p class="sec-sub"><strong>AI 是目标、机器学习是手段、深度学习是核心实现</strong>；CNN 用卷积核自动提取图像特征；<strong>KPU 是 K210 内置的神经网络加速器</strong>。本模块先建立神经网络理论框架，再动手用 KPU 跑 3×3 卷积滤波实验，为后续 YOLO 目标检测打基础。</p>
+
+<div class="leaf">
+  <div class="leaf-head">
+    <span class="tag m">总览</span><span class="id">M10-01</span>
+    <h3>模块学习目标</h3>
+  </div>
+  <div class="leaf-body">
+    <div class="goal-grid">
+      <div class="goal">
+        <div class="g-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2B6CB0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>知识目标</div>
+        <ul>
+          <li>能说出 AI / ML / DL 的关系与图像识别四类任务</li>
+          <li>能说出神经元三要素与 CNN 的卷积/池化/激活/全连接</li>
+          <li>能说出 KPU 的功能、特点与 nncase 工具链</li>
+        </ul>
+      </div>
+      <div class="goal">
+        <div class="g-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#E8720C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>技能目标</div>
+        <ul>
+          <li>能读懂 KPU 滤波工程（conv_init / conv_run、四卷积核）</li>
+          <li>能完成 kpu 工程编译、烧录并观察滤波效果</li>
+          <li>能用按键切换模式并说出 RGB888→RGB565 转换</li>
+        </ul>
+      </div>
+      <div class="goal">
+        <div class="g-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2E7D5B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>素养目标</div>
+        <ul>
+          <li>理解"卷积核决定图像效果"的原理</li>
+          <li>体会嵌入式 NPU 加速器对边缘计算的价值</li>
+          <li>形成"模型 + 数据 → 识别"的 AI 工程思维</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="leaf">
+  <div class="leaf-head">
+    <span class="tag m">总览</span><span class="id">M10-02</span>
+    <h3>任务结构与学时分配</h3>
+  </div>
+  <div class="leaf-body">
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr>
+        <th style="width:26%">任务</th><th style="width:34%">内容</th><th style="width:18%">活页构成</th><th style="width:12%">学时</th><th>学习成果</th>
+      </tr>
+      <tr>
+        <td><strong>任务 1</strong><br>认识神经网络与 KPU</td>
+        <td>AI/ML/DL、ANN、CNN、KPU 与 nncase 工具链</td>
+        <td class="c">任务卡 + K×3 + A×1</td>
+        <td class="c">1 学时</td>
+        <td>能说出 CNN 原理与 KPU 功能</td>
+      </tr>
+      <tr>
+        <td><strong>任务 2</strong><br>基于 KPU 的图像滤波实验</td>
+        <td>工程结构、main.c 解析、卷积核、编译、烧录、现象验证</td>
+        <td class="c">任务卡 + K×2 + W×2</td>
+        <td class="c">1 学时</td>
+        <td>按键切换四种滤波模式</td>
+      </tr>
+    </table>
+    </div>
+    <div class="note"><strong>知识前置：</strong>摄像头采集与 LCD 显示（模块九）复用；按键中断（模块四）复用；本模块新增"KPU 做卷积运算 + RGB888→RGB565 转换"。</div>
+  </div>
+</div>
+
+<div class="leaf">
+  <div class="leaf-head">
+    <span class="tag m">总览</span><span class="id">M10-03</span>
+    <h3>模块学习路径</h3>
+  </div>
+  <div class="leaf-body">
+    <div class="timeline">
+      <div class="tl-time">第 1 学时</div>
+      <div class="tl-axis"><span class="tl-dot"></span></div>
+      <div class="tl-content"><b>任务 1 · 认识神经网络与 KPU</b><div class="tld">AI/ML/DL → ANN → CNN → KPU 与工具链 → 活动检测</div></div>
+
+      <div class="tl-time">第 2 学时</div>
+      <div class="tl-axis"><span class="tl-dot"></span></div>
+      <div class="tl-content"><b>任务 2 · 基于 KPU 的图像滤波实验</b><div class="tld">工程结构与主程序 → 卷积核 → 编译 → 烧录 → 按键验证四种模式</div></div>
+    </div>
+    <div class="note"><strong>本模块在课程中的位置：</strong>KPU 是 K210 的"算力心脏"，本章之后的 YOLO 目标检测、人脸识别等模块都运行在 KPU 上；本模块的卷积滤波实验是理解"神经网络如何看图像"的起点。</div>
+  </div>
+</div>
+
+
+<div class="leaf" id="t1">
+  <div class="leaf-head">
+    <span class="tag m">任务 1</span><span class="id">M10-T1-00</span>
+    <h3>任务卡：认识神经网络与 KPU</h3>
+    <span class="time">1 学时</span>
+  </div>
+  <div class="leaf-body">
+    <h4>任务情境</h4>
+    <p>前面九个模块让 K210"能显示、能触摸、能存储、能看"，本模块让它<strong>"会算"</strong>：K210 内置一颗 <strong>KPU 神经网络加速器</strong>，专门跑卷积神经网络。在用它之前，先建立理论：<strong>AI/ML/DL 是什么关系？神经元怎么工作？卷积神经网络怎么"看"图像？KPU 能干什么？</strong>任务 2 动手做滤波实验。</p>
+    <div class="taskcard">
+      <div class="tc"><div class="tc-k">学习目标</div><div class="tc-v">说出 CNN 原理与 KPU 功能</div></div>
+      <div class="tc"><div class="tc-k">核心知识</div><div class="tc-v">ANN、CNN、KPU、nncase</div></div>
+      <div class="tc"><div class="tc-k">任务成果</div><div class="tc-v">CNN 结构图 + KPU 特性表</div></div>
+      <div class="tc"><div class="tc-k">评价方式</div><div class="tc-v">随堂检测 + 小组互评</div></div>
+    </div>
+    <div class="tip"><strong>学习方法：</strong>这一节概念多，抓主线："神经元加权求和 → 卷积核提特征 → 池化降尺寸 → 激活加非线性 → 全连接出结果"，KPU 就是把这条链硬件加速。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t1k1">
+  <div class="leaf-head">
+    <span class="tag k">知识活页</span><span class="id">M10-T1-K1</span>
+    <h3>从人工智能到深度学习</h3>
+    <span class="time">约 15 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>1. 人工智能、机器学习与深度学习</h4>
+    <p><strong>人工智能（Artificial Intelligence，AI）</strong>是让机器能够像人一样思考、学习、决策的技术科学。<strong>机器学习（Machine Learning，ML）</strong>是实现人工智能的一种方法，它让计算机<strong>通过数据学习规律</strong>，而不是显式地编写规则。<strong>深度学习（Deep Learning，DL）</strong>是机器学习的一个分支，它利用<strong>多层神经网络自动提取数据特征</strong>，模仿人脑的工作方式。</p>
+    <div class="flow">
+      <div class="fnode hl"><div class="f-t">AI 人工智能</div><div class="f-s">目标：让机器像人一样</div></div>
+      <div class="farr">→</div>
+      <div class="fnode"><div class="f-t">ML 机器学习</div><div class="f-s">手段：从数据学规律</div></div>
+      <div class="farr">→</div>
+      <div class="fnode"><div class="f-t">DL 深度学习</div><div class="f-s">核心：多层神经网络</div></div>
+    </div>
+    <p>三者关系可以概括为：<strong>人工智能是目标，机器学习是实现人工智能的手段，深度学习是机器学习中最核心、最强大的实现方式</strong>。本课程学习的图像识别技术，正是深度学习在计算机视觉领域的重要应用。</p>
+    <h4>2. 计算机视觉与图像识别</h4>
+    <p><strong>计算机视觉（Computer Vision，CV）</strong>是让计算机"看懂"图像和视频的科学。图像识别是计算机视觉的核心任务之一，其基本流程为：<strong>信息获取 → 图像预处理 → 特征提取 → 模型训练 → 识别输出</strong>。</p>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:26%">典型任务</th><th>说明</th></tr>
+      <tr><td class="c">图像分类</td><td>判断整幅图像属于哪个类别，如图中是猫还是狗</td></tr>
+      <tr><td class="c">目标检测</td><td>不仅判断类别，还要框出目标的位置</td></tr>
+      <tr><td class="c">人脸检测与识别</td><td>检测出是否有人脸，并识别人脸的身份</td></tr>
+      <tr><td class="c">语义分割</td><td>对图像中的每个像素进行分类</td></tr>
+    </table>
+    </div>
+    <div class="note"><strong>记忆锚点：</strong>AI ⊃ ML ⊃ DL；图像识别 = 让计算机"看懂"图，流程五步：获取 → 预处理 → 特征 → 训练 → 输出。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t1k2">
+  <div class="leaf-head">
+    <span class="tag k">知识活页</span><span class="id">M10-T1-K2</span>
+    <h3>人工神经网络与卷积神经网络</h3>
+    <span class="time">约 20 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>1. 神经元模型</h4>
+    <p><strong>人工神经网络（Artificial Neural Network，ANN）</strong>是模仿生物神经网络行为特征的数学模型。神经网络本质上由大量相互连接的"神经元"组成，其基本结构包括三个部分：<strong>权重（Weight）、偏置（Bias）和激活函数（Activation Function）</strong>。</p>
+    <div class="flow">
+      <div class="fnode"><div class="f-t">输入信号</div><div class="f-s">x1、x2、x3…</div></div>
+      <div class="farr">→</div>
+      <div class="fnode hl"><div class="f-t">加权求和</div><div class="f-s">Σ(xᵢ·wᵢ) + b</div></div>
+      <div class="farr">→</div>
+      <div class="fnode"><div class="f-t">激活函数</div><div class="f-s">判断是否"兴奋"</div></div>
+      <div class="farr">→</div>
+      <div class="fnode"><div class="f-t">输出</div><div class="f-s">传给下一层</div></div>
+    </div>
+    <p>一个神经元接收多个输入信号，每个输入乘以对应的权重后求和，再加上偏置，最后通过激活函数输出结果。神经元可以形象地理解为：把许多输入信号按不同的重要程度（权重）加权求和，再判断这个信号总和是否达到"兴奋"的阈值（偏置），若达到则激活并输出。<strong>神经网络的学习过程，就是不断调整权重和偏置</strong>，使网络的输出不断逼近期望结果的过程。</p>
+    <h4>2. 层次结构</h4>
+    <p>一个典型的人工神经网络由多层神经元构成：<strong>输入层</strong>（接收外部输入数据）、<strong>隐藏层</strong>（特征提取和变换，可以有多层）、<strong>输出层</strong>（输出分类或回归结果）。当隐藏层数量较多时，神经网络就演变为<strong>"深度神经网络"（DNN）</strong>，深度学习由此得名。</p>
+    <h4>3. 卷积神经网络（CNN）</h4>
+    <p><strong>卷积神经网络（Convolutional Neural Network，CNN）</strong>是一种基于卷积运算的深度学习模型，是当前<strong>图像识别领域最主流</strong>的神经网络架构。CNN 通过<strong>卷积、池化、激活</strong>等运算组合，能够自动从图像中提取从低级到高级的层次化特征：浅层卷积提取边缘、角点等<strong>低级特征</strong>，深层卷积组合出人脸、车辆等<strong>高级语义特征</strong>。</p>
+    <h4>4. 卷积运算</h4>
+    <p>卷积是信号处理和图像处理中非常常用的技术。在深度学习中，卷积层的过滤器（卷积核）并不进行反转，本质上是执行<strong>逐元素乘法和加法运算</strong>。设 C 为卷积核，Large 为输入图像，Small 为输出图像，经过卷积（矩阵乘法）后，大图像被下采样为小图像：<strong>C × Large = Small</strong>。卷积核在输入图像上滑动，对应位置的元素相乘后累加，得到输出图像的一个像素点。</p>
+    <p><strong>K210 的 KPU 支持两种卷积内核：1×1 卷积和 3×3 卷积。</strong>其中<strong>深度可分卷积（Depthwise Separable Convolution）</strong>是一种高效的卷积方式，分两步完成：第一步，每个卷积核只与输入层的一个通道卷积（不使用所有通道），得到对应的特征图；第二步，应用 1×1 卷积扩展通道深度。深度可分卷积大幅减少了计算量，是许多轻量级 MobileNet 类模型在嵌入式平台高效运行的关键。</p>
+    <h4>5. 池化、激活与全连接</h4>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:18%">运算</th><th>作用与要点</th></tr>
+      <tr><td class="c"><strong>池化</strong></td><td>不改变深度但缩小矩阵大小（高分辨率→低分辨率）；降低空间尺寸减少计算量、扩大感受野、防止过拟合；常见最大池化与平均池化</td></tr>
+      <tr><td class="c"><strong>激活</strong></td><td>为网络引入<strong>非线性</strong>；非线性建模 + 构建稀疏矩阵；常用 ReLU、Sigmoid、Tanh；KPU 支持任意形式的激活函数</td></tr>
+      <tr><td class="c"><strong>全连接</strong></td><td>把特征图展开（flatten）映射为最终输出；图像分类通常配合 <strong>Softmax</strong> 输出每个类别的概率</td></tr>
+    </table>
+    </div>
+    <h4>6. 目标检测与 YOLO</h4>
+    <p>目标检测是图像识别的核心任务，<strong>K210 的 KPU 上主要运行 YOLO（You Only Look Once，只看一次）框架</strong>的目标检测算法。YOLO 的核心思想是<strong>把目标检测看作回归问题</strong>，直接在整幅图像上预测目标的位置（边界框）和类别，一次性输出所有检测结果。相比传统的滑窗法，YOLO 速度快得多，非常适合在 K210 这类嵌入式低功耗平台上实时运行。</p>
+    <div class="note"><strong>记忆锚点：</strong>卷积提特征、池化降尺寸、激活加非线性、全连接出结果；YOLO"只看一次"出框 + 类别，适合嵌入式。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t1k3">
+  <div class="leaf-head">
+    <span class="tag k">知识活页</span><span class="id">M10-T1-K3</span>
+    <h3>KPU 加速器与工具链</h3>
+    <span class="time">约 20 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>1. KPU 的功能</h4>
+    <p><strong>KPU（Knowledge Processing Unit，知识处理单元）</strong>是 K210 芯片内部的一个<strong>神经网络处理器</strong>，它可以在低功耗的情况下实现卷积神经网络计算，<strong>实时获取被检测目标的大小、坐标和种类</strong>，对人脸或者物体进行检测和分类。简单来说，KPU 能加载和运行不同的神经网络模型，实现各种机器视觉功能。</p>
+    <p>KPU 相当于 K210 芯片中的<strong>"GPU"（显卡）</strong>，本质是实现高速的图像数据运算。它内置<strong>卷积（Convolution）、批归一化（Batch Normalization，BN）、激活（Activation）、池化（Pooling）</strong>运算单元，可以对人脸或物体进行实时检测。</p>
+    <h4>2. KPU 的特点</h4>
+    <div class="steps">
+      <div class="step">支持主流训练框架按照特定限制规则训练出来的<strong>定点化模型</strong>，对网络层数无直接限制</div>
+      <div class="step">支持<strong>每层卷积神经网络参数单独配置</strong>，包括输入输出通道数目、输入输出行宽列高</div>
+      <div class="step">支持两种卷积内核：<strong>1×1 和 3×3</strong></div>
+      <div class="step">支持<strong>任意形式的激活函数</strong></div>
+      <div class="step">实时工作时最大支持神经网络参数大小为 <strong>5.5MiB 到 5.9MiB</strong></div>
+      <div class="step">非实时工作时最大支持网络参数大小为 <strong>（Flash 容量 - 软件体积）</strong></div>
+    </div>
+    <h4>3. 模型编译器与 nncase</h4>
+    <p>使用 KPU 时，必须结合<strong>模型编译器（Model Compiler）</strong>。K210 目前支持的深度学习模型类型有 <strong>TensorFlow、TensorFlow Lite（tflite）、Caffe1.0 以及 ONNX</strong>，并且需要借助专门工具来转换。</p>
+    <p><strong>nncase</strong>（https://github.com/kendryte/nncase）是 K210 官方提供的模型转换工具，它用来将训练好的模型转换成 KPU 能够识别的 <strong>kmodel 格式文件</strong>。当 K210 运行 C 代码时，能够加载 6MB 左右的模型；当运行 MaixPy 时，能够加载 3MB 左右的模型。</p>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:22%">格式</th><th>说明</th></tr>
+      <tr><td class="c"><code class="inline">kmodel</code></td><td>nncase 转换后的神经网络模型文件，是 KPU 运行所需的格式</td></tr>
+      <tr><td class="c"><code class="inline">kfpkg</code></td><td>由 flash-list.json 文本文件（记录固件和模型烧录地址）、.bin 固件文件、其他二进制文件组成的打包文件，用于代码与模型分开烧录</td></tr>
+    </table>
+    </div>
+    <h4>4. 与 KPU 相关的函数（头文件 kpu.h）</h4>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:36%">API</th><th>作用</th></tr>
+      <tr><td><code class="inline">kpu_single_task_init / deinit</code></td><td>初始化 / 反初始化单任务 KPU</td></tr>
+      <tr><td><code class="inline">kpu_model_load_from_buffer</code></td><td>从内存缓冲区加载 kmodel 模型</td></tr>
+      <tr><td><code class="inline">kpu_load_kmodel</code></td><td>加载 kmodel 模型文件到 KPU 任务句柄</td></tr>
+      <tr><td><code class="inline">kpu_model_free</code></td><td>释放模型占用的内存</td></tr>
+      <tr><td><code class="inline">kpu_run_kmodel</code></td><td>将待处理图像数据送入 KPU 运行模型</td></tr>
+      <tr><td><code class="inline">kpu_get_output</code></td><td>获取 KPU 推理输出的结果数据（如特征值、检测框坐标等）</td></tr>
+      <tr><td><code class="inline">kpu_start</code></td><td>启动 KPU</td></tr>
+    </table>
+    </div>
+    <div class="note"><strong>记忆锚点：</strong>实际编程流程：加载 kmodel → 获取摄像头当前帧 → 调用 kpu_run_kmodel → 获取输出。模型先用 nncase 转换，再随程序加载。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t1a1">
+  <div class="leaf-head">
+    <span class="tag a">活动活页</span><span class="id">M10-T1-A1</span>
+    <h3>活动：概念梳理与随堂检测</h3>
+    <span class="time">约 15 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>活动一：关系图填写（个人完成）</h4>
+    <p>根据 K1–K3 活页，填写下表（每空 1 分）：</p>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:34%">概念</th><th style="width:30%">定位</th><th>一句话说明</th></tr>
+      <tr><td class="c">人工智能（AI）</td><td class="c"></td><td class="c">让机器像人一样思考</td></tr>
+      <tr><td class="c">机器学习（ML）</td><td class="c"></td><td class="c">从数据学习规律</td></tr>
+      <tr><td class="c">深度学习（DL）</td><td class="c"></td><td class="c">多层神经网络</td></tr>
+      <tr><td class="c">KPU</td><td class="c"></td><td class="c">K210 内部神经网络处理器</td></tr>
+    </table>
+    </div>
+    <div class="note"><strong>提示：</strong>AI 是目标 / ML 是实现手段 / DL 是核心实现方式。完成后与同桌互对答案。</div>
+    <h4>活动二：随堂检测（自测）</h4>
+    <div class="quiz">
+      <div class="qitem">
+        <div class="q"><span class="qno">1</span>AI、ML、DL 三者是什么关系？</div>
+        <div class="ans">答案：AI 是目标，ML 是实现手段，DL 是 ML 中最核心最强大的实现方式。</div>
+        <button class="q-btn" onclick="toggleAns(this)">查看答案</button>
+      </div>
+      <div class="qitem">
+        <div class="q"><span class="qno">2</span>一个神经元的三个基本结构是什么？它如何计算输出？</div>
+        <div class="ans">答案：权重、偏置、激活函数；输入×权重求和 + 偏置，再经激活函数输出。</div>
+        <button class="q-btn" onclick="toggleAns(this)">查看答案</button>
+      </div>
+      <div class="qitem">
+        <div class="q"><span class="qno">3</span>CNN 的四大类核心运算是什么？各自的作用？</div>
+        <div class="ans">答案：卷积（提取特征）、池化（降尺寸防过拟合）、激活（加非线性）、全连接（输出结果）。</div>
+        <button class="q-btn" onclick="toggleAns(this)">查看答案</button>
+      </div>
+      <div class="qitem">
+        <div class="q"><span class="qno">4</span>K210 的 KPU 支持哪两种卷积内核？</div>
+        <div class="ans">答案：1×1 卷积和 3×3 卷积。</div>
+        <button class="q-btn" onclick="toggleAns(this)">查看答案</button>
+      </div>
+      <div class="qitem">
+        <div class="q"><span class="qno">5</span>nncase 是什么？kmodel 和 kfpkg 各是什么？</div>
+        <div class="ans">答案：nncase 是官方模型转换工具，把训练好的模型转成 kmodel；kmodel 是 KPU 运行的模型文件，kfpkg 是固件与模型分开烧录的打包文件。</div>
+        <button class="q-btn" onclick="toggleAns(this)">查看答案</button>
+      </div>
+      <div class="qitem">
+        <div class="q"><span class="qno">6</span>KPU 上主要运行什么框架的目标检测算法？核心思想是什么？</div>
+        <div class="ans">答案：YOLO（You Only Look Once）；把目标检测看作回归问题，整幅图上一次输出边界框与类别。</div>
+        <button class="q-btn" onclick="toggleAns(this)">查看答案</button>
+      </div>
+    </div>
+    <div class="done-row"><input type="checkbox" id="done-t1" class="doneck" data-key="done-t1"><label for="done-t1">我已完成任务 1 的学习并自测通过（勾选后本任务标记完成）</label></div>
+  </div>
+</div>
+
+<div class="leaf" id="t2">
+  <div class="leaf-head">
+    <span class="tag m">任务 2</span><span class="id">M10-T2-00</span>
+    <h3>任务卡：基于 KPU 的图像滤波实验</h3>
+    <span class="time">1 学时</span>
+  </div>
+  <div class="leaf-body">
+    <h4>任务情境</h4>
+    <p>理论落地：<strong>让 KPU 对摄像头实时画面做 3×3 卷积滤波，按中间按键在"原始 → 边沿检测 → 锐化 → 浮雕"四种模式间切换。</strong>工程由 <code class="inline">main.c + l_conv.c/h + camera/ + lcd/</code> 组成。重点读懂四种卷积核数据与 main.c 的"采集 → KPU 运算 → 转格式 → 显示 → 按键切换"循环。</p>
+    <div class="taskcard">
+      <div class="tc"><div class="tc-k">学习目标</div><div class="tc-v">读懂 KPU 滤波代码并完成实验</div></div>
+      <div class="tc"><div class="tc-k">工程文件</div><div class="tc-v">main.c + l_conv.c/h + camera</div></div>
+      <div class="tc"><div class="tc-k">任务成果</div><div class="tc-v">按键切换四种滤波效果</div></div>
+      <div class="tc"><div class="tc-k">评价方式</div><div class="tc-v">成果展示 + 流程口述</div></div>
+    </div>
+    <div class="tip"><strong>学习方法：</strong>本工程没有加载 kmodel 大模型，而是直接用 KPU 跑<strong>手工设置的卷积核</strong>——这让你能"看见"卷积是怎么改图像的：换一组 9 个数字，画面效果就变了。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t2k1">
+  <div class="leaf-head">
+    <span class="tag k">知识活页</span><span class="id">M10-T2-K1</span>
+    <h3>工程结构与主程序解析</h3>
+    <span class="time">约 20 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>1. 代码结构</h4>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:26%">文件/目录</th><th>作用</th></tr>
+      <tr><td><code class="inline">camera/</code></td><td>与摄像头有关的驱动和功能函数（dvp_cam、ov2640）</td></tr>
+      <tr><td><code class="inline">lcd/</code></td><td>与液晶显示屏有关的驱动和功能函数</td></tr>
+      <tr><td><code class="inline">pin_config.h</code></td><td>定义引脚映射关系（LCD、摄像头、按键）</td></tr>
+      <tr><td><code class="inline">l_conv.c / l_conv.h</code></td><td>用于设置和配置运算的参数（滤波器/卷积核）</td></tr>
+      <tr><td><code class="inline">main.c</code></td><td>主程序：采集 → KPU 运算 → 显示 → 按键切换</td></tr>
+    </table>
+    </div>
+    <h4>2. 四种卷积核（conv_data_demo[4]）</h4>
+    <p>每组卷积核是 <strong>RGB 三通道各一个 3×3 核</strong>（9 个数 × 3 通道），KPU 用它对每个像素做 3×3 邻域加权求和：</p>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:20%">模式</th><th style="width:44%">卷积核（单通道 3×3）</th><th>效果</th></tr>
+      <tr><td class="c"><strong>origin</strong></td><td><code class="inline">0 0 0 / 0 1 0 / 0 0 0</code></td><td>单位核，输出 = 原像素，保持原始画面</td></tr>
+      <tr><td class="c"><strong>edge</strong></td><td><code class="inline">-1 -1 -1 / -1 8 -1 / -1 -1 -1</code></td><td>拉普拉斯算子，提取轮廓与边缘</td></tr>
+      <tr><td class="c"><strong>sharp</strong></td><td><code class="inline">-1 -1 -1 / -1 9 -1 / -1 -1 -1</code></td><td>锐化算子，增强细节对比度</td></tr>
+      <tr><td class="c"><strong>relievo</strong></td><td><code class="inline">2 0 0 / 0 -1 0 / 0 0 -1</code></td><td>浮雕算子，产生立体浮雕视觉效果</td></tr>
+    </table>
+    </div>
+    <h4>3. main.c 完整源码</h4>
+    <pre class="code"><span class="pp">#include</span> <span class="hd">&lt;stdio.h&gt;</span>
+<span class="pp">#include</span> <span class="hd">&lt;string.h&gt;</span>
+<span class="pp">#include</span> <span class="hd">&lt;unistd.h&gt;</span>
+<span class="pp">#include</span> <span class="hd">&lt;stdlib.h&gt;</span>
+<span class="pp">#include</span> <span class="hd">"dvp.h"</span>
+<span class="pp">#include</span> <span class="hd">"fpioa.h"</span>
+<span class="pp">#include</span> <span class="hd">"lcd.h"</span>
+<span class="pp">#include</span> <span class="hd">"ov2640.h"</span>
+<span class="pp">#include</span> <span class="hd">"plic.h"</span>
+<span class="pp">#include</span> <span class="hd">"sysctl.h"</span>
+<span class="pp">#include</span> <span class="hd">"uarths.h"</span>
+<span class="pp">#include</span> <span class="hd">"st7789.h"</span>
+<span class="pp">#include</span> <span class="hd">"dvp_cam.h"</span>
+<span class="pp">#include</span> <span class="hd">"utils.h"</span>
+<span class="pp">#include</span> <span class="hd">"kpu.h"</span>
+<span class="pp">#include</span> <span class="hd">"l_conv.h"</span>
+<span class="pp">#include</span> <span class="hd">"sleep.h"</span>
+<span class="pp">#include</span> <span class="hd">"encoding.h"</span>
+<span class="pp">#include</span> <span class="hd">"gpiohs.h"</span>
+<span class="pp">#include</span> <span class="hd">"pin_config.h"</span>
+
+<span class="kw">int</span> <span class="fn">key_flag</span> = <span class="num">0</span>;
+<span class="fn">gpio_pin_value_t</span> <span class="fn">key_state</span> = <span class="num">1</span>;
+<span class="fn">volatile</span> <span class="fn">uint8_t</span> <span class="fn">g_ai_done_flag</span>;
+<span class="fn">uint8_t</span> <span class="fn">g_ai_buf_out</span>[<span class="num">320</span> * <span class="num">240</span> * <span class="num">3</span>] <span class="fn">__attribute__</span>((<span class="fn">aligned</span>(<span class="num">128</span>)));
+
+<span class="c">/* KPU完成中断回调 */</span>
+<span class="kw">static</span> <span class="kw">int</span> <span class="fn">kpu_done</span>(<span class="kw">void</span> *<span class="fn">ctx</span>)
+{
+    <span class="fn">g_ai_done_flag</span> = <span class="num">1</span>;
+    <span class="kw">return</span> <span class="num">0</span>;
+}
+
+<span class="c">// 卷积 池化 批归一化 激活 输出偏置</span>
+<span class="fn">float</span> <span class="fn">conv_data</span>[<span class="num">9</span>*<span class="num">3</span>*<span class="num">3</span>] = { <span class="c">//origin 单位核，保持原图</span>
+<span class="num">0</span>,<span class="num">0</span>,<span class="num">0</span>,<span class="num">0</span>,<span class="num">1</span>,<span class="num">0</span>,<span class="num">0</span>,<span class="num">0</span>,<span class="num">0</span>,  <span class="c">// R 通道</span>
+<span class="num">0</span>,<span class="num">0</span>,<span class="num">0</span>,<span class="num">0</span>,<span class="num">1</span>,<span class="num">0</span>,<span class="num">0</span>,<span class="num">0</span>,<span class="num">0</span>,  <span class="c">// G 通道</span>
+<span class="num">0</span>,<span class="num">0</span>,<span class="num">0</span>,<span class="num">0</span>,<span class="num">1</span>,<span class="num">0</span>,<span class="num">0</span>,<span class="num">0</span>,<span class="num">0</span>}; <span class="c">// B 通道</span>
+
+<span class="kw">int</span> <span class="fn">demo_index</span> = <span class="num">0</span>;
+<span class="kw">const</span> <span class="fn">float</span> <span class="fn">conv_data_demo</span>[<span class="num">4</span>][<span class="num">9</span>*<span class="num">3</span>*<span class="num">3</span>] = {
+{ <span class="c">//origin 单位核</span> ... },
+{ <span class="c">//edge 拉普拉斯边沿检测</span> ... },
+{ <span class="c">//sharp 锐化</span> ... },
+{ <span class="c">//relievo 浮雕</span> ... }
+};
+
+<span class="c">/**
+* @brief 硬件初始化：按键 + LCD + DVP 摄像头
+*/</span>
+<span class="kw">void</span> <span class="fn">hardware_init</span>(<span class="kw">void</span>)
+{
+    <span class="c">/* 按键 */</span>
+    <span class="fn">fpioa_set_function</span>(<span class="fn">PIN_KEYPAD_MIDDLE</span>, <span class="fn">FUNC_KEYPAD_MIDDLE</span>);
+    <span class="c">/* LCD */</span>
+    <span class="fn">fpioa_set_function</span>(<span class="fn">PIN_LCD_CS</span>,  <span class="fn">FUNC_LCD_CS</span>);
+    <span class="fn">fpioa_set_function</span>(<span class="fn">PIN_LCD_RST</span>, <span class="fn">FUNC_LCD_RST</span>);
+    <span class="fn">fpioa_set_function</span>(<span class="fn">PIN_LCD_RS</span>,  <span class="fn">FUNC_LCD_RS</span>);
+    <span class="fn">fpioa_set_function</span>(<span class="fn">PIN_LCD_WR</span>,  <span class="fn">FUNC_LCD_WR</span>);
+    <span class="c">/* DVP camera */</span>
+    <span class="fn">fpioa_set_function</span>(<span class="fn">PIN_DVP_RST</span>,   <span class="fn">FUNC_CMOS_RST</span>);
+    <span class="fn">fpioa_set_function</span>(<span class="fn">PIN_DVP_PWDN</span>,  <span class="fn">FUNC_CMOS_PWDN</span>);
+    <span class="fn">fpioa_set_function</span>(<span class="fn">PIN_DVP_XCLK</span>,  <span class="fn">FUNC_CMOS_XCLK</span>);
+    <span class="fn">fpioa_set_function</span>(<span class="fn">PIN_DVP_VSYNC</span>, <span class="fn">FUNC_CMOS_VSYNC</span>);
+    <span class="fn">fpioa_set_function</span>(<span class="fn">PIN_DVP_HSYNC</span>, <span class="fn">FUNC_CMOS_HREF</span>);
+    <span class="fn">fpioa_set_function</span>(<span class="fn">PIN_DVP_PCLK</span>,  <span class="fn">FUNC_CMOS_PCLK</span>);
+    <span class="fn">fpioa_set_function</span>(<span class="fn">PIN_DVP_SCL</span>,   <span class="fn">FUNC_SCCB_SCLK</span>);
+    <span class="fn">fpioa_set_function</span>(<span class="fn">PIN_DVP_SDA</span>,   <span class="fn">FUNC_SCCB_SDA</span>);
+    <span class="fn">sysctl_set_spi0_dvp_data</span>(<span class="num">1</span>);
+}
+
+<span class="c">/* RGB888 → RGB565（KPU输出RGB888，LCD只支持RGB565） */</span>
+<span class="kw">void</span> <span class="fn">rgb888_to_565</span>(<span class="fn">uint8_t</span> *<span class="fn">src_r</span>, <span class="fn">uint8_t</span> *<span class="fn">src_g</span>, <span class="fn">uint8_t</span> *<span class="fn">src_b</span>, <span class="fn">uint16_t</span> *<span class="fn">dst</span>, <span class="fn">uint32_t</span> <span class="fn">len</span>)
+{
+    <span class="fn">uint32_t</span> <span class="fn">i</span>;
+    <span class="kw">for</span> (<span class="fn">i</span> = <span class="num">0</span>; <span class="fn">i</span> &lt; <span class="fn">len</span>; <span class="fn">i</span> += <span class="num">2</span>)
+    {
+        <span class="fn">dst</span>[<span class="fn">i</span>] = (((<span class="fn">uint16_t</span>)(<span class="fn">src_r</span>[<span class="fn">i</span> + <span class="num">1</span>] &gt;&gt; <span class="num">3</span>)) &lt;&lt; <span class="num">11</span>) +
+            (((<span class="fn">uint16_t</span>)<span class="fn">src_g</span>[<span class="fn">i</span> + <span class="num">1</span>] &gt;&gt; <span class="num">2</span>) &lt;&lt; <span class="num">5</span>) +
+            (((<span class="fn">uint16_t</span>)<span class="fn">src_b</span>[<span class="fn">i</span> + <span class="num">1</span>]) &gt;&gt; <span class="num">3</span>);
+        <span class="fn">dst</span>[<span class="fn">i</span> + <span class="num">1</span>] = ...;
+    }
+}
+
+<span class="c">/**
+* @brief 主函数，程序的入口
+*/</span>
+<span class="kw">int</span> <span class="fn">main</span>(<span class="kw">void</span>)
+{
+    <span class="fn">hardware_init</span>();
+    <span class="fn">io_set_power</span>();
+    <span class="c">/* 时钟：PLL0 800MHz / PLL1 300MHz / PLL2 45.1584MHz */</span>
+    <span class="fn">sysctl_pll_set_freq</span>(<span class="fn">SYSCTL_PLL0</span>, <span class="num">800000000UL</span>);
+    <span class="fn">sysctl_pll_set_freq</span>(<span class="fn">SYSCTL_PLL1</span>, <span class="num">300000000UL</span>);
+    <span class="fn">sysctl_pll_set_freq</span>(<span class="fn">SYSCTL_PLL2</span>, <span class="num">45158400UL</span>);
+    <span class="fn">uarths_init</span>();
+    <span class="fn">plic_init</span>();
+    <span class="fn">sysctl_enable_irq</span>();
+
+    <span class="fn">printf</span>(<span class="str">"LCD init\r\n"</span>);
+    <span class="fn">lcd_init</span>();
+    <span class="fn">lcd_draw_picture_half</span>(<span class="num">0</span>, <span class="num">0</span>, <span class="num">320</span>, <span class="num">240</span>, <span class="fn">gImage_logo</span>);
+    <span class="fn">sleep</span>(<span class="num">1</span>);
+
+    <span class="fn">printf</span>(<span class="str">"ov2640 init\r\n"</span>);
+    <span class="fn">ov2640_init</span>();
+    <span class="fn">init_key</span>();  <span class="c">/* 按键初始化 */</span>
+
+    <span class="c">/* KPU任务初始化：设置3×3卷积核 */</span>
+    <span class="fn">kpu_task_t</span> <span class="fn">task</span>;
+    <span class="fn">conv_init</span>(&amp;<span class="fn">task</span>, <span class="fn">CONV_3_3</span>, <span class="fn">conv_data</span>);
+    <span class="fn">printf</span>(<span class="str">"KPU TASK INIT, FREE MEM: %ld\r\n"</span>, <span class="fn">get_free_heap_size</span>());
+    <span class="fn">printf</span>(<span class="str">"Please press the keypad to switch mode\r\n"</span>);
+
+    <span class="kw">while</span> (<span class="num">1</span>)
+    {
+        <span class="kw">while</span> (<span class="fn">g_dvp_finish_flag</span> == <span class="num">0</span>)  <span class="c">/* 等摄像头一帧完成 */</span>
+            ;
+        <span class="c">/* KPU 运算：输入 g_ai_buf_in，输出 g_ai_buf_out */</span>
+        <span class="fn">conv_run</span>(&amp;<span class="fn">task</span>, <span class="fn">g_ai_buf_in</span>, <span class="fn">g_ai_buf_out</span>, <span class="fn">kpu_done</span>);
+        <span class="kw">while</span> (!<span class="fn">g_ai_done_flag</span>)  <span class="c">/* 等KPU算完 */</span>
+            ;
+        <span class="fn">g_ai_done_flag</span> = <span class="num">0</span>;
+        <span class="fn">g_dvp_finish_flag</span> = <span class="num">0</span>;
+
+        <span class="c">/* RGB888 → RGB565 */</span>
+        <span class="fn">rgb888_to_565</span>(<span class="fn">g_ai_buf_out</span>, <span class="fn">g_ai_buf_out</span> + <span class="num">320</span> * <span class="num">240</span>, <span class="fn">g_ai_buf_out</span> + <span class="num">320</span> * <span class="num">240</span> * <span class="num">2</span>,
+            (<span class="fn">uint16_t</span> *)<span class="fn">g_display_buf</span>, <span class="num">320</span> * <span class="num">240</span>);
+        <span class="fn">draw_text</span>();  <span class="c">/* 左上角写当前模式 */</span>
+        <span class="fn">lcd_draw_picture</span>(<span class="num">0</span>, <span class="num">0</span>, <span class="num">320</span>, <span class="num">240</span>, <span class="fn">g_display_buf</span>);
+
+        <span class="kw">if</span> (<span class="fn">key_flag</span>)  <span class="c">/* 使用按键选择的卷积核 */</span>
+        {
+            <span class="kw">if</span> (<span class="fn">key_state</span> == <span class="num">0</span>)  <span class="c">/* 按下 */</span>
+            {
+                <span class="fn">msleep</span>(<span class="num">20</span>);  <span class="c">/* 延迟去抖 */</span>
+                <span class="fn">key_flag</span> = <span class="num">0</span>;
+                <span class="fn">demo_index</span> = (<span class="fn">demo_index</span> + <span class="num">1</span>) % <span class="num">4</span>;
+                <span class="fn">memcpy</span>((<span class="kw">void</span> *)<span class="fn">conv_data</span>, (<span class="kw">void</span> *)(<span class="fn">conv_data_demo</span>[<span class="fn">demo_index</span>]),
+                    <span class="num">3</span> * <span class="num">3</span> * <span class="num">3</span> * <span class="num">3</span> * <span class="fn">sizeof</span>(<span class="fn">float</span>));
+                <span class="fn">conv_init</span>(&amp;<span class="fn">task</span>, <span class="fn">CONV_3_3</span>, <span class="fn">conv_data</span>);  <span class="c">/* 重新设置卷积核 */</span>
+            }
+            <span class="kw">else</span>
+            {
+                <span class="fn">msleep</span>(<span class="num">20</span>);
+                <span class="fn">key_flag</span> = <span class="num">0</span>;
+            }
+        }
+    }
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+    <h4>4. 主流程解读</h4>
+    <div class="steps">
+      <div class="step"><b>硬件准备：</b>映射按键 + LCD + 摄像头引脚；BANK6/7 设 1.8V；PLL 三路时钟；plic_init 使能中断。</div>
+      <div class="step"><b>显示欢迎：</b>lcd_init → 显示 logo 1 秒 → ov2640_init → init_key。</div>
+      <div class="step"><b>KPU 初始化：</b><code class="inline">conv_init(&task, CONV_3_3, conv_data)</code>——创建 KPU 任务并装入 3×3 卷积核；串口打印剩余内存。</div>
+      <div class="step"><b>采集与运算：</b>等 g_dvp_finish_flag（摄像头帧完成）→ <code class="inline">conv_run</code> 把 g_ai_buf_in 送入 KPU 卷积 → 等 g_ai_done_flag（KPU 完成中断）。</div>
+      <div class="step"><b>转换与显示：</b>rgb888_to_565 转 RGB565 → draw_text 左上角写模式名 → lcd_draw_picture 显示。</div>
+      <div class="step"><b>按键切换：</b>按下中间按键（去抖）→ demo_index+1 取模 4 → memcpy 换卷积核 → conv_init 重新装入 → 画面切换到下一种滤波。</div>
+    </div>
+    <div class="note"><strong>教材与工程差异：</strong>教材流程把"KPU 运算/转换/显示/按键"编号为步骤 9~13；工程源码实现一致，其中四种模式名分别为 origin / edge / sharp / relievo。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t2k2">
+  <div class="leaf-head">
+    <span class="tag k">知识活页</span><span class="id">M10-T2-K2</span>
+    <h3>关键代码详解</h3>
+    <span class="time">约 20 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>1. conv_init 与 conv_run（l_conv.c）</h4>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:30%">函数</th><th>作用</th></tr>
+      <tr><td><code class="inline">conv_init(task, conv_x_x, conv_data)</code></td><td>把卷积核装入 KPU 任务：CONV_1_1（1×1）或 CONV_3_3（3×3），并设置输入输出尺寸、通道等参数</td></tr>
+      <tr><td><code class="inline">conv_run(task, img_src, img_dst, callback)</code></td><td>启动 KPU 运算：把输入图像送入，结果写入输出缓冲，运算完成触发回调</td></tr>
+    </table>
+    </div>
+    <h4>2. 中断与标志</h4>
+    <p><code class="inline">kpu_done</code> 是 KPU 运算完成的中断回调，只做一件事：<code class="inline">g_ai_done_flag = 1</code>；主循环等待该标志后再继续——和模块九 DVP"帧完成置标志"是同一个套路。</p>
+    <div class="flow">
+      <div class="fnode"><div class="f-t">DVP 帧完成</div><div class="f-s">g_dvp_finish_flag=1</div></div>
+      <div class="farr">→</div>
+      <div class="fnode"><div class="f-t">conv_run</div><div class="f-s">KPU 卷积运算</div></div>
+      <div class="farr">→</div>
+      <div class="fnode hl"><div class="f-t">KPU 完成</div><div class="f-s">g_ai_done_flag=1</div></div>
+      <div class="farr">→</div>
+      <div class="fnode"><div class="f-t">转换显示</div><div class="f-s">RGB565 + 模式名 + LCD</div></div>
+    </div>
+    <h4>3. RGB888 → RGB565</h4>
+    <p>KPU 输出的 AI 数据是 <strong>RGB888</strong>（每像素 3 字节），而 LCD 只支持 <strong>RGB565</strong>（每像素 2 字节）。转换即<strong>截取高位</strong>：R 取高 5 位（>>3）、G 取高 6 位（>>2）、B 取高 5 位（>>3），再按 16 位拼装。这就是实验总结第 (2) 条说的"数据格式不一样，需要转换后才能正常显示"。</p>
+    <h4>4. 按键切换与卷积核重装</h4>
+    <p>按键中断置 <code class="inline">key_flag</code>；主循环里检测到按下后 <strong>msleep(20) 去抖</strong>，<code class="inline">demo_index = (demo_index+1) % 4</code> 轮换模式，<code class="inline">memcpy</code> 把 conv_data_demo[demo_index] 的 27 个 float 复制到 conv_data，再 <code class="inline">conv_init</code> 重新装入 KPU 任务——<strong>改卷积核 → 改图像效果</strong>。</p>
+    <div class="note"><strong>实验总结：</strong>① KPU 可以处理图像，产生不一样的视觉效果；② KPU 与 LCD 的数据格式不一样（KPU 输出 RGB888，LCD 要求 RGB565），需要转换后才能正常显示；③ 卷积、池化、激活等神经网络核心运算，是 KPU 完成各类图像识别任务的基础。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t2w1">
+  <div class="leaf-head">
+    <span class="tag w">工作活页</span><span class="id">M10-T2-W1</span>
+    <h3>编译与烧录</h3>
+    <span class="time">约 15 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>任务：把工程编译成固件并烧录进 K210</h4>
+    <div class="steps">
+      <div class="step"><b>复制工程到 SDK。</b>把课程资料中的 <code class="inline">kpu</code> 文件夹整体复制到 SDK 的 <code class="inline">src</code> 目录下，例如 <code class="inline">D:\K210\SDK\kendryte-standalone-sdk-develop\src\kpu</code>（以你自己的 SDK 安装路径为准）。</div>
+      <div class="step"><b>打开终端。</b>在 VSCode 中打开 SDK 工程，点击「终端 → 新建终端」，进入 SDK 根目录下的 <code class="inline">build</code> 目录。</div>
+      <div class="step"><b>执行 CMake 配置。</b><div class="cmdline">cmake .. -DPROJ=kpu -G "MinGW Makefiles"</div>等待配置完成（看到 "Generating done" 即成功）。</div>
+      <div class="step"><b>执行编译。</b><div class="cmdline">make</div>输出编译、链接、生成 .bin 的日志（"Built target kpu"）即成功。</div>
+      <div class="step"><b>确认固件。</b>确认 build 目录下存在 <code class="inline">kpu.bin</code>。</div>
+      <div class="step"><b>烧录。</b>用 Type-C 数据线连接开发板与电脑，打开 kflash 烧录工具，选择对应的设备（CH340 串口），Firmware 选择 <code class="inline">kpu.bin</code>，点击 Flash 烧录。</div>
+    </div>
+    <div class="warnbox"><strong>常见报错：</strong>kpu 工程包含 camera/lcd 子目录与 l_conv.c、data.h，务必整个 kpu 文件夹复制进 src 目录，且 <code class="inline">-DPROJ=kpu</code> 拼写正确。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t2w2">
+  <div class="leaf-head">
+    <span class="tag w">工作活页</span><span class="id">M10-T2-W2</span>
+    <h3>现象验证与故障排查</h3>
+    <span class="time">约 20 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>1. 预期实验现象</h4>
+    <div class="note"><strong>现象描述：</strong>烧录固件完成后，系统会自动弹出一个终端窗口并打印初始化信息。LCD 显示器上已经显示摄像头当前采集的画面，<strong>左上角还有一个 "origin" 的字样</strong>。按下开发板中间的按键，画面会依次在<strong>原始画面（origin）→ 边沿检测（edge）→ 锐化（sharp）→ 浮雕（relievo）</strong>等模式之间切换，不同的滤波器产生完全不同的视觉效果。</div>
+    <div class="cycle">
+      <div class="cy"><div class="cy-t">origin</div><div class="screen-demo"><div class="scr-inner">原图</div></div><div>单位核 · 原画面</div></div>
+      <div class="cy"><div class="cy-t">edge</div><div class="screen-demo"><div class="scr-inner scr-edge">轮廓</div></div><div>拉普拉斯 · 边沿检测</div></div>
+      <div class="cy"><div class="cy-t">sharp</div><div class="screen-demo"><div class="scr-inner scr-sharp">细节</div></div><div>锐化算子</div></div>
+      <div class="cy"><div class="cy-t">relievo</div><div class="screen-demo"><div class="scr-inner scr-rel">立体</div></div><div>浮雕算子</div></div>
+    </div>
+    <h4>2. 现象与代码对应（口述自检）</h4>
+    <p>上电 → LCD 显示 logo 1 秒 → ov2640_init → conv_init 装入 origin 核 → 循环：等帧 → conv_run 卷积 → 等 KPU 完成 → RGB888→565 → draw_text 写 " origin " → 显示。按键按下 → 去抖 → demo_index+1 → memcpy 换核 → conv_init 重装 → 画面切换。</p>
+    <h4>3. 故障排查表</h4>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:26%">现象</th><th style="width:36%">可能原因</th><th>处理方法</th></tr>
+      <tr><td>LCD 无画面/花屏</td><td>摄像头或 DVP 问题 / LCD 未初始化</td><td>同模块九排查：引脚映射、PLL2 时钟、lcd_init</td></tr>
+      <tr><td>画面只有原图，按键无效</td><td>init_key 未调用 / 按键引脚映射错误 / 中断未使能</td><td>确认 PIN_KEYPAD_MIDDLE 映射与 plic_init、sysctl_enable_irq</td></tr>
+      <tr><td>画面颜色异常</td><td>RGB888→RGB565 转换错误 / 显示缓冲地址不对</td><td>核对 rgb888_to_565 移位；确认 g_display_buf 与 lcd_draw_picture</td></tr>
+      <tr><td>模式不切换/切换跳跃</td><td>去抖不足 / demo_index 取模错误</td><td>确认 msleep(20) 去抖与 (demo_index+1)%4 逻辑</td></tr>
+      <tr><td>串口无 "KPU TASK INIT"</td><td>kpu 相关文件未编译进工程</td><td>确认 l_conv.c、data.h 在 kpu 目录且 -DPROJ=kpu 正确</td></tr>
+    </table>
+    </div>
+    <h4>4. 实验检查清单</h4>
+    <ul class="checklist">
+      <li><input type="checkbox" id="ck1"><label for="ck1">kpu 工程已复制到 SDK 的 src/kpu 目录，编译生成 kpu.bin</label></li>
+      <li><input type="checkbox" id="ck2"><label for="ck2">kflash 烧录完成，LCD 显示摄像头画面，左上角有 origin 字样</label></li>
+      <li><input type="checkbox" id="ck3"><label for="ck3">按中间按键画面依次切换 原始/边沿检测/锐化/浮雕 四种模式</label></li>
+      <li><input type="checkbox" id="ck4"><label for="ck4">串口打印 LCD init / ov2640 init / KPU TASK INIT 与剩余内存</label></li>
+      <li><input type="checkbox" id="ck5"><label for="ck5">能用"卷积核→KPU 运算→转 565→显示→按键换核"口头复述流程</label></li>
+    </ul>
+    <div class="done-row"><input type="checkbox" id="done-t2" class="doneck" data-key="done-t2"><label for="done-t2">我已完成任务 2 的实验并记录现象（勾选后本任务标记完成）</label></div>
+  </div>
+</div>
+
+<div class="leaf" id="eval">
+  <div class="leaf-head">
+    <span class="tag e">评价</span><span class="id">M10-E1</span>
+    <h3>模块十 · 神经网络加速器 KPU 评价量表</h3>
+    <span class="time">约 10 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <p>对照评价量表逐项自评（自己评）、互评（同桌评）、师评（教师评），在对应栏填 <strong>★</strong>（优秀 5-4 分 / 合格 3 分 / 待改进 2-1 分）。</p>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:7%">序号</th><th style="width:61%">评价维度</th><th style="width:10%">自评</th><th style="width:10%">互评</th><th>师评</th></tr>
+      <tr><td class="c">1</td><td>能说出 AI / ML / DL 三者关系与图像识别四类任务</td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
+      <tr><td class="c">2</td><td>能说出神经元三要素（权重、偏置、激活函数）与计算过程</td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
+      <tr><td class="c">3</td><td>能说出 CNN 的卷积、池化、激活、全连接的作用</td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
+      <tr><td class="c">4</td><td>能说出 KPU 的功能（相当于 K210 的 GPU）与六大特点</td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
+      <tr><td class="c">5</td><td>能说出 nncase、kmodel、kfpkg 的作用与 kpu.h 核心 API</td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
+      <tr><td class="c">6</td><td>能读懂四种卷积核（origin/edge/sharp/relievo）与 conv_init/conv_run</td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
+      <tr><td class="c">7</td><td>能独立完成 kpu 工程编译、烧录，按键切换四种滤波模式</td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
+      <tr><td class="c">8</td><td>理解 RGB888→RGB565 转换原因与"卷积核决定图像效果"原理</td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
+    </table>
+    </div>
+    <h4>课后反思（各写一句话）</h4>
+    <ul class="reflect">
+      <li>我学得最好的是：____________________</li>
+      <li>我还需要加强的是：____________________</li>
+      <li>我想对老师说：____________________</li>
+    </ul>
+  </div>
+</div>
+
+<div class="leaf" id="ext">
+  <div class="leaf-head">
+    <span class="tag x">拓展</span><span class="id">M10-X1</span>
+    <h3>拓展任务：让 KPU 滤波更好玩</h3>
+    <span class="time">选做</span>
+  </div>
+  <div class="leaf-body">
+    <p>完成必学内容后选做，对应修改工程源码、重新编译烧录，体会"改卷积核 → 改图像效果"。</p>
+    <div class="ext-item"><b>拓展 1：改卷积核做模糊效果。</b>把 edge 核改成均值模糊核（9 个数全为 1，或 1/9 归一化），烧录观察画面变模糊；再改成高斯核（中心大、四周小），对比两种模糊的差异。</div>
+    <div class="ext-item"><b>拓展 2：增加第五种模式。</b>在 conv_data_demo 数组里新增一组卷积核（如 Sobel 水平边缘核），把按键取模改成 5，验证循环切换。</div>
+    <div class="ext-item"><b>拓展 3：修改模式提示。</b>把 draw_text 里的模式名字符串与颜色改成中文或自己的名字，观察左上角显示变化（注意字符串占位长度）。</div>
+    <div class="ext-item"><b>拓展 4：叠加显示信息。</b>在显示循环里用 lcd_draw_string 叠加一行帧计数或 demo_index，体验"滤波 + 信息叠加"。</div>
+    <div class="ext-item"><b>拓展 5（进阶）：加载 kmodel 模型。</b>思考：本实验用的是手工卷积核，如果换成 nncase 转换出的 kmodel（如 YOLO 模型），KPU 就能做目标检测——这正是下一阶段"摄像头 + 模型 → 识别"的方向。</div>
+    <div class="note"><strong>完成标准：</strong>至少完成拓展 1-3 中的两个，并在活页空白处记录每种改动的现象；拓展 4-5 可作为小组探究课题。</div>
+  </div>
+</div>
+
+<footer class="foot">
+  <div class="f-inner">
+    <div><b>《图像识别技术》活页式教材 · 模块十 神经网络加速器 KPU（神经网络 · 卷积神经网络 · KPU处理器）</b> · 建议学时 2 学时</div>
+    <div>配套硬件：Kendryte K210 开发板 · 配套工程：kpu（main.c + l_conv.c + camera + lcd）</div>
+  </div>
+</footer>
+
+</main>
+
+<script>
+var PRFX = 'm10:';
+function toggleAns(btn){ var a = btn.previousElementSibling; if(a.classList.contains('ans')){ a.style.display = (a.style.display === 'block') ? 'none' : 'block'; btn.textContent = (a.style.display === 'block') ? '收起答案' : '查看答案'; } }
+var burgers = document.getElementById('burgerBtn'), mask = document.getElementById('tocMask'), toc = document.getElementById('toc');
+if (burgers) burgers.onclick = function(){ toc.classList.add('open'); mask.classList.add('open'); };
+if (mask) mask.onclick = function(){ toc.classList.remove('open'); mask.classList.remove('open'); };
+var printBtn = document.getElementById('printBtn');
+if (printBtn) printBtn.onclick = function(){ window.print(); };
+/* 侧边目录滚动高亮 */
+var links = toc ? toc.querySelectorAll('a') : [];
+var secs = [];
+links.forEach(function(a){ var id = a.getAttribute('href'); if(id && id.length > 1){ var el = document.querySelector(id); if(el) secs.push([el, a]); } });
+window.addEventListener('scroll', function(){
+  var y = window.scrollY + 120, cur = null;
+  secs.forEach(function(p){ if(p[0].offsetTop <= y) cur = p[1]; });
+  links.forEach(function(a){ a.classList.remove('active'); });
+  if(cur) cur.classList.add('active');
+}, {passive:true});
+/* 完成勾选持久化（localStorage 键前缀 m10:） */
+var cks = document.querySelectorAll('.doneck');
+cks.forEach(function(c){ var k = PRFX + c.getAttribute('data-key'); try { c.checked = localStorage.getItem(k) === '1'; } catch(e){} c.addEventListener('change', function(){ try { localStorage.setItem(k, c.checked ? '1' : '0'); } catch(e){} }); });
+</script>
+
+</body>
+</html>

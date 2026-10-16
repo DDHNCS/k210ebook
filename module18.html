@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>模块十八 · 模型训练与部署（Python环境-物体检测） — 图像识别技术活页式教材</title>
+<style>
+
+
+/* ============ 基础变量与重置 ============ */
+:root{
+  --ink:#1A2E4B;          /* 主色：深靛蓝 */
+  --ink-2:#274a73;
+  --accent:#E8720C;       /* 强调：橙 */
+  --bg:#EEF1F6;
+  --paper:#FFFFFF;
+  --paper-2:#F7F9FC;
+  --line:#D6DEE9;
+  --line-2:#E8EDF4;
+  --text:#233040;
+  --text-2:#5A6B82;
+  --k:#2B6CB0;   /* 知识活页 */
+  --w:#E8720C;   /* 工作活页 */
+  --a:#2E7D5B;   /* 活动活页 */
+  --e:#6D5BA6;   /* 评价活页 */
+  --x:#7A8797;   /* 拓展活页 */
+  --code-bg:#0F1D2F;
+  --ok:#2E7D5B;
+  --warn:#B45309;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;scroll-padding-top:74px;}
+body{
+  font-family:"Noto Sans SC","Microsoft YaHei","PingFang SC",system-ui,-apple-system,"Segoe UI",sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.75;
+  font-size:16px;
+}
+a{color:var(--ink-2);text-decoration:none;}
+img{max-width:100%;}
+::selection{background:#FFE2C4;}
+
+/* ============ 顶部导航 ============ */
+.topbar{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  background:rgba(26,46,75,.97);
+  color:#fff;
+  display:flex;align-items:center;gap:14px;
+  padding:0 22px;height:56px;
+  box-shadow:0 2px 10px rgba(26,46,75,.25);
+}
+.topbar .brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:15.5px;letter-spacing:.4px;}
+.topbar .brand svg{flex:none;}
+.topbar .brand .sub{color:#AFC3DE;font-weight:400;font-size:12.5px;}
+.topbar .spacer{flex:1;}
+.topbar .tool{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);
+  color:#fff;padding:7px 14px;border-radius:8px;font-size:13px;cursor:pointer;
+  font-family:inherit;transition:background .2s;min-height:40px;
+}
+.topbar .tool:hover{background:rgba(255,255,255,.22);}
+.topbar a.tool{text-decoration:none;}
+.burger{display:none;background:none;border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:8px;padding:9px 12px;cursor:pointer;min-height:40px;min-width:42px;}
+@media (max-width:720px){
+  .topbar a.tool{display:none;}
+  .topbar .brand .sub{display:none;}
+  .burger{display:block;}
+  .toc a{padding:9px 22px;}
+  .topbar .tool{padding:9px 14px;}
+}
+
+/* ============ 侧边目录 ============ */
+.toc{
+  position:fixed;top:56px;bottom:0;left:0;width:250px;
+  background:var(--paper);
+  border-right:1px solid var(--line);
+  overflow-y:auto;padding:20px 0 30px;
+  z-index:90;
+}
+.toc .toc-title{
+  font-size:12px;color:var(--text-2);letter-spacing:2px;font-weight:700;
+  padding:0 22px 10px;text-transform:uppercase;
+}
+.toc a{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 22px;font-size:13.5px;color:var(--text-2);
+  border-left:3px solid transparent;transition:all .15s;
+}
+.toc a .dot{width:7px;height:7px;border-radius:50%;flex:none;}
+.toc a:hover{color:var(--ink);background:var(--paper-2);}
+.toc a.active{color:var(--ink);font-weight:700;border-left-color:var(--accent);background:var(--paper-2);}
+.toc a.active .dot{background:var(--accent);}
+.toc .g1{margin-top:14px;font-size:12px;color:var(--text-2);padding:8px 22px 4px;font-weight:700;}
+@media (max-width:960px){ .toc{left:-260px;transition:left .25s;} .toc.open{left:0;box-shadow:4px 0 18px rgba(0,0,0,.18);} }
+.toc-mask{display:none;position:fixed;inset:0;background:rgba(15,25,40,.45);z-index:85;}
+.toc-mask.open{display:block;}
+
+/* ============ 主布局 ============ */
+.wrap{
+  max-width:1000px;margin:0 auto;
+  padding:88px 26px 70px;
+}
+@media (min-width:961px){ .wrap{padding-left:296px;padding-right:46px;max-width:1240px;} }
+@media (max-width:720px){ .wrap{padding:76px 16px 50px;} }
+
+/* ============ 封面 ============ */
+.cover{
+  background:linear-gradient(160deg,#152B49 0%,#1A3A63 58%,#224A7C 100%);
+  color:#fff;border-radius:18px;overflow:hidden;
+  padding:54px 46px 44px;position:relative;
+  margin-bottom:34px;
+}
+.cover::after{
+  content:"";position:absolute;right:-90px;top:-90px;width:300px;height:300px;
+  background:radial-gradient(circle,rgba(232,114,12,.35),transparent 68%);
+}
+.cover .c-flag{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);
+  padding:5px 14px;border-radius:999px;font-size:12.5px;letter-spacing:1.5px;
+  margin-bottom:22px;
+}
+.cover h1{font-size:38px;line-height:1.25;font-weight:900;letter-spacing:1px;margin-bottom:10px;}
+.cover .c-module{font-size:19px;font-weight:700;color:#FFC38A;margin-bottom:18px;}
+.cover .c-desc{max-width:640px;color:#CFDCEE;font-size:15px;margin-bottom:26px;}
+.cover .c-meta{display:flex;flex-wrap:wrap;gap:10px 28px;font-size:13px;color:#B9CAE2;}
+.cover .c-meta b{color:#fff;font-weight:600;}
+.cover .c-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px;}
+.cover .btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:10px 22px;border-radius:10px;font-size:14.5px;font-weight:700;cursor:pointer;
+  border:1px solid transparent;transition:transform .15s,box-shadow .15s;font-family:inherit;
+}
+.cover .btn-primary{background:var(--accent);color:#fff;box-shadow:0 6px 18px rgba(232,114,12,.4);}
+.cover .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(232,114,12,.5);}
+.cover .btn-ghost{background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.3);}
+.cover .btn-ghost:hover{background:rgba(255,255,255,.18);}
+@media (max-width:720px){ .cover{padding:38px 24px 32px;} .cover h1{font-size:28px;} }
+
+/* ============ 章节标题 ============ */
+.sec-title{
+  display:flex;align-items:center;gap:12px;
+  font-size:23px;font-weight:900;color:var(--ink);
+  margin:44px 0 6px;
+}
+.sec-title .bar{width:6px;height:26px;background:var(--accent);border-radius:3px;flex:none;}
+.sec-sub{color:var(--text-2);font-size:14px;margin-bottom:20px;}
+
+/* ============ 活页卡 ============ */
+.leaf{
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:14px;
+  margin:22px 0;
+  position:relative;
+  box-shadow:0 3px 14px rgba(26,46,75,.06);
+  page-break-inside:avoid;
+}
+.leaf .leaf-head{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:14px 20px 12px;
+  border-bottom:1px solid var(--line-2);
+  background:var(--paper-2);
+  border-radius:14px 14px 0 0;
+}
+.leaf .leaf-head .tag{
+  font-size:11.5px;font-weight:800;letter-spacing:1px;color:#fff;
+  padding:3px 10px;border-radius:6px;flex:none;
+}
+.tag.k{background:var(--k);} .tag.w{background:var(--w);} .tag.a{background:var(--a);}
+.tag.e{background:var(--e);} .tag.x{background:var(--x);} .tag.m{background:var(--ink);}
+.leaf .leaf-head .id{
+  font-family:Consolas,"Courier New",monospace;
+  font-size:12px;color:var(--text-2);background:var(--paper);
+  border:1px solid var(--line);padding:2px 9px;border-radius:6px;flex:none;
+}
+.leaf .leaf-head h3{font-size:17px;font-weight:800;color:var(--ink);flex:1;min-width:200px;}
+.leaf .leaf-head .time{
+  font-size:12px;color:var(--text-2);background:var(--paper);
+  border:1px solid var(--line);padding:2px 9px;border-radius:6px;flex:none;
+}
+.leaf .leaf-body{padding:20px 24px 24px;}
+@media (max-width:720px){ .leaf .leaf-body{padding:16px 16px 20px;} }
+
+/* 打孔装饰（活页隐喻） */
+.leaf::before{
+  content:"";position:absolute;left:-13px;top:40px;width:9px;height:9px;border-radius:50%;
+  background:var(--bg);border:1.5px solid var(--line);box-shadow:inset 0 1px 2px rgba(0,0,0,.08);
+}
+.leaf::after{
+  content:"";position:absolute;left:-13px;top:64px;width:9px;height:9px;border-radius:50%;
+  background:var(--bg);border:1.5px solid var(--line);box-shadow:inset 0 1px 2px rgba(0,0,0,.08);
+}
+
+/* ============ 正文排版 ============ */
+.leaf-body h4{
+  font-size:15.5px;font-weight:800;color:var(--ink-2);
+  margin:18px 0 8px;padding-left:11px;border-left:4px solid var(--accent);
+}
+.leaf-body h4:first-child{margin-top:0;}
+.leaf-body p{margin:9px 0;text-align:justify;}
+.leaf-body ul,.leaf-body ol{margin:9px 0 9px 4px;padding-left:22px;}
+.leaf-body li{margin:5px 0;}
+.leaf-body li::marker{color:var(--accent);font-weight:700;}
+.leaf-body strong{color:var(--ink);}
+.leaf-body .note{
+  background:#FFF6EA;border:1px solid #F4D5AE;border-left:4px solid var(--accent);
+  border-radius:8px;padding:11px 15px;margin:12px 0;font-size:14px;color:#6B4A21;
+}
+.leaf-body .tip{
+  background:#EAF4EC;border:1px solid #C9E2CF;border-left:4px solid var(--a);
+  border-radius:8px;padding:11px 15px;margin:12px 0;font-size:14px;color:#2C5540;
+}
+.leaf-body .warnbox{
+  background:#FDF0F0;border:1px solid #F2C7C7;border-left:4px solid #C0392B;
+  border-radius:8px;padding:11px 15px;margin:12px 0;font-size:14px;color:#7A2E28;
+}
+
+/* ============ 表格 ============ */
+.tbl-wrap{overflow-x:auto;margin:12px 0;}
+table.tbl{
+  width:100%;border-collapse:collapse;font-size:14px;
+  background:var(--paper);
+}
+table.tbl th{
+  background:#E4EAF3;color:var(--ink);font-weight:700;text-align:center;
+  padding:9px 12px;border:1px solid var(--line);
+}
+table.tbl td{
+  padding:8px 12px;border:1px solid var(--line-2);vertical-align:middle;
+}
+table.tbl td.c{text-align:center;}
+table.tbl td.r{text-align:right;font-family:Consolas,monospace;}
+table.tbl tr:nth-child(even) td{background:#FAFBFD;}
+table.tbl tr:hover td{background:#F3F6FB;}
+
+/* ============ 代码块 ============ */
+pre.code{
+  background:var(--code-bg);color:#E6EDF7;border-radius:10px;
+  padding:16px 18px;overflow-x:auto;font-size:13px;line-height:1.65;
+  font-family:Consolas,"JetBrains Mono","Courier New",monospace;
+  margin:12px 0;tab-size:4;
+}
+pre.code .c{color:#7E93B0;}          /* 注释 */
+pre.code .fn{color:#82AAFF;}        /* 函数 */
+pre.code .kw{color:#C792EA;}        /* 关键字 */
+pre.code .num{color:#F78C6C;}       /* 数字 */
+pre.code .str{color:#C3E88D;}       /* 字符串 */
+pre.code .hd{color:#FFCB6B;}        /* 头文件 */
+pre.code .pp{color:#F78C6C;}        /* 宏 */
+code.inline{
+  background:#EDF1F7;color:#C2410C;padding:1px 7px;border-radius:5px;
+  font-family:Consolas,"Courier New",monospace;font-size:13.5px;
+}
+.cmdline{
+  background:#13263F;color:#9FD0FF;border-radius:8px;padding:8px 14px;
+  font-family:Consolas,"Courier New",monospace;font-size:13px;margin:8px 0;
+  overflow-x:auto;white-space:nowrap;
+}
+.cmdline::before{content:"PS > ";color:#E8720C;font-weight:700;}
+
+/* ============ 步骤 ============ */
+.steps{counter-reset:step;margin:12px 0;}
+.step{
+  position:relative;padding:2px 0 2px 44px;margin:13px 0;
+}
+.step::before{
+  counter-increment:step;content:counter(step);
+  position:absolute;left:0;top:2px;width:28px;height:28px;border-radius:50%;
+  background:var(--ink);color:#fff;font-weight:800;font-size:13.5px;
+  display:flex;align-items:center;justify-content:center;
+}
+.step b{color:var(--ink);}
+.step .step-sub{margin:6px 0 0;padding-left:14px;border-left:2px solid var(--line);font-size:14.5px;}
+
+/* ============ 目标卡片 ============ */
+.goal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0;}
+@media (max-width:720px){ .goal-grid{grid-template-columns:1fr;} }
+.goal{
+  border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:var(--paper-2);
+}
+.goal .g-ic{display:flex;align-items:center;gap:8px;font-weight:800;color:var(--ink);font-size:14.5px;margin-bottom:8px;}
+.goal ul{list-style:none;padding:0;margin:0;}
+.goal li{font-size:13.5px;color:var(--text-2);padding:3px 0 3px 16px;position:relative;}
+.goal li::before{content:"";position:absolute;left:0;top:12px;width:6px;height:6px;border-radius:50%;background:var(--accent);}
+
+/* ============ 任务卡（导入区） ============ */
+.taskcard{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0;}
+@media (max-width:720px){ .taskcard{grid-template-columns:repeat(2,1fr);} }
+.tc{
+  border:1px solid var(--line);border-radius:10px;padding:10px 14px;background:var(--paper-2);
+  font-size:13px;
+}
+.tc .tc-k{color:var(--text-2);font-size:12px;letter-spacing:1px;margin-bottom:3px;}
+.tc .tc-v{font-weight:700;color:var(--ink);}
+
+/* ============ 检测/折叠答案 ============ */
+.quiz{margin:10px 0;}
+.qitem{
+  border:1px solid var(--line);border-radius:10px;margin:10px 0;overflow:hidden;
+}
+.qitem .q{
+  padding:11px 16px;background:var(--paper-2);font-size:14.5px;font-weight:600;color:var(--ink);
+}
+.qitem .q .qno{
+  display:inline-block;background:var(--ink);color:#fff;border-radius:6px;
+  font-size:12px;padding:1px 8px;margin-right:8px;font-weight:800;
+}
+.qitem .ans{
+  display:none;padding:10px 16px;border-top:1px dashed var(--line);
+  font-size:13.5px;color:var(--text-2);background:#FBFCFE;
+}
+.qitem.open .ans{display:block;}
+.qitem .q-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  margin-top:8px;background:none;border:1px solid var(--line);border-radius:7px;
+  padding:4px 12px;font-size:12.5px;color:var(--text-2);cursor:pointer;font-family:inherit;
+}
+.qitem .q-btn:hover{color:var(--accent);border-color:var(--accent);}
+
+/* ============ 评价表 ============ */
+.score-td{text-align:center;}
+
+/* ============ 完成勾选 ============ */
+.done-row{display:flex;align-items:center;gap:10px;margin:10px 0 2px;}
+.done-row input{width:17px;height:17px;accent-color:var(--accent);cursor:pointer;}
+.done-row label{font-size:14px;color:var(--text-2);cursor:pointer;}
+.leaf.done{border-color:#9CC9A8;}
+.leaf.done .leaf-head{background:#F0F8F1;}
+.leaf.done .leaf-head h3{color:var(--a);}
+
+/* ============ 流程图（引脚映射） ============ */
+.flow{
+  display:flex;align-items:stretch;gap:0;margin:16px 0;flex-wrap:wrap;
+}
+.flow .fnode{
+  flex:1;min-width:130px;background:var(--paper-2);border:1.5px solid var(--ink-2);
+  border-radius:10px;padding:12px 10px;text-align:center;position:relative;
+}
+.flow .fnode .f-t{font-weight:800;color:var(--ink);font-size:14px;}
+.flow .fnode .f-s{font-size:12px;color:var(--text-2);margin-top:3px;}
+.flow .fnode.hl{border-color:var(--accent);background:#FFF4E8;}
+.flow .fnode.hl .f-t{color:#B45309;}
+.flow .farr{display:flex;align-items:center;padding:0 7px;color:var(--accent);font-weight:900;}
+@media (max-width:720px){
+  .flow{flex-direction:column;}
+  .flow .farr{transform:rotate(90deg);justify-content:center;padding:2px 0;}
+}
+
+/* ============ 时序逻辑（交替点亮推导） ============ */
+.cycle{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0;}
+@media (max-width:720px){ .cycle{grid-template-columns:repeat(2,1fr);} }
+.cy{
+  border:1px solid var(--line);border-radius:10px;padding:10px;text-align:center;
+  background:var(--paper-2);font-size:13px;
+}
+.cy .cy-t{font-weight:800;color:var(--ink);margin-bottom:4px;}
+.cy .led-line{display:flex;justify-content:center;gap:10px;margin-top:6px;}
+.cy .led{width:26px;height:26px;border-radius:50%;border:2px solid #B9C4D4;display:inline-flex;align-items:center;justify-content:center;}
+.cy .led.red-on{background:#E03131;border-color:#E03131;box-shadow:0 0 10px rgba(224,49,49,.6);}
+.cy .led.green-on{background:#2F9E44;border-color:#2F9E44;box-shadow:0 0 10px rgba(47,158,68,.6);}
+.cy .led.off{background:#EEF1F6;}
+.cy .led.blue-on{background:#1971C2;border-color:#1971C2;box-shadow:0 0 10px rgba(25,113,194,.65);}
+.cy .led-lab{font-size:10px;color:var(--text-2);}
+
+/* ============ 规格卡 ============ */
+.spec-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0;}
+@media (max-width:720px){ .spec-grid{grid-template-columns:1fr 1fr;} }
+.spec{
+  border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--paper-2);
+  display:flex;gap:10px;align-items:flex-start;
+}
+.spec svg{flex:none;margin-top:2px;}
+.spec .s-t{font-size:12.5px;color:var(--text-2);}
+.spec .s-v{font-size:13.5px;font-weight:700;color:var(--ink);margin-top:2px;}
+
+/* ============ 检查清单 ============ */
+.checklist{list-style:none;padding:0;margin:10px 0;}
+.checklist li{
+  display:flex;align-items:flex-start;gap:10px;padding:8px 12px;
+  border:1px solid var(--line-2);border-radius:8px;margin:7px 0;font-size:14px;background:var(--paper-2);
+}
+.checklist li input{width:16px;height:16px;accent-color:var(--a);margin-top:4px;flex:none;cursor:pointer;}
+
+/* ============ 时间轴 ============ */
+.timeline{display:grid;grid-template-columns:86px 34px 1fr;gap:0;margin:16px 0;max-width:760px;}
+@media (max-width:720px){ .timeline{grid-template-columns:70px 30px 1fr;} }
+.tl-time{text-align:right;padding:6px 12px 6px 0;font-size:13.5px;color:var(--text-2);font-weight:700;}
+.tl-axis{position:relative;}
+.tl-axis::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:2px;background:var(--line);transform:translateX(-50%);}
+.tl-dot{position:absolute;left:50%;top:16px;width:12px;height:12px;border-radius:50%;background:var(--accent);transform:translate(-50%,0);border:2.5px solid #FFE2C4;z-index:1;}
+.tl-content{padding:6px 0 20px 14px;}
+.tl-content b{color:var(--ink);font-size:14.5px;}
+.tl-content .tld{font-size:13px;color:var(--text-2);margin-top:2px;}
+
+/* ============ 页脚 ============ */
+.footer{
+  margin-top:46px;padding:22px;text-align:center;color:var(--text-2);font-size:12.5px;
+  border-top:1px solid var(--line);
+}
+
+/* ============ 打印 ============ */
+@media print{
+  body{background:#fff;font-size:12px;}
+  .topbar,.toc,.toc-mask{display:none !important;}
+  .wrap{padding:0;max-width:none;}
+  .cover{border-radius:0;padding:36px 30px;}
+  .leaf{box-shadow:none;margin:0 0 2px;border-radius:0;break-inside:avoid;}
+  .leaf::before,.leaf::after{display:none;}
+  .leaf .leaf-head{border-radius:0;}
+  .leaf{margin-bottom:10px;}
+  .sec-title{margin-top:26px;}
+  .qitem .ans{display:block;border-top:1px solid var(--line);}
+  .qitem .q-btn{display:none;}
+  a{color:var(--ink);}
+  pre.code{font-size:11px;}
+  table.tbl{font-size:11.5px;}
+}
+
+
+.subline{font-weight:700;color:#1A2E4B;background:#F1F4F9;border-left:4px solid #E8720C;padding:8px 12px;border-radius:6px;margin:0 0 10px;font-size:14px;}
+
+@media print{
+  /* PDF-break-guard */
+  .tbl-wrap, table.tbl, table.tbl tr, .taskcard, .flow, .steps, .cycle,
+  .timeline, .screen-demo, .quiz .qitem, .note, .tip, .warnbox, .ext-item,
+  .goal, .tc, .checklist { break-inside: avoid; }
+  pre.code { break-inside: avoid; }
+  img { break-inside: avoid; }
+}
+
+</style>
+</head>
+<body>
+
+<!-- ============ 顶部导航 ============ -->
+<header class="topbar">
+  <button class="burger" id="burgerBtn" aria-label="打开目录">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+  </button>
+  <div class="brand">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFC38A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg>
+    <span>图像识别技术 <span class="sub">· 活页式教材 · 模块十八</span></span>
+  </div>
+  <div class="spacer"></div>
+  <a class="tool" href="index.html">模块一</a>
+  <a class="tool" href="module2.html">模块二</a>
+  <a class="tool" href="module3.html">模块三</a>
+  <a class="tool" href="module4.html">模块四</a>
+  <a class="tool" href="module5.html">模块五</a>
+  <a class="tool" href="module6.html">模块六</a>
+  <a class="tool" href="module7.html">模块七</a>
+  <a class="tool" href="module8.html">模块八</a>
+  <a class="tool" href="module9.html">模块九</a>
+  <a class="tool" href="module10.html">模块十</a>
+  <a class="tool" href="module11.html">模块十一</a>
+  <a class="tool" href="module12.html">模块十二</a>
+  <a class="tool" href="module13.html">模块十三</a>
+  <a class="tool" href="module14.html">模块十四</a>
+  <a class="tool" href="module15.html">模块十五</a>
+  <a class="tool" href="module16.html">模块十六</a>
+  <a class="tool" href="module17.html">模块十七</a>
+  <button class="tool" id="printBtn">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+    打印教材
+  </button>
+</header>
+
+<!-- ============ 侧边目录 ============ -->
+<div class="toc-mask" id="tocMask"></div>
+<nav class="toc" id="toc">
+  <div class="toc-title">活页索引</div>
+  <a href="#cover"><span class="dot" style="background:#1A2E4B"></span>封面与模块信息</a>
+  <a href="#overview"><span class="dot" style="background:#1A2E4B"></span>模块总体设计</a>
+  <div class="g1">任务 1 · 检测模型训练与数据集</div>
+  <a href="#t1"><span class="dot" style="background:#E8720C"></span>任务卡</a>
+  <a href="#t1k1"><span class="dot" style="background:#2B6CB0"></span>K1 分类与检测对比</a>
+  <a href="#t1k2"><span class="dot" style="background:#2B6CB0"></span>K2 检测数据集与标注</a>
+  <a href="#t1k3"><span class="dot" style="background:#2B6CB0"></span>K3 检测模型训练</a>
+  <a href="#t1a1"><span class="dot" style="background:#2E7D5B"></span>A1 活动与检测</a>
+  <div class="g1">任务 2 · 数据收集与标注</div>
+  <a href="#t2"><span class="dot" style="background:#E8720C"></span>任务卡</a>
+  <a href="#t2k1"><span class="dot" style="background:#2B6CB0"></span>K1 检测数据收集</a>
+  <a href="#t2k2"><span class="dot" style="background:#2B6CB0"></span>K2 检测标注</a>
+  <a href="#t2w1"><span class="dot" style="background:#E8720C"></span>W1 数据集实操</a>
+  <div class="g1">任务 3 · 训练与 Python 部署</div>
+  <a href="#t3"><span class="dot" style="background:#E8720C"></span>任务卡</a>
+  <a href="#t3k1"><span class="dot" style="background:#2B6CB0"></span>K1 训练与 kfpkg</a>
+  <a href="#t3k2"><span class="dot" style="background:#2B6CB0"></span>K2 部署与核心代码</a>
+  <a href="#t3k3"><span class="dot" style="background:#2B6CB0"></span>K3 分类与检测归纳</a>
+  <a href="#t3w1"><span class="dot" style="background:#E8720C"></span>W1 部署实操</a>
+  <a href="#t3w2"><span class="dot" style="background:#E8720C"></span>W2 验证与总结</a>
+  <div class="g1">评价与拓展</div>
+  <a href="#eval"><span class="dot" style="background:#6D5BA6"></span>E1 模块评价</a>
+  <a href="#ext"><span class="dot" style="background:#7A8797"></span>X1 拓展任务</a>
+  <a href="#summary"><span class="dot" style="background:#1A2E4B"></span>课程总结</a>
+</nav>
+
+<main class="wrap">
+
+<!-- ============ 封面 ============ -->
+<section class="cover" id="cover">
+  <div class="c-flag">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#FFC38A" stroke-width="2.4" stroke-linecap="round"><path d="M12 2l2.4 7.2H22l-6 4.6 2.3 7.2-6.3-4.5-6.3 4.5L8 13.8l-6-4.6h7.6z"/></svg>
+    活页式 · 工作手册式教材
+  </div>
+  <h1>图像识别技术</h1>
+  <div class="c-module">模块十八 · 模型训练与部署（Python 环境-物体检测）</div>
+  <p class="c-desc">模块十七训练了<strong>物体分类</strong>模型；本模块进阶到<strong>物体检测</strong>——由同学们<strong>自行收集目标检测数据集、标注（方框框出目标）、在 MaixHub 训练</strong>，下载自带 Python 代码的检测模型包，在 <strong>Python 环境</strong>部署，实现<strong>多目标实时检测</strong>，并与分类对比、归纳总结。</p>
+  <div class="c-meta">
+    <span>配套课程：<b>图像识别技术（边缘计算 &amp; 机器视觉）</b></span>
+    <span>建议学时：<b>4 学时</b></span>
+    <span>前置模块：<b>模块一 ~ 模块十七</b></span>
+    <span>硬件平台：<b>Kendryte K210 开发板（MaixPy）</b></span>
+  </div>
+  <div class="c-actions">
+    <a class="btn btn-primary" href="#overview">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9V3z"/></svg>
+      开始学习
+    </a>
+    <a class="btn btn-ghost" href="#toc">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+      查看活页索引
+    </a>
+  </div>
+</section>
+
+<!-- ============ 模块总体设计 ============ -->
+<div class="sec-title"><span class="bar"></span><h2 id="overview">模块总体设计</h2></div>
+<p class="sec-sub"><strong>Python 路线的物体检测</strong>：模块十七做了物体<strong>分类</strong>（判断"是什么"），本模块做物体<strong>检测</strong>（既要"是什么"还要"在哪"）——同学们<strong>自行收集目标检测数据集 → 方框标注 → MaixHub 在线训练 → 下载检测模型包（kmodel + main.py + report.json）→ Python 环境部署</strong>，用 <strong>nn.YOLO2</strong> 实现多目标实时检测，并与分类全程对比、归纳总结。</p>
+
+<div class="leaf">
+  <div class="leaf-head">
+    <span class="tag m">总览</span><span class="id">M18-01</span>
+    <h3>模块学习目标</h3>
+  </div>
+  <div class="leaf-body">
+    <div class="goal-grid">
+      <div class="goal">
+        <div class="g-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2B6CB0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>知识目标</div>
+        <ul>
+          <li>能说出分类与检测在数据集、标注、KPU 参数上的差异</li>
+          <li>能说出检测标注规范（框选、位置、标签一致性）</li>
+          <li>能读懂 Python 检测核心代码（nn.YOLO2/anchors/NMS）</li>
+        </ul>
+      </div>
+      <div class="goal">
+        <div class="g-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#E8720C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>技能目标</div>
+        <ul>
+          <li>能自行收集目标检测数据集并画框标注上传</li>
+          <li>能在 MaixHub 训练检测模型并下载 kfpkg/kmodel</li>
+          <li>能部署自训检测模型实现多目标实时检测</li>
+        </ul>
+      </div>
+      <div class="goal">
+        <div class="g-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2E7D5B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>素养目标</div>
+        <ul>
+          <li>理解"任务不同、数据标注方式不同"的工程观</li>
+          <li>形成分类与检测的对比归纳思维</li>
+          <li>完成"收集→标注→训练→部署→总结"全链路能力</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="leaf">
+  <div class="leaf-head">
+    <span class="tag m">总览</span><span class="id">M18-02</span>
+    <h3>任务结构与学时分配</h3>
+  </div>
+  <div class="leaf-body">
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr>
+        <th style="width:26%">任务</th><th style="width:34%">内容</th><th style="width:18%">活页构成</th><th style="width:12%">学时</th><th>学习成果</th>
+      </tr>
+      <tr>
+        <td><strong>任务 1</strong><br>检测模型训练与数据集</td>
+        <td>分类/检测对比、检测数据集与标注规范、训练步骤</td>
+        <td class="c">任务卡 + K×3 + A×1</td>
+        <td class="c">1 学时</td>
+        <td>掌握检测训练方法</td>
+      </tr>
+      <tr>
+        <td><strong>任务 2</strong><br>数据收集与标注</td>
+        <td>多目标收集、画框标注、上传 MaixHub</td>
+        <td class="c">任务卡 + K×2 + W×1</td>
+        <td class="c">1 学时</td>
+        <td>完成自建检测数据集</td>
+      </tr>
+      <tr>
+        <td><strong>任务 3</strong><br>训练与 Python 部署</td>
+        <td>训练下载、部署核心代码、分类/检测归纳、验证</td>
+        <td class="c">任务卡 + K×3 + W×2</td>
+        <td class="c">2 学时</td>
+        <td>Python 跑通自训检测</td>
+      </tr>
+    </table>
+    </div>
+    <div class="note"><strong>知识前置：</strong>Python 环境（模块十六）；Python 分类训练与部署（模块十七，本模块全程对照）；检测原理与 anchors/阈值/NMS 调参（模块十一~十三 C 版对照）。</div>
+  </div>
+</div>
+
+<div class="leaf">
+  <div class="leaf-head">
+    <span class="tag m">总览</span><span class="id">M18-03</span>
+    <h3>模块学习路径</h3>
+  </div>
+  <div class="leaf-body">
+    <div class="timeline">
+      <div class="tl-time">第 1 学时</div>
+      <div class="tl-axis"><span class="tl-dot"></span></div>
+      <div class="tl-content"><b>任务 1 · 检测模型训练与数据集</b><div class="tld">分类 vs 检测 → 检测数据集与标注规范 → 训练步骤</div></div>
+
+      <div class="tl-time">第 2 学时</div>
+      <div class="tl-axis"><span class="tl-dot"></span></div>
+      <div class="tl-content"><b>任务 2 · 数据收集与标注</b><div class="tld">多目标收集 → 画框标注（规范/一致性） → 上传 MaixHub</div></div>
+
+      <div class="tl-time">第 3~4 学时</div>
+      <div class="tl-axis"><span class="tl-dot"></span></div>
+      <div class="tl-content"><b>任务 3 · 训练与 Python 部署</b><div class="tld">训练下载（kfpkg） → 部署核心代码（YOLO2） → 分类/检测归纳 → 多目标验证</div></div>
+    </div>
+    <div class="note"><strong>本模块在课程中的位置：</strong>课程最后一节（3.9）。学完本模块，即完成"环境搭建 → 基础外设 → 图像处理 → 图像识别应用 → 模型训练与部署"完整链路，页尾附<strong>课程总结</strong>。</div>
+  </div>
+</div>
+
+
+<div class="leaf" id="t1">
+  <div class="leaf-head">
+    <span class="tag m">任务 1</span><span class="id">M18-T1-00</span>
+    <h3>任务卡：检测模型训练与数据集</h3>
+    <span class="time">1 学时</span>
+  </div>
+  <div class="leaf-body">
+    <h4>任务情境</h4>
+    <p>模块十七用 MaixHub 训练了<strong>物体分类</strong>模型；本任务学习<strong>目标检测</strong>：它与分类最大的区别是<strong>数据集要用方框标注出目标位置</strong>。先弄清分类与检测的差异、检测数据集规范与训练方法，为动手收集标注做准备。</p>
+    <div class="taskcard">
+      <div class="tc"><div class="tc-k">学习目标</div><div class="tc-v">掌握检测训练方法</div></div>
+      <div class="tc"><div class="tc-k">核心知识</div><div class="tc-v">分类/检测对比、标注、训练</div></div>
+      <div class="tc"><div class="tc-k">任务成果</div><div class="tc-v">检测流程认知图</div></div>
+      <div class="tc"><div class="tc-k">评价方式</div><div class="tc-v">随堂检测 + 小组互评</div></div>
+    </div>
+    <div class="tip"><strong>学习方法：</strong>时刻与模块十七分类对照——<strong>分类标注=建文件夹，检测标注=画方框</strong>；检测多了"位置"信息，KPU 参数也多了 anchors/NMS。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t1k1">
+  <div class="leaf-head">
+    <span class="tag k">知识活页</span><span class="id">M18-T1-K1</span>
+    <h3>目标检测与图像分类对比</h3>
+    <span class="time">约 20 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>1. 最大区别：数据集标注方式</h4>
+    <p><strong>目标检测与图像分类在数据集准备上最大的区别是：目标检测需要对图片中的目标进行标注（用方框框出目标位置）。</strong>分类只需按类别整理（文件夹即标签），检测还须告诉模型"目标在哪"。</p>
+    <div class="flow">
+      <div class="fnode"><div class="f-t">图像分类</div><div class="f-s">文件夹即标签<br>判断"是什么"</div></div>
+      <div class="farr">→</div>
+      <div class="fnode hl"><div class="f-t">目标检测</div><div class="f-s">方框标注位置<br>"是什么 + 在哪"</div></div>
+    </div>
+    <h4>2. 整体对比</h4>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:22%">对比项</th><th style="width:36%">图像分类（模块十七）</th><th>目标检测（本模块）</th></tr>
+      <tr><td class="c">任务目标</td><td>判断整张图属于哪一类</td><td>找出图中所有目标并定位（框）</td></tr>
+      <tr><td class="c">数据集标注</td><td>文件夹名即标签（无需画框）</td><td><strong>画方框框出目标</strong> + 标签</td></tr>
+      <tr><td class="c">输出结果</td><td>类别 + 置信度</td><td>多个框（x/y/w/h）+ 类别 + 置信度</td></tr>
+      <tr><td class="c">KPU 参数</td><td>特征值阈值</td><td><strong>anchors（锚框）+ threshold（阈值）+ NMS</strong></td></tr>
+      <tr><td class="c">模型类</td><td>nn.Classifier</td><td>nn.YOLO2（YOLO 系列）</td></tr>
+    </table>
+    </div>
+    <div class="note"><strong>记忆锚点：</strong>分类管"是不是"，检测管"在哪 + 是不是"；标注差异 = <strong>文件夹 vs 画框</strong>。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t1k2">
+  <div class="leaf-head">
+    <span class="tag k">知识活页</span><span class="id">M18-T1-K2</span>
+    <h3>检测数据集与标注规范</h3>
+    <span class="time">约 15 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>1. 数据收集要求</h4>
+    <div class="steps">
+      <div class="step"><b>多目标多场景：</b>每类目标 <strong>≥50 张</strong>，覆盖不同大小、位置、角度、光照；目标可<strong>多个同时出现</strong>（多目标检测场景）。</div>
+      <div class="step"><b>清晰完整：</b>目标主体清晰、尽量完整出现在画面中，避免严重遮挡与模糊。</div>
+      <div class="step"><b>来源合规：</b>摄像头拍摄、视频转图或公开数据集，注意授权。</div>
+    </div>
+    <h4>2. 标注规范（检测训练的核心）</h4>
+    <div class="note"><strong>数据标注的规范性和一致性是目标检测训练的核心</strong>，标注框选的位置、大小、标签一致性都会<strong>直接影响训练效果</strong>。</div>
+    <div class="steps">
+      <div class="step"><b>框选位置：</b>方框<strong>紧贴目标</strong>，尽量包住目标主体，不要留太大空白或切掉部分目标。</div>
+      <div class="step"><b>框选大小：</b>每个目标一个框；<strong>大小统一规范</strong>，小目标与大目标框法一致。</div>
+      <div class="step"><b>标签一致性：</b>同类目标用<strong>同一标签名</strong>（英文小写），不要混用（如 cat 与 Cat 视为两类）。</div>
+      <div class="step"><b>无遗漏：</b>图中出现的每个目标都要标注，避免"有时标有时不标"。</div>
+    </div>
+    <div class="note"><strong>记忆锚点：</strong>标注四规范 = <strong>紧贴框 + 大小一致 + 标签一致 + 无遗漏</strong>。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t1k3">
+  <div class="leaf-head">
+    <span class="tag k">知识活页</span><span class="id">M18-T1-K3</span>
+    <h3>检测模型的训练</h3>
+    <span class="time">约 15 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>在 MaixHub 平台训练目标检测模型</h4>
+    <div class="steps">
+      <div class="step"><b>1 新建数据集：</b>选择数据集类型为<strong>"检测"</strong>（与分类区分）。</div>
+      <div class="step"><b>2 上传并标注：</b>上传收集的图片，用平台标注工具<strong>画框 + 填标签</strong>，逐张完成标注。</div>
+      <div class="step"><b>3 划分集：</b>分为<strong>训练集</strong>与<strong>验证集</strong>（可指定或自动分配）。</div>
+      <div class="step"><b>4 创建训练任务：</b>设置<strong>图像缩放比例、部署平台</strong>（K210/MaixPy）等参数，开始训练。</div>
+      <div class="step"><b>5 下载模型：</b>选择<strong>手动部署</strong>下载模型包——基于 MaixPy 环境，<strong>自带 Python 运行代码</strong>，含 kmodel + main.py + report.json（报告含 labels 与 anchors）。</div>
+    </div>
+    <div class="note"><strong>记忆锚点：</strong>检测训练 5 步 = 建检测数据集 → 上传画框标注 → 划分 → 建任务 → 下载（自带 Python 代码）。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t1a1">
+  <div class="leaf-head">
+    <span class="tag a">活动活页</span><span class="id">M18-T1-A1</span>
+    <h3>活动：对比归类与随堂检测</h3>
+    <span class="time">约 15 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>活动一：分类 / 检测归类（个人完成）</h4>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:36%">描述</th><th style="width:28%">图像分类</th><th>目标检测</th></tr>
+      <tr><td>数据集用方框框出目标位置</td><td class="c">□</td><td class="c">□</td></tr>
+      <tr><td>文件夹名即标签</td><td class="c">□</td><td class="c">□</td></tr>
+      <tr><td>KPU 参数含 anchors 与 NMS</td><td class="c">□</td><td class="c">□</td></tr>
+      <tr><td>输出多个框（x/y/w/h）+ 类别</td><td class="c">□</td><td class="c">□</td></tr>
+    </table>
+    </div>
+    <div class="note"><strong>参考答案：</strong>① 检测 ② 分类 ③ 检测 ④ 检测。</div>
+    <h4>活动二：随堂检测（自测）</h4>
+    <div class="quiz">
+      <div class="qitem">
+        <div class="q"><span class="qno">1</span>目标检测与图像分类在数据集准备上最大的区别？</div>
+        <div class="ans">答案：目标检测需要对图片中的目标进行标注（用方框框出目标位置）；分类只需按类别整理（文件夹即标签）。</div>
+        <button class="q-btn" onclick="toggleAns(this)">查看答案</button>
+      </div>
+      <div class="qitem">
+        <div class="q"><span class="qno">2</span>检测标注的四条规范？</div>
+        <div class="ans">答案：框选位置紧贴目标、框选大小统一规范、标签一致性、无遗漏（图中目标都要标注）。</div>
+        <button class="q-btn" onclick="toggleAns(this)">查看答案</button>
+      </div>
+      <div class="qitem">
+        <div class="q"><span class="qno">3</span>检测模型与分类模型在 KPU 参数上有何不同？</div>
+        <div class="ans">答案：检测涉及锚框值（anchors）、阈值（threshold）和非极大值抑制（NMS）；分类主要涉及特征值阈值。</div>
+        <button class="q-btn" onclick="toggleAns(this)">查看答案</button>
+      </div>
+      <div class="qitem">
+        <div class="q"><span class="qno">4</span>为什么标注的规范性和一致性是检测训练的核心？</div>
+        <div class="ans">答案：框选的位置、大小、标签一致性直接决定模型学到的目标边界与类别特征，标注混乱则模型效果差。</div>
+        <button class="q-btn" onclick="toggleAns(this)">查看答案</button>
+      </div>
+      <div class="qitem">
+        <div class="q"><span class="qno">5</span>MaixHub 检测训练 5 步是什么？</div>
+        <div class="ans">答案：建检测数据集 → 上传并画框标注 → 划分训练/验证集 → 创建训练任务（缩放、平台） → 手动部署下载模型。</div>
+        <button class="q-btn" onclick="toggleAns(this)">查看答案</button>
+      </div>
+    </div>
+    <div class="done-row"><input type="checkbox" id="done-t1" class="doneck" data-key="done-t1"><label for="done-t1">我已完成任务 1 的学习并自测通过（勾选后本任务标记完成）</label></div>
+  </div>
+</div>
+
+<div class="leaf" id="t2">
+  <div class="leaf-head">
+    <span class="tag m">任务 2</span><span class="id">M18-T2-00</span>
+    <h3>任务卡：数据收集与标注</h3>
+    <span class="time">1 学时</span>
+  </div>
+  <div class="leaf-body">
+    <h4>任务情境</h4>
+    <p>由同学们<strong>自行收集目标检测数据集并标注</strong>：选定 ≥2 类目标物体，收集<strong>每类 ≥50 张</strong>图片（鼓励一张图多个目标），用 MaixHub 标注工具<strong>画框标注</strong>，整理成检测数据集并<strong>上传平台</strong>，为任务 3 训练部署做准备。</p>
+    <div class="taskcard">
+      <div class="tc"><div class="tc-k">学习目标</div><div class="tc-v">完成自建检测数据集</div></div>
+      <div class="tc"><div class="tc-k">核心知识</div><div class="tc-v">收集、画框标注、上传</div></div>
+      <div class="tc"><div class="tc-k">任务成果</div><div class="tc-v">上传成功的检测数据集</div></div>
+      <div class="tc"><div class="tc-k">评价方式</div><div class="tc-v">成果展示 + 互评</div></div>
+    </div>
+    <div class="tip"><strong>学习方法：</strong>与模块十七分类对照——<strong>分类标注=建文件夹（快），检测标注=画框（细）</strong>；多花的功夫换来"定位"能力。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t2k1">
+  <div class="leaf-head">
+    <span class="tag k">知识活页</span><span class="id">M18-T2-K1</span>
+    <h3>检测数据收集</h3>
+    <span class="time">约 15 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>与分类收集的异同</h4>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:24%">对比项</th><th style="width:36%">分类数据（模块十七）</th><th>检测数据（本模块）</th></tr>
+      <tr><td class="c">每类数量</td><td>≥50 张</td><td><strong>≥50 张</strong>（同一原则）</td></tr>
+      <tr><td class="c">画面内容</td><td>单目标为主</td><td><strong>可多目标同框</strong>（多目标检测）</td></tr>
+      <tr><td class="c">位置多样性</td><td>多角度多光照</td><td><strong>多位置、多大小</strong>（目标在画面不同区域）</td></tr>
+      <tr><td class="c">标注要求</td><td>无需画框</td><td><strong>每个目标画框 + 标签</strong></td></tr>
+    </table>
+    </div>
+    <div class="steps">
+      <div class="step"><b>多位置拍摄：</b>目标放在画面<strong>不同位置、不同距离</strong>（大目标/小目标），模拟真实场景。</div>
+      <div class="step"><b>多目标组合：</b>拍摄<strong>多个同类目标</strong>同框（如两只猫），训练模型一次检出多个。</div>
+      <div class="step"><b>视频转图：</b>拍摄目标移动视频，按帧截取，一次获得大量不同位置样本。</div>
+    </div>
+    <div class="note"><strong>记忆锚点：</strong>检测收集 = <strong>多位置 × 多大小 × 多目标 × 足数量</strong>（每类 ≥50 张）。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t2k2">
+  <div class="leaf-head">
+    <span class="tag k">知识活页</span><span class="id">M18-T2-K2</span>
+    <h3>检测标注</h3>
+    <span class="time">约 20 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>1. 用 MaixHub 标注工具画框</h4>
+    <p>上传图片后，在平台标注界面<strong>拖动鼠标画矩形框</strong>框住每个目标，并为每个框选择<strong>标签</strong>（类别名）。标注结果保存后用于训练。</p>
+    <div class="flow">
+      <div class="fnode"><div class="f-t">打开图片</div><div class="f-s">选择标注</div></div>
+      <div class="farr">→</div>
+      <div class="fnode hl"><div class="f-t">画框框住目标</div><div class="f-s">紧贴边界</div></div>
+      <div class="farr">→</div>
+      <div class="fnode"><div class="f-t">选标签</div><div class="f-s">类别名一致</div></div>
+      <div class="farr">→</div>
+      <div class="fnode"><div class="f-t">逐张完成</div><div class="f-s">无遗漏</div></div>
+    </div>
+    <h4>2. 标注自检要点</h4>
+    <div class="steps">
+      <div class="step"><b>框紧贴目标：</b>上下左右贴近目标边缘，不留大面积空白。</div>
+      <div class="step"><b>每目标一框：</b>一个目标一个框，多目标逐框标注。</div>
+      <div class="step"><b>标签统一：</b>同一类别全程用同一标签名，先统一好类别清单再动手。</div>
+      <div class="step"><b>完整性：</b>一张图漏标一个目标 = 教模型"这个不算"，宁多勿漏。</div>
+    </div>
+    <div class="note"><strong>记忆锚点：</strong>标注质量 = <strong>框准 + 标签一 + 不漏标</strong>，这是检测模型效果好坏的分水岭。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t2w1">
+  <div class="leaf-head">
+    <span class="tag w">工作活页</span><span class="id">M18-T2-W1</span>
+    <h3>检测数据集实操</h3>
+    <span class="time">约 20 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>任务：完成自己的检测数据集并上传 MaixHub</h4>
+    <div class="steps">
+      <div class="step"><b>1 选目标。</b>选定 ≥2 类物体（如猫/狗、手机/水杯、笔/橡皮），类别名用英文小写。</div>
+      <div class="step"><b>2 收集图片。</b>每类 <strong>≥50 张</strong>：多位置、多大小、可多目标同框；拍摄 + 视频转图 + 合规公开图。</div>
+      <div class="step"><b>3 建数据集。</b>MaixHub 新建数据集，类型选<strong>"检测"</strong>。</div>
+      <div class="step"><b>4 上传标注。</b>上传图片，用标注工具<strong>逐张画框 + 选标签</strong>，框紧贴、标签一致、无遗漏。</div>
+      <div class="step"><b>5 划分上传。</b>指定或自动分配验证集，确认后可创建训练任务。</div>
+    </div>
+    <h4>数据集自查清单</h4>
+    <ul class="checklist">
+      <li><input type="checkbox" id="ck-a"><label for="ck-a">每个类别图片 ≥50 张，含多位置/多大小/多目标同框</label></li>
+      <li><input type="checkbox" id="ck-b"><label for="ck-b">已选"检测"类型数据集并上传图片</label></li>
+      <li><input type="checkbox" id="ck-c"><label for="ck-c">每个目标均已画框标注，框紧贴目标、大小规范</label></li>
+      <li><input type="checkbox" id="ck-d"><label for="ck-d">标签命名统一一致（英文小写），无漏标、无错标</label></li>
+      <li><input type="checkbox" id="ck-e"><label for="ck-e">训练/验证集已划分（指定或自动分配）</label></li>
+    </ul>
+    <div class="done-row"><input type="checkbox" id="done-t2" class="doneck" data-key="done-t2"><label for="done-t2">我已完成任务 2 的检测数据集收集、标注与上传（勾选后本任务标记完成）</label></div>
+  </div>
+</div>
+
+<div class="leaf" id="t3">
+  <div class="leaf-head">
+    <span class="tag m">任务 3</span><span class="id">M18-T3-00</span>
+    <h3>任务卡：训练与 Python 部署</h3>
+    <span class="time">2 学时</span>
+  </div>
+  <div class="leaf-body">
+    <h4>任务情境</h4>
+    <p>用任务 2 自建的检测数据集<strong>在 MaixHub 训练</strong>，下载<strong>自带 Python 运行代码</strong>的检测模型包（kmodel + main.py + report.json，报告含 labels 与 anchors），把 <strong>kmodel 放入 TF 卡或 Flash</strong>，用 <strong>MaixPy IDE</strong> 运行，实现<strong>多目标实时检测</strong>；并与模块十七分类全程对比、归纳总结。</p>
+    <div class="taskcard">
+      <div class="tc"><div class="tc-k">学习目标</div><div class="tc-v">Python 跑通自训检测</div></div>
+      <div class="tc"><div class="tc-k">实验材料</div><div class="tc-v">自建检测数据集 + MaixHub</div></div>
+      <div class="tc"><div class="tc-k">任务成果</div><div class="tc-v">多目标实时检测</div></div>
+      <div class="tc"><div class="tc-k">评价方式</div><div class="tc-v">成果展示 + 口述对比</div></div>
+    </div>
+    <div class="tip"><strong>学习方法：</strong>与模块十七分类对照——<strong>分类 = nn.Classifier + classify；检测 = nn.YOLO2 + detect</strong>，检测多了 anchors 与 NMS 参数。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t3k1">
+  <div class="leaf-head">
+    <span class="tag k">知识活页</span><span class="id">M18-T3-K1</span>
+    <h3>训练任务与模型下载（kfpkg）</h3>
+    <span class="time">约 15 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>1. 创建训练任务</h4>
+    <div class="steps">
+      <div class="step"><b>选择数据集：</b>选中任务 2 上传并标注好的检测数据集。</div>
+      <div class="step"><b>设置参数：</b>设置<strong>图像缩放比例</strong>（与模型输入匹配，如 224×224）、<strong>部署平台</strong>（K210/MaixPy）等。</div>
+      <div class="step"><b>监控训练：</b>查看<strong>loss / acc / 各类别 AP</strong>（平均精度）曲线，验证集准确率与 AP 越高越可靠。</div>
+      <div class="step"><b>下载模型：</b>选择<strong>手动部署</strong>下载——基于 MaixPy 环境，<strong>自带 Python 运行代码</strong>。</div>
+    </div>
+    <h4>2. kfpkg 打包概念</h4>
+    <div class="note"><strong>kfpkg：</strong>目标检测模型部署与分类模型部署流程类似，都需要 <strong>"kfpkg 打包 → 模型烧录 → 程序适配 → 调试运行"</strong>。kfpkg 文件<strong>指定了模型的烧录地址</strong>，可直接烧进 Flash；也可以直接把 <strong>kmodel</strong> 放 TF 卡或烧到指定地址，但要保证<strong>程序中设定的模型地址与实际一致</strong>。</div>
+    <div class="note"><strong>记忆锚点：</strong>检测部署流程 = kfpkg 打包 → 烧录 → 程序适配 → 调试运行；地址一致性是关键。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t3k2">
+  <div class="leaf-head">
+    <span class="tag k">知识活页</span><span class="id">M18-T3-K2</span>
+    <h3>部署流程与核心代码</h3>
+    <span class="time">约 20 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>1. 部署步骤</h4>
+    <div class="steps">
+      <div class="step"><b>1 准备模型文件：</b>解压下载的检测模型包，得到 <strong>kmodel</strong>、<strong>main.py</strong>、<strong>report.json</strong>（含 labels 与 anchors）。</div>
+      <div class="step"><b>2 存放模型：</b>kmodel 放入 <strong>TF 卡或 Flash</strong>（kfpkg 烧录或按地址烧录，与程序一致）。</div>
+      <div class="step"><b>3 程序适配：</b>用 MaixPy IDE 打开 main.py，核对 <strong>labels 与 anchors</strong>，调整阈值/NMS。</div>
+      <div class="step"><b>4 调试运行：</b>连接开发板运行，验证<strong>多目标检测效果</strong>。</div>
+    </div>
+    <h4>2. 目标检测模型的 Python 核心代码</h4>
+    <pre class="code"><span class="fn">from maix import camera, display, nn</span>
+<span class="c"># 加载目标检测模型（YOLO 系列，指定模型地址）</span>
+<span class="fn">detector</span> = <span class="fn">nn.YOLO2</span>(<span class="num">0x300000</span>, <span class="num">0.5</span>, <span class="num">0.3</span>) <span class="c"># 模型地址、阈值、NMS</span>
+<span class="fn">def on_detect</span>(<span class="fn">frame</span>, <span class="fn">detections</span>):
+    <span class="fn">for d in detections</span>:
+        <span class="fn">frame.draw_rect</span>(<span class="fn">d.x</span>, <span class="fn">d.y</span>, <span class="fn">d.w</span>, <span class="fn">d.h</span>, (<span class="num">0</span>, <span class="num">255</span>, <span class="num">0</span>)) <span class="c"># 框出目标</span>
+        <span class="fn">frame.draw_string</span>(<span class="fn">d.x</span> + <span class="num">3</span>, <span class="fn">d.y</span> + <span class="num">3</span>, <span class="fn">d.class_name</span>, (<span class="num">0</span>, <span class="num">255</span>, <span class="num">0</span>))
+<span class="fn">while True</span>:
+    <span class="fn">img</span> = <span class="fn">camera.capture</span>()              <span class="c"># 采集图像</span>
+    <span class="fn">detections</span> = <span class="fn">detector.detect</span>(<span class="fn">img</span>)    <span class="c"># 运行检测</span>
+    <span class="fn">on_detect</span>(<span class="fn">img</span>, <span class="fn">detections</span>)        <span class="c"># 绘制检测结果</span>
+    <span class="fn">display.show</span>(<span class="fn">img</span>)                  <span class="c"># 显示画面</span></pre>
+    <div class="note"><strong>记忆锚点：</strong>检测 = nn.YOLO2(地址, 阈值, NMS) + detect() 返回检测框列表 + on_detect 画框标注；与模块十七分类（nn.Classifier + classify）对照。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t3k3">
+  <div class="leaf-head">
+    <span class="tag k">知识活页</span><span class="id">M18-T3-K3</span>
+    <h3>分类与检测：全程对比归纳</h3>
+    <span class="time">约 15 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>1. 配套模型包实例对照</h4>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:22%">项目</th><th style="width:38%">model-135983（分类·猫狗）</th><th>model-74448（检测·字母数字）</th></tr>
+      <tr><td class="c">label_type</td><td class="c">classification</td><td class="c"><strong>detection</strong></td></tr>
+      <tr><td class="c">labels</td><td class="c">['cat', 'dog']（2 类）</td><td class="c">36 类（A-Z + 0-9）</td></tr>
+      <tr><td class="c">输出张量</td><td class="c">[1, 1, 2]</td><td class="c">[7, 7, 205]（7×7 网格 × 每格预测）</td></tr>
+      <tr><td class="c">anchors</td><td class="c">无</td><td class="c"><strong>5 组锚框</strong>（5.47,5.84 … 4.06,5.75）</td></tr>
+      <tr><td class="c">标注方式</td><td class="c">文件夹即标签</td><td class="c"><strong>画框 + 标签</strong></td></tr>
+      <tr><td class="c">核心 API</td><td class="c">nn.Classifier + classify</td><td class="c"><strong>nn.YOLO2 + detect</strong></td></tr>
+    </table>
+    </div>
+    <h4>2. 全程对比表</h4>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:22%">环节</th><th style="width:38%">图像分类（模块十七）</th><th>目标检测（本模块）</th></tr>
+      <tr><td class="c">数据集类型</td><td>分类数据集（单目标为主）</td><td>检测数据集（可多目标同框）</td></tr>
+      <tr><td class="c">标注工作</td><td>按类建文件夹（分钟级）</td><td><strong>逐张画框 + 标签</strong>（小时级，更细）</td></tr>
+      <tr><td class="c">训练参数</td><td>缩放比例、部署平台</td><td>同左；报告多 anchors/AP 曲线</td></tr>
+      <tr><td class="c">部署参数</td><td>特征值阈值</td><td><strong>anchors + threshold + NMS</strong></td></tr>
+      <tr><td class="c">核心代码</td><td>classifier.classify(img)</td><td>detector.detect(img) + on_detect 画框</td></tr>
+      <tr><td class="c">显示结果</td><td>类别 + 置信度</td><td><strong>多个框 + 类别 + 置信度</strong></td></tr>
+      <tr><td class="c">应用场景</td><td>品种/状态判断、门禁类别</td><td>多目标定位、人流计数、缺陷定位</td></tr>
+    </table>
+    </div>
+    <h4>3. 归纳总结（口述）</h4>
+    <div class="note"><strong>三句话总结：</strong>① 任务不同标注不同——<strong>分类标"类"、检测标"框"</strong>；② 检测比分类多了<strong>位置维度</strong>（anchors/NMS/多框输出），标注成本更高但能力更强；③ 部署流程同构（kfpkg→烧录→适配→调试），差异在 <strong>KPU 参数与核心 API</strong>。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t3w1">
+  <div class="leaf-head">
+    <span class="tag w">工作活页</span><span class="id">M18-T3-W1</span>
+    <h3>自训检测模型部署实操</h3>
+    <span class="time">约 20 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>任务：把自训检测模型部署到 K210</h4>
+    <div class="steps">
+      <div class="step"><b>1 下载解压。</b>MaixHub 手动部署下载自训检测模型包，解压得到 kmodel、main.py、report.json。</div>
+      <div class="step"><b>2 检查报告。</b>打开 report.json 确认 labels 与自建标注一致、<strong>anchors</strong> 已给出、输入输出尺寸正确。</div>
+      <div class="step"><b>3 放模型文件。</b>kmodel 复制到 TF 卡（main.py 默认读 /sd/m.kmodel）或用 kfpkg 烧录进 Flash（地址一致）。</div>
+      <div class="step"><b>4 程序适配。</b>用 MaixPy IDE 打开 main.py：核对 labels 与 anchors；如需可调 <strong>threshold（0.5）与 NMS（0.3）</strong>；按开发板调整反色/旋转。</div>
+      <div class="step"><b>5 连接运行。</b>连接开发板点击"运行"，把自训目标（可多个）放到镜头前，观察多目标检测结果并记录。</div>
+    </div>
+    <div class="warnbox"><strong>注意：</strong>① main.py 按 MaixHub 生成版本（如 maixpy3 v0.4.8 或 v0.6.x）使用，若运行报错改用<strong>教材新版 nn.YOLO2 写法</strong>。② <strong>anchors 必须与模型匹配</strong>（来自 report.json），改错会导致检测失效。③ 模型默认读 /sd/m.kmodel（TF 卡），放 Flash 要改地址一致。④ 检测效果不理想时，先查<strong>标注质量</strong>（框准不准、有无漏标），再调阈值/NMS——标注决定上限。</div>
+  </div>
+</div>
+
+<div class="leaf" id="t3w2">
+  <div class="leaf-head">
+    <span class="tag w">工作活页</span><span class="id">M18-T3-W2</span>
+    <h3>部署验证与归纳总结</h3>
+    <span class="time">约 20 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <h4>1. 预期实验现象</h4>
+    <div class="note"><strong>现象描述：</strong>运行程序后，LCD 显示摄像头画面；自训目标出现在镜头前时，<strong>每个目标被绿色（或红色）方框框住</strong>，框旁标注 <strong>类别与置信度</strong>（如 "cat : 0.98"）；多个目标同时出现时<strong>同时框出多个</strong>；画面下方显示推理耗时 t:xxms。</div>
+    <div class="cycle">
+      <div class="cy"><div class="cy-t">单目标</div><div class="screen-demo"><div class="scr-inner scr-det"><div class="det-box"></div></div></div><div>1 框 + 标签</div></div>
+      <div class="cy"><div class="cy-t">多目标</div><div class="screen-demo"><div class="scr-inner scr-det"><div class="det-box db1"></div><div class="det-box db2"></div></div></div><div>多框同时</div></div>
+      <div class="cy"><div class="cy-t">串口</div><div class="screen-demo"><div class="scr-inner scr-det"><div class="cls-tag">t:45ms</div></div></div><div>同步输出</div></div>
+    </div>
+    <h4>2. 现象与代码对应（口述自检）</h4>
+    <p>detector = nn.YOLO2(0x300000, 0.5, 0.3) 加载检测模型（地址/阈值/NMS）→ camera.capture() 采集 → detector.detect(img) 返回检测框列表 → on_detect 遍历用 draw_rect 画框 + draw_string 写类别 → display.show 上屏。与分类对比：<strong>detect 返回的是多个框对象（x/y/w/h + class_name），分类返回的是单个 (label, score)</strong>。</p>
+    <h4>3. 实验检查清单</h4>
+    <ul class="checklist">
+      <li><input type="checkbox" id="ck1"><label for="ck1">自训检测模型包已下载解压，report.json 中 labels 与 anchors 核对无误</label></li>
+      <li><input type="checkbox" id="ck2"><label for="ck2">kmodel 已放入 TF 卡或烧录进 Flash（地址与程序一致）</label></li>
+      <li><input type="checkbox" id="ck3"><label for="ck3">MaixPy IDE 已连接开发板，程序运行无报错</label></li>
+      <li><input type="checkbox" id="ck4"><label for="ck4">自训目标（单/多）放镜头前，均被方框框住且类别置信度正确</label></li>
+      <li><input type="checkbox" id="ck5"><label for="ck5">多个目标同框时同时检出（多目标检测有效）</label></li>
+      <li><input type="checkbox" id="ck6"><label for="ck6">能口述"收集→标注→训练→部署→归纳"闭环，并与分类全程对比总结</label></li>
+    </ul>
+    <div class="done-row"><input type="checkbox" id="done-t3" class="doneck" data-key="done-t3"><label for="done-t3">我已完成任务 3 的训练部署并记录现象与对比总结（勾选后本任务标记完成）</label></div>
+  </div>
+</div>
+
+<div class="leaf" id="eval">
+  <div class="leaf-head">
+    <span class="tag e">评价</span><span class="id">M18-E1</span>
+    <h3>模块十八 · 模型训练与部署（Python环境-物体检测）评价量表</h3>
+    <span class="time">约 10 分钟</span>
+  </div>
+  <div class="leaf-body">
+    <p>对照评价量表逐项自评（自己评）、互评（同桌评）、师评（教师评），在对应栏填 <strong>★</strong>（优秀 5-4 分 / 合格 3 分 / 待改进 2-1 分）。</p>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:7%">序号</th><th style="width:61%">评价维度</th><th style="width:10%">自评</th><th style="width:10%">互评</th><th>师评</th></tr>
+      <tr><td class="c">1</td><td>能说出分类与检测在数据集标注、KPU 参数上的差异</td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
+      <tr><td class="c">2</td><td>能说出检测标注四规范（框紧贴、大小一致、标签一致、无遗漏）</td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
+      <tr><td class="c">3</td><td>能收集多位置/多大小/多目标检测数据（每类≥50 张）</td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
+      <tr><td class="c">4</td><td>能在 MaixHub 建检测数据集、画框标注并划分上传</td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
+      <tr><td class="c">5</td><td>能读懂 Python 检测核心代码（nn.YOLO2/anchors/NMS/on_detect）</td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
+      <tr><td class="c">6</td><td>能解析检测模型包（labels/anchors/输出张量）并核对</td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
+      <tr><td class="c">7</td><td>能独立完成自训检测模型部署并实现多目标实时检测</td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
+      <tr><td class="c">8</td><td>能完成"收集→标注→训练→部署→归纳"闭环并与分类对比总结</td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
+    </table>
+    </div>
+    <h4>课后反思（各写一句话）</h4>
+    <ul class="reflect">
+      <li>我学得最好的是：____________________</li>
+      <li>我还需要加强的是：____________________</li>
+      <li>我想对老师说：____________________</li>
+    </ul>
+  </div>
+</div>
+
+<div class="leaf" id="ext">
+  <div class="leaf-head">
+    <span class="tag x">拓展</span><span class="id">M18-X1</span>
+    <h3>拓展任务：把检测玩得更深</h3>
+    <span class="time">选做</span>
+  </div>
+  <div class="leaf-body">
+    <p>完成必学内容后选做，围绕"调参、标注质量、多任务对比"继续探究。</p>
+    <div class="ext-item"><b>拓展 1：跑字母数字检测包。</b>把配套的 model-74448（36 类字母数字检测）部署运行，把一张写有多个字母/数字的纸放到镜头前，验证多目标同时检出，观察 anchors 参数对检测的影响。</div>
+    <div class="ext-item"><b>拓展 2：阈值与 NMS 调参。</b>在 nn.YOLO2 中把 threshold 改为 0.3 / 0.7、NMS 改为 0.1 / 0.6，观察误检、漏检与重叠框变化——与模块十一~十三 C 版调参结论对照，记录最佳组合。</div>
+    <div class="ext-item"><b>拓展 3：标注质量实验。</b>同一批数据准备两份标注（一份规范、一份随意），各训一次模型对比识别率，实证"标注的规范性和一致性是检测训练的核心"。</div>
+    <div class="ext-item"><b>拓展 4：检测 + 计数。</b>在 on_detect 中加入目标计数（len(detections)）与类别统计显示，把开发板变成一个简单的"目标计数器"，观察多人/多物场景。</div>
+    <div class="ext-item"><b>拓展 5（进阶）：三任务对比报告。</b>整理一份"分类 vs 检测（Python）vs 人脸检测（C）"对照笔记：数据集、标注、KPU 参数、代码、场景，作为图像识别任务选型的参考文档。</div>
+    <div class="note"><strong>完成标准：</strong>至少完成拓展 1-3 中的两个，并在活页空白处记录现象；拓展 4-5 可作为小组探究课题。</div>
+  </div>
+</div>
+
+<div class="leaf" id="summary">
+  <div class="leaf-head">
+    <span class="tag m">总结</span><span class="id">M18-S1</span>
+    <h3>课程总结：从零到完整的嵌入式 AI 应用</h3>
+    <span class="time">回顾</span>
+  </div>
+  <div class="leaf-body">
+    <p>学完本课程，读者已具备<strong>从零搭建嵌入式 AI 开发环境、独立完成从环境搭建、基础外设开发、图像识别应用到模型训练与部署的完整项目开发能力</strong>，为今后从事物联网智能终端、边缘计算、智能硬件等领域的开发工作奠定扎实基础。</p>
+    <div class="tbl-wrap">
+    <table class="tbl">
+      <tr><th style="width:22%">模块板块</th><th>覆盖内容</th></tr>
+      <tr><td class="c">环境搭建</td><td>VSCode + Kendryte SDK + CMake + Toolchain 工具链配置（模块一）</td></tr>
+      <tr><td class="c">基础外设</td><td>GPIO（LED/RGB 灯）、按键与中断、定时器、LCD 显示与触摸、Flash 存储、OV2640 摄像头采集（模块二~九）</td></tr>
+      <tr><td class="c">图像处理</td><td>KPU 神经网络处理器、卷积神经网络原理、图像滤波实验（模块十）</td></tr>
+      <tr><td class="c">图像识别应用</td><td>人脸检测、物体检测、物体分类（模块十一~十四）</td></tr>
+      <tr><td class="c">模型训练与部署</td><td>百度飞桨（C 环境，模块十五）、MaixHub（Python 环境，模块十七~十八）、公开模型部署与参数调优（模块十三）</td></tr>
+    </table>
+    </div>
+    <div class="note"><strong>能力沉淀：</strong>两条开发路线（C 编译烧录 / Python 刷固件跑脚本）× 两类模型任务（分类 / 检测）× 两种训练平台（飞桨 / MaixHub）——组合起来就是完整的嵌入式 AI 应用开发工具箱。</div>
+  </div>
+</div>
+
+<footer class="foot">
+  <div class="f-inner">
+    <div><b>《图像识别技术》活页式教材 · 模块十八 模型训练与部署（Python环境-物体检测）</b> · 建议学时 4 学时</div>
+    <div>配套硬件：Kendryte K210 开发板 · 配套平台：MaixHub 在线训练 · 配套工程：model-74448（字母数字检测）</div>
+  </div>
+</footer>
+
+</main>
+
+<script>
+var PRFX = 'm18:';
+function toggleAns(btn){ var a = btn.previousElementSibling; if(a.classList.contains('ans')){ a.style.display = (a.style.display === 'block') ? 'none' : 'block'; btn.textContent = (a.style.display === 'block') ? '收起答案' : '查看答案'; } }
+var burgers = document.getElementById('burgerBtn'), mask = document.getElementById('tocMask'), toc = document.getElementById('toc');
+if (burgers) burgers.onclick = function(){ toc.classList.add('open'); mask.classList.add('open'); };
+if (mask) mask.onclick = function(){ toc.classList.remove('open'); mask.classList.remove('open'); };
+var printBtn = document.getElementById('printBtn');
+if (printBtn) printBtn.onclick = function(){ window.print(); };
+/* 侧边目录滚动高亮 */
+var links = toc ? toc.querySelectorAll('a') : [];
+var secs = [];
+links.forEach(function(a){ var id = a.getAttribute('href'); if(id && id.length > 1){ var el = document.querySelector(id); if(el) secs.push([el, a]); } });
+window.addEventListener('scroll', function(){
+  var y = window.scrollY + 120, cur = null;
+  secs.forEach(function(p){ if(p[0].offsetTop <= y) cur = p[1]; });
+  links.forEach(function(a){ a.classList.remove('active'); });
+  if(cur) cur.classList.add('active');
+}, {passive:true});
+/* 完成勾选持久化（localStorage 键前缀 m18:） */
+var cks = document.querySelectorAll('.doneck');
+cks.forEach(function(c){ var k = PRFX + c.getAttribute('data-key'); try { c.checked = localStorage.getItem(k) === '1'; } catch(e){} c.addEventListener('change', function(){ try { localStorage.setItem(k, c.checked ? '1' : '0'); } catch(e){} }); });
+</script>
+
+</body>
+</html>

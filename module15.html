@@ -481,6 +481,7 @@ code.inline{
 <div class="toc-mask" id="tocMask"></div>
 <nav class="toc" id="toc">
   <div class="toc-title">活页索引</div>
+  <a href="index.html"><span class="dot" style="background:#7A8797"></span>← 返回教材目录</a>
   <a href="#cover"><span class="dot" style="background:#1A2E4B"></span>封面与模块信息</a>
   <a href="#overview"><span class="dot" style="background:#1A2E4B"></span>模块总体设计</a>
   <div class="g1">任务 1 · 百度飞桨平台与模型训练</div>
@@ -523,7 +524,7 @@ code.inline{
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9V3z"/></svg>
       开始学习
     </a>
-    <a class="btn btn-ghost" href="#toc">
+    <a class="btn btn-ghost" href="#cover" onclick="var t=document.getElementById('toc'),m=document.getElementById('tocMask');if(t)t.classList.add('open');if(m)m.classList.add('open');if(window.innerWidth>960){window.scrollTo({top:0,behavior:'smooth'});}return false;">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
       查看活页索引
     </a>
@@ -1044,7 +1045,7 @@ if (printBtn) printBtn.onclick = function(){ window.print(); };
 /* 侧边目录滚动高亮 */
 var links = toc ? toc.querySelectorAll('a') : [];
 var secs = [];
-links.forEach(function(a){ var id = a.getAttribute('href'); if(id && id.length > 1){ var el = document.querySelector(id); if(el) secs.push([el, a]); } });
+links.forEach(function(a){ var id = a.getAttribute('href'); if(id && id.charAt(0) === '#'){ var el = document.querySelector(id); if(el) secs.push([el, a]); } });
 window.addEventListener('scroll', function(){
   var y = window.scrollY + 120, cur = null;
   secs.forEach(function(p){ if(p[0].offsetTop <= y) cur = p[1]; });
